@@ -13,7 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { motion } from 'framer-motion';
 import type { Profile, PersonalInfo } from '@/lib/types';
 import { PersonalInfoForm } from '@/components/PersonalInfoForm';
 
@@ -33,11 +32,7 @@ export function ProfileSettings({
   return (
     <div className="space-y-6">
       {/* Profile Settings Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
-      >
+      <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
         <Card className="border border-border bg-card">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-3">
@@ -104,14 +99,10 @@ export function ProfileSettings({
             </div>
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
 
       {/* Personal Information Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
-      >
+      <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
         <Card className="border border-border bg-card">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
@@ -126,19 +117,14 @@ export function ProfileSettings({
                   </p>
                 </div>
               </div>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onSyncFromMasterData}
+                className="border-border hover:bg-accent hover-lift"
               >
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onSyncFromMasterData}
-                  className="border-border hover:bg-accent"
-                >
-                  Sync from Master Data
-                </Button>
-              </motion.div>
+                Sync from Master Data
+              </Button>
             </div>
           </CardHeader>
           <CardContent className="pt-0">
@@ -172,7 +158,7 @@ export function ProfileSettings({
             </div>
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
     </div>
   );
 }

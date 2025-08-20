@@ -10,7 +10,6 @@ import type {
   Skill,
   Education,
 } from "@/lib/types";
-import { motion } from "framer-motion";
 import { useBuilderState } from "@/hooks/useBuilderState";
 import { BuilderHeader } from "@/components/builder/BuilderHeader";
 import { ProfileSettings } from "@/components/builder/ProfileSettings";
@@ -116,13 +115,7 @@ export default function BuilderPage() {
       {/* Main Content Area */}
       <div className="flex-1 flex pt-20">
         {/* Left Side - Editor */}
-        <motion.div
-          className="overflow-y-auto p-6"
-          style={{ width: '50vw' }}
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
+        <div className="overflow-y-auto p-6 animate-fade-in" style={{ width: '50vw' }}>
           <div className="flex flex-col gap-6">
             <ProfileSettings
               profile={profile}
@@ -143,7 +136,7 @@ export default function BuilderPage() {
               onResetProfileOverride={handleResetProfileOverride}
             />
           </div>
-        </motion.div>
+        </div>
 
         {/* Right Side - Resume Preview */}
         <ResumePreview profile={profile} data={data} />

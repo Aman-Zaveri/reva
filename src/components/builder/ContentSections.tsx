@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import type { Profile, DataBundle } from '@/lib/types';
 import { CustomizableItemPicker } from '@/components/CustomizableItemPicker';
 
@@ -33,11 +32,7 @@ export function ContentSections({
 }: ContentSectionsProps) {
   return (
     <div className="space-y-6">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.5 }}
-      >
+      <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
         <CustomizableItemPicker
           title="Work Experiences"
           type="experience"
@@ -55,13 +50,9 @@ export function ContentSections({
             onResetProfileOverride('experience', itemId)
           }
         />
-      </motion.div>
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.6 }}
-      >
+      <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
         <CustomizableItemPicker
           title="Projects"
           type="project"
@@ -77,13 +68,9 @@ export function ContentSections({
             onResetProfileOverride('project', itemId)
           }
         />
-      </motion.div>
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.7 }}
-      >
+      <div className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
         <CustomizableItemPicker
           title="Skills"
           type="skill"
@@ -99,13 +86,9 @@ export function ContentSections({
             onResetProfileOverride('skill', itemId)
           }
         />
-      </motion.div>
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.8 }}
-      >
+      <div className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
         <CustomizableItemPicker
           title="Education"
           type="education"
@@ -121,7 +104,7 @@ export function ContentSections({
             onResetProfileOverride('education', itemId)
           }
         />
-      </motion.div>
+      </div>
     </div>
   );
 }
