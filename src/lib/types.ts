@@ -63,4 +63,10 @@ export type Profile = {
   skillOverrides?: Record<string, Partial<Skill>>;
   educationOverrides?: Record<string, Partial<Education>>;
   template?: 'classic' | 'compact';
+  // AI optimization metadata
+  aiOptimization?: {
+    timestamp: string;
+    keyInsights: string[];
+    jobDescriptionHash: string;
+  };
 };

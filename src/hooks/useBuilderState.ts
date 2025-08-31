@@ -1,13 +1,6 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import type {
-  PersonalInfo,
-  Experience,
-  Project,
-  Skill,
-  Education,
-} from '@/lib/types';
 
 export function useBuilderState() {
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'idle'>('saved');
@@ -21,7 +14,7 @@ export function useBuilderState() {
 
   // Enhanced update functions with save status
   const createUpdateHandler = useCallback(
-    (updateFn: Function) => (...args: any[]) => {
+    <T extends unknown[]>(updateFn: (...args: T) => void) => (...args: T) => {
       updateFn(...args);
       handleSaveStatusChange();
     },

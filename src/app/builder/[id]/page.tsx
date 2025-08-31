@@ -104,12 +104,20 @@ export default function BuilderPage() {
 
   const handleSyncFromMasterData = createUpdateHandler(syncFromMasterData);
 
+  const handleApplyOptimizations = createUpdateHandler(
+    (optimizations: Partial<typeof profile>) => {
+      updateProfile(profile.id, optimizations);
+    }
+  );
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <BuilderHeader
         profile={profile}
+        data={data}
         saveStatus={saveStatus}
         onDeleteProfile={() => deleteProfile(profile.id)}
+        onApplyOptimizations={handleApplyOptimizations}
       />
 
       {/* Main Content Area */}

@@ -4,15 +4,18 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Printer, Save, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import type { Profile } from '@/lib/types';
+import { AIOptimizer } from './AIOptimizer';
+import type { Profile, DataBundle } from '@/lib/types';
 
 interface BuilderHeaderProps {
   profile: Profile;
+  data: DataBundle;
   saveStatus: 'saved' | 'saving' | 'idle';
   onDeleteProfile: () => void;
+  onApplyOptimizations: (optimizations: Partial<Profile>) => void;
 }
 
-export function BuilderHeader({ profile, saveStatus, onDeleteProfile }: BuilderHeaderProps) {
+export function BuilderHeader({ profile, data, saveStatus, onDeleteProfile, onApplyOptimizations }: BuilderHeaderProps) {
   const router = useRouter();
 
   const handleDelete = () => {
@@ -59,6 +62,12 @@ export function BuilderHeader({ profile, saveStatus, onDeleteProfile }: BuilderH
               </div>
             )}
           </div>
+
+          <AIOptimizer
+            profile={profile}
+            data={data}
+            onApplyOptimizations={onApplyOptimizations}
+          />
 
           <Button
             variant="outline"
