@@ -105,7 +105,7 @@ export default function BuilderPage() {
   const handleSyncFromMasterData = createUpdateHandler(syncFromMasterData);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-hero">
+    <div className="min-h-screen flex flex-col bg-background">
       <BuilderHeader
         profile={profile}
         saveStatus={saveStatus}
@@ -113,9 +113,9 @@ export default function BuilderPage() {
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex pt-20">
-        {/* Left Side - Editor */}
-        <div className="overflow-y-auto p-6 animate-fade-in" style={{ width: '50vw' }}>
+      <div className="flex-1">
+        {/* Left Side - Editor (takes up remaining space) */}
+        <div className="overflow-y-auto hide-scrollbar p-6" style={{ width: '50vw', height: 'calc(100vh - 73px)' }}>
           <div className="flex flex-col gap-6">
             <ProfileSettings
               profile={profile}
@@ -138,7 +138,7 @@ export default function BuilderPage() {
           </div>
         </div>
 
-        {/* Right Side - Resume Preview */}
+        {/* Right Side - Resume Preview (now fixed positioned, not in flex flow) */}
         <ResumePreview profile={profile} data={data} />
       </div>
     </div>

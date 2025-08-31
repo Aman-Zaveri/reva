@@ -23,17 +23,16 @@ export function BuilderHeader({ profile, saveStatus, onDeleteProfile }: BuilderH
   };
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 w-full border-b glass backdrop-blur-xl py-4 px-5 animate-fade-in">
+    <div className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-sm py-4 px-6">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <Button
             variant="ghost"
             size="sm"
             asChild
-            className="hover:bg-white/10 hover-lift"
           >
             <Link href="/">
-              <ArrowLeft size={16} className="mr-2" />
+              <ArrowLeft size={16}/>
               Back to Home
             </Link>
           </Button>
@@ -48,13 +47,13 @@ export function BuilderHeader({ profile, saveStatus, onDeleteProfile }: BuilderH
           {/* Save Status Indicator */}
           <div className="flex items-center gap-2 text-sm min-w-[80px]">
             {saveStatus === 'saving' && (
-              <div className="flex items-center gap-2 text-muted-foreground animate-pulse">
-                <Save size={14} className="animate-spin" />
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Save size={14} />
                 <span>Saving...</span>
               </div>
             )}
             {saveStatus === 'saved' && (
-              <div className="flex items-center gap-2 text-emerald-600 animate-scale-subtle">
+              <div className="flex items-center gap-2 text-green-600">
                 <Check size={14} />
                 <span>Saved</span>
               </div>
@@ -65,7 +64,6 @@ export function BuilderHeader({ profile, saveStatus, onDeleteProfile }: BuilderH
             variant="outline"
             size="sm"
             onClick={() => window.open(`/print/${profile.id}`, '_blank')}
-            className="border-border hover:bg-accent hover-lift"
           >
             <Printer size={16} className="mr-2" />
             Export PDF
@@ -75,7 +73,6 @@ export function BuilderHeader({ profile, saveStatus, onDeleteProfile }: BuilderH
             variant="destructive"
             size="sm"
             onClick={handleDelete}
-            className="border-border hover:bg-destructive/90 hover-lift"
           >
             Delete
           </Button>
