@@ -1,14 +1,31 @@
 import { z } from 'zod';
 
+// Helper function to validate URLs that might be missing protocol
+const isValidUrlOrPartial = (val: string | undefined | null): boolean => {
+  if (!val || val === '') return true;
+  
+  // If it already has a protocol, validate as normal URL
+  if (val.startsWith('http://') || val.startsWith('https://')) {
+    return z.string().url().safeParse(val).success;
+  }
+  
+  // If it looks like a domain (contains a dot), it's probably valid
+  if (val.includes('.') && !val.includes(' ')) {
+    return true;
+  }
+  
+  return false;
+};
+
 // Validation schemas
 export const PersonalInfoSchema = z.object({
   fullName: z.string().min(1, 'Full name is required'),
   email: z.string().email('Invalid email address'),
   phone: z.string().min(1, 'Phone number is required'),
   location: z.string().min(1, 'Location is required'),
-  linkedin: z.string().url('Invalid LinkedIn URL').optional().or(z.literal('')),
-  github: z.string().url('Invalid GitHub URL').optional().or(z.literal('')),
-  website: z.string().url('Invalid website URL').optional().or(z.literal('')),
+  linkedin: z.string().optional(),
+  github: z.string().optional(),
+  website: z.string().optional(),
   summary: z.string().optional(),
 });
 
@@ -24,7 +41,7 @@ export const ExperienceSchema = z.object({
 export const ProjectSchema = z.object({
   id: z.string(),
   title: z.string().min(1, 'Project title is required'),
-  link: z.string().url('Invalid project URL').optional().or(z.literal('')),
+  link: z.string().optional(),
   bullets: z.array(z.string()).min(1, 'At least one bullet point is required'),
   tags: z.array(z.string()).optional().default([]),
 });
@@ -72,7 +89,7 @@ export const DataBundleSchema = z.object({
 // API request schemas
 export const OptimizeResumeRequestSchema = z.object({
   jobUrl: z.string().url('Invalid job URL').optional(),
-  jobDescription: z.string().min(50, 'Job description must be at least 50 characters').optional(),
+  jobDescription: z.string().optional(),
   profile: ProfileSchema,
   data: DataBundleSchema,
 }).refine(
@@ -80,6 +97,12 @@ export const OptimizeResumeRequestSchema = z.object({
   {
     message: "Either jobUrl or jobDescription must be provided",
     path: ["jobUrl"],
+  }
+).refine(
+  (data) => !data.jobDescription || data.jobDescription.length >= 50,
+  {
+    message: "Job description must be at least 50 characters when provided",
+    path: ["jobDescription"],
   }
 );
 

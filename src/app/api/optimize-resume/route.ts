@@ -8,9 +8,17 @@ export async function POST(req: NextRequest) {
   try {
     const requestData = await req.json();
     
+    console.log('=== DEBUG REQUEST DATA ===');
+    console.log('LinkedIn (profile):', requestData.profile?.personalInfo?.linkedin);
+    console.log('GitHub (profile):', requestData.profile?.personalInfo?.github);
+    console.log('LinkedIn (data):', requestData.data?.personalInfo?.linkedin);
+    console.log('GitHub (data):', requestData.data?.personalInfo?.github);
+    console.log('Project links:', requestData.data?.projects?.map((p: any) => p.link));
+    
     // Validate request data
     const validation = validateOptimizeRequest(requestData);
     if (!validation.success) {
+      console.log('Validation failed:', validation.errors);
       return NextResponse.json(
         { 
           error: ERROR_MESSAGES.VALIDATION_ERROR,
