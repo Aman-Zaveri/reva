@@ -73,6 +73,7 @@ export function ContentSections({
           onItemsReorder={(newOrder) => handleReorder('experienceIds', newOrder)}
           onToggleVisibility={(id) => handleSelectionChange('experienceIds', id)}
           onCustomizeItem={onUpdateProfileExperience}
+          onResetOverride={(id) => onResetProfileOverride('experience', id)}
         />
       </div>
 
@@ -88,6 +89,7 @@ export function ContentSections({
           onItemsReorder={(newOrder) => handleReorder('projectIds', newOrder)}
           onToggleVisibility={(id) => handleSelectionChange('projectIds', id)}
           onCustomizeItem={onUpdateProfileProject}
+          onResetOverride={(id) => onResetProfileOverride('project', id)}
         />
       </div>
 
@@ -103,6 +105,7 @@ export function ContentSections({
           onItemsReorder={(newOrder) => handleReorder('skillIds', newOrder)}
           onToggleVisibility={(id) => handleSelectionChange('skillIds', id)}
           onCustomizeItem={onUpdateProfileSkill}
+          onResetOverride={(id) => onResetProfileOverride('skill', id)}
         />
       </div>
 
@@ -118,6 +121,7 @@ export function ContentSections({
           onItemsReorder={(newOrder) => handleReorder('educationIds', newOrder)}
           onToggleVisibility={(id) => handleSelectionChange('educationIds', id)}
           onCustomizeItem={onUpdateProfileEducation}
+          onResetOverride={(id) => onResetProfileOverride('education', id)}
         />
       </div>
     </div>

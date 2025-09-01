@@ -26,7 +26,7 @@ export function BuilderHeader({ profile, data, saveStatus, onDeleteProfile, onAp
   };
 
   return (
-    <div className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-sm py-4 px-6">
+    <div className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur-sm py-4 px-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button
@@ -75,7 +75,7 @@ export function BuilderHeader({ profile, data, saveStatus, onDeleteProfile, onAp
             onClick={() => window.open(`/print/${profile.id}`, '_blank')}
           >
             <Printer size={16} className="mr-2" />
-            Export PDF
+            Export
           </Button>
 
           <Button

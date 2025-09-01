@@ -1,22 +1,24 @@
-import React from 'react';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, Edit2, Eye, EyeOff } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
-import type { Experience, Project, Skill, Education } from '@/lib/types';
+import React from "react";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { GripVertical, Edit2, Eye, EyeOff, RotateCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import type { Experience, Project, Skill, Education } from "@/lib/types";
 
 export interface SortableItemDisplayProps {
   id: string;
   item: Experience | Project | Skill | Education;
-  type: 'experience' | 'project' | 'skill' | 'education';
+  type: "experience" | "project" | "skill" | "education";
   isVisible: boolean;
   isSelected: boolean;
-  variant?: 'compact' | 'detailed';
+  hasOverride?: boolean;
+  variant?: "compact" | "detailed";
   onToggleVisibility: (id: string) => void;
   onEdit: (id: string) => void;
   onToggleSelection?: (id: string) => void;
+  onResetOverride?: (id: string) => void;
   className?: string;
 }
 
@@ -26,11 +28,13 @@ export function SortableItemDisplay({
   type,
   isVisible,
   isSelected,
-  variant = 'detailed',
+  hasOverride = false,
+  variant = "detailed",
   onToggleVisibility,
   onEdit,
   onToggleSelection,
-  className
+  onResetOverride,
+  className,
 }: SortableItemDisplayProps) {
   const {
     attributes,
@@ -48,18 +52,23 @@ export function SortableItemDisplay({
   };
 
   const renderItemContent = () => {
-    if (variant === 'compact') {
+    if (variant === "compact") {
       return (
         <div className="flex-1 min-w-0">
-          <h4 className="text-sm font-medium truncate">
-            {item.title}
-          </h4>
-          {'company' in item && (
+          <div className="flex items-center gap-2">
+            <h4 className="text-sm font-medium truncate">{item.title}</h4>
+            {hasOverride && (
+              <Badge variant="secondary" className="text-xs flex-shrink-0">
+                Updated
+              </Badge>
+            )}
+          </div>
+          {"company" in item && (
             <p className="text-xs text-muted-foreground truncate">
               {item.company}
             </p>
           )}
-          {'name' in item && (
+          {"name" in item && (
             <p className="text-xs text-muted-foreground truncate">
               {item.name}
             </p>
@@ -70,15 +79,21 @@ export function SortableItemDisplay({
 
     // Detailed view
     switch (type) {
-      case 'experience':
+      case "experience":
         const exp = item as Experience;
         return (
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between mb-1">
-              <h4 className="text-sm font-medium">{exp.title}</h4>
-              <Badge variant={exp.company ? 'secondary' : 'outline'} className="ml-2 text-xs">
-                {exp.company || 'No Company'}
-              </Badge>
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <h4 className="text-sm font-medium truncate">
+                  {exp.title} - {exp.company || "No Company"}
+                </h4>
+                {hasOverride && (
+                  <Badge variant="secondary" className="text-xs flex-shrink-0">
+                    Updated
+                  </Badge>
+                )}
+              </div>
             </div>
             <p className="text-xs text-muted-foreground mb-1">{exp.date}</p>
             <p className="text-xs text-muted-foreground">
@@ -87,17 +102,27 @@ export function SortableItemDisplay({
           </div>
         );
 
-      case 'project':
+      case "project":
         const proj = item as Project;
         return (
           <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between mb-1">
-              <h4 className="text-sm font-medium">{proj.title}</h4>
-              {proj.link && (
-                <Badge variant="outline" className="ml-2 text-xs">
-                  Has Link
-                </Badge>
-              )}
+            <div className="flex items-end justify-between mb-1">
+              <div className="flex items-start gap-2 flex-1 min-w-0">
+                <h4 className="text-sm font-medium truncate">{proj.title}</h4>
+                {hasOverride && (
+                  <Badge variant="secondary" className="text-xs flex-shrink-0">
+                    Updated
+                  </Badge>
+                )}
+                {proj.link && (
+                  <Badge
+                    variant="outline"
+                    className="ml-2 text-xs flex-shrink-0"
+                  >
+                    Link
+                  </Badge>
+                )}
+              </div>
             </div>
             <p className="text-xs text-muted-foreground">
               {proj.bullets?.length || 0} bullet points
@@ -105,22 +130,36 @@ export function SortableItemDisplay({
           </div>
         );
 
-      case 'skill':
+      case "skill":
         const skill = item as Skill;
         return (
           <div className="flex-1 min-w-0">
-            <h4 className="text-sm font-medium mb-1">{skill.name}</h4>
+            <div className="flex items-center gap-2 mb-1">
+              <h4 className="text-sm font-medium truncate">{skill.name}</h4>
+              {hasOverride && (
+                <Badge variant="secondary" className="text-xs flex-shrink-0">
+                  Updated
+                </Badge>
+              )}
+            </div>
             <p className="text-xs text-muted-foreground line-clamp-2">
               {skill.details}
             </p>
           </div>
         );
 
-      case 'education':
+      case "education":
         const edu = item as Education;
         return (
           <div className="flex-1 min-w-0">
-            <h4 className="text-sm font-medium mb-1">{edu.title}</h4>
+            <div className="flex items-center gap-2 mb-1">
+              <h4 className="text-sm font-medium truncate">{edu.title}</h4>
+              {hasOverride && (
+                <Badge variant="secondary" className="text-xs flex-shrink-0">
+                  Updated
+                </Badge>
+              )}
+            </div>
             <p className="text-xs text-muted-foreground">{edu.details}</p>
           </div>
         );
@@ -128,7 +167,14 @@ export function SortableItemDisplay({
       default:
         return (
           <div className="flex-1 min-w-0">
-            <h4 className="text-sm font-medium">{item.title}</h4>
+            <div className="flex items-center gap-2">
+              <h4 className="text-sm font-medium truncate">{item.title}</h4>
+              {hasOverride && (
+                <Badge variant="secondary" className="text-xs flex-shrink-0">
+                  Updated
+                </Badge>
+              )}
+            </div>
           </div>
         );
     }
@@ -140,16 +186,15 @@ export function SortableItemDisplay({
       style={style}
       className={cn(
         "group flex items-center gap-2 p-3 border rounded-lg transition-colors",
-        isVisible 
-          ? "bg-background border-border" 
+        isVisible
+          ? "bg-background border-border"
           : "bg-muted/50 border-muted-foreground/20",
-        isSelected && "ring-2 ring-primary ring-offset-2",
         isDragging && "shadow-lg",
         className
       )}
     >
       <button
-        className="opacity-0 group-hover:opacity-100 p-1 hover:bg-muted rounded cursor-grab active:cursor-grabbing transition-opacity"
+        className="opacity-30 group-hover:opacity-100 p-1 hover:bg-muted rounded cursor-grab active:cursor-grabbing transition-opacity"
         {...attributes}
         {...listeners}
       >
@@ -171,6 +216,25 @@ export function SortableItemDisplay({
         <Button
           variant="ghost"
           size="sm"
+          onClick={() => onEdit(id)}
+          className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+        >
+          <Edit2 className="h-3 w-3" />
+        </Button>
+        {hasOverride && onResetOverride && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onResetOverride(id)}
+            className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-orange-600 hover:text-orange-700 hover:bg-orange-100 dark:hover:bg-orange-100"
+            title="Reset to master data"
+          >
+            <RotateCcw className="h-3 w-3" />
+          </Button>
+        )}
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => onToggleVisibility(id)}
           className={cn(
             "h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity",
@@ -182,14 +246,6 @@ export function SortableItemDisplay({
           ) : (
             <EyeOff className="h-3 w-3 text-muted-foreground" />
           )}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onEdit(id)}
-          className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-        >
-          <Edit2 className="h-3 w-3" />
         </Button>
       </div>
     </div>

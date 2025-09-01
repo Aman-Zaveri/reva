@@ -99,7 +99,7 @@ export function AIOptimizer({ profile, data, onApplyOptimizations }: AIOptimizer
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" className="gap-2">
-          <Sparkles size={16} />
+          <Sparkles size={8} />
           AI Optimize
         </Button>
       </DialogTrigger>

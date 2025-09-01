@@ -34,14 +34,14 @@ export function ProfileSettings({
       {/* Profile Settings Card */}
       <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
         <Card className="border border-border bg-card">
-          <CardHeader className="pb-3">
-            <div className="flex items-center gap-3">
+          <CardHeader>
+            <div className="flex items-center gap-5">
               <div className="p-2 rounded-lg bg-primary text-primary-foreground">
                 <Settings className="w-4 h-4" />
               </div>
               <div>
-                <CardTitle className="text-lg">Profile Settings</CardTitle>
-                <p className="text-sm text-muted-foreground">
+                <CardTitle className="text-md">Profile Settings</CardTitle>
+                <p className="text-xs text-muted-foreground">
                   Configure name and template
                 </p>
               </div>
@@ -84,7 +84,7 @@ export function ProfileSettings({
               </div>
             </div>
 
-            <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
+            <div className="p-3 rounded-lg border border-primary/20">
               <p className="text-xs text-primary/80">
                 ✨ Customize content below without affecting your{' '}
                 <Button
@@ -104,15 +104,15 @@ export function ProfileSettings({
       {/* Personal Information Card */}
       <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
         <Card className="border border-border bg-card">
-          <CardHeader className="pb-3">
+          <CardHeader>
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-5">
                 <div className="p-2 rounded-lg bg-primary text-primary-foreground">
                   <Users className="w-4 h-4" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg">Personal Information</CardTitle>
-                  <p className="text-sm text-muted-foreground">
+                  <CardTitle className="text-md">Personal Information</CardTitle>
+                  <p className="text-xs text-muted-foreground">
                     Contact details and professional summary
                   </p>
                 </div>
@@ -121,7 +121,7 @@ export function ProfileSettings({
                 variant="outline"
                 size="sm"
                 onClick={onSyncFromMasterData}
-                className="border-border hover:bg-accent hover-lift"
+                className="border-border hover:bg-accent hover-lift text-xs"
               >
                 Sync from Master Data
               </Button>
@@ -143,7 +143,7 @@ export function ProfileSettings({
               }
               onUpdate={onUpdatePersonalInfo}
             />
-            <div className="mt-4 p-3 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/30">
+            <div className="mt-4 p-3 rounded-lg border border-blue-200 dark:border-blue-800/30">
               <p className="text-xs text-blue-700 dark:text-blue-300">
                 💡 Personal information defaults come from{' '}
                 <Button
