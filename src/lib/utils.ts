@@ -6,6 +6,9 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+// Generate a random ID
+export const nanoid = () => Math.random().toString(36).slice(2, 10);
+
 // Get the effective data for a profile (master data + profile overrides)
 export function getEffectiveProfileData(profile: Profile, masterData: DataBundle) {
   const experiences: Experience[] = masterData.experiences.map(exp => ({

@@ -1,7 +1,7 @@
 'use client';
 
 import { create } from 'zustand';
-import { nanoid } from './util';
+import { nanoid } from './utils';
 import { LocalStorageProfileRepository } from '@/repositories/profile.repository';
 import { STORAGE_KEYS, SUCCESS_MESSAGES, ERROR_MESSAGES } from '@/utils/constants';
 import type { Profile, DataBundle, Experience, Project, Skill, Education, PersonalInfo } from './types';

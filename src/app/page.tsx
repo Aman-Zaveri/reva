@@ -6,7 +6,7 @@ import { Plus, FileText, Database, Target, Zap, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ModeToggle } from '@/components/mode-toggle';
+import { ModeToggle } from '@/components/theme/mode-toggle';
 
 export default function Page() {
   const { profiles, createProfile, cloneProfile } = useProfilesStore();
