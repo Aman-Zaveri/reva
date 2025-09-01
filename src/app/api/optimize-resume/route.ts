@@ -27,8 +27,8 @@ export async function POST(req: NextRequest) {
     // If URL is provided, extract job description from it
     if (jobUrl && !jobDescription) {
       try {
-        const scrapingResult = await ScrapingService.extractJobDescription(jobUrl);
-        finalJobDescription = scrapingResult.content;
+        const jobInfo = await ScrapingService.extractJobInfo(jobUrl);
+        finalJobDescription = jobInfo.description;
       } catch (error) {
         return NextResponse.json(
           { 
