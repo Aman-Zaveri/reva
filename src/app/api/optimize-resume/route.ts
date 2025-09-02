@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ScrapingService } from '@/services/scraping.service';
-import { ResumeOptimizationService } from '@/services/resume-optimization.service';
-import { validateOptimizeRequest } from '@/utils/validation';
-import { ERROR_MESSAGES } from '@/utils/constants';
+import { ScrapingService } from '@/shared/services/scraping.service';
+import { ResumeOptimizationService } from '@/features/ai-optimization/services/resume-optimization.service';
+import { validateOptimizeRequest } from '@/shared/utils/validation';
+import { ERROR_MESSAGES } from '@/shared/utils/constants';
 
 export async function POST(req: NextRequest) {
   try {

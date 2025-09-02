@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ScrapingService } from '@/services/scraping.service';
-import { ERROR_MESSAGES } from '@/utils/constants';
+import { ScrapingService } from '@/shared/services/scraping.service';
+import { ERROR_MESSAGES } from '@/shared/utils/constants';
 
 export async function GET(req: NextRequest) {
   try {

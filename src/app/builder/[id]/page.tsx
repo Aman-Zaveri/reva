@@ -2,19 +2,16 @@
 
 import { notFound, useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
-import { useProfilesStore } from "@/lib/store";
+import { useProfilesStore } from "@/shared/lib/store";
 import type {
   PersonalInfo,
   Experience,
   Project,
   Skill,
   Education,
-} from "@/lib/types";
-import { useBuilderState } from "@/hooks/useBuilderState";
-import { BuilderHeader } from "@/components/builder/BuilderHeader";
-import { ProfileSettings } from "@/components/builder/ProfileSettings";
-import { ContentSections } from "@/components/builder/ContentSections";
-import { ResumePreview } from "@/components/builder/ResumePreview";
+} from "@/shared/lib/types";
+import { useBuilderState } from "@/shared/hooks/useBuilderState";
+import { BuilderHeader, ProfileSettings, ContentSections, ResumePreview } from "@/features/resume-builder";
 
 export default function BuilderPage() {
   const params = useParams<{ id: string }>();
@@ -23,7 +20,6 @@ export default function BuilderPage() {
     profiles,
     updateProfile,
     updatePersonalInfo,
-    reorderProfileItems,
     deleteProfile,
     data,
     updateProfileExperience,
@@ -94,14 +90,6 @@ export default function BuilderPage() {
       )
   );
 
-  const handleReorderItems = createUpdateHandler(
-    (
-      itemType: "experienceIds" | "projectIds" | "skillIds" | "educationIds",
-      fromIndex: number,
-      toIndex: number
-    ) => reorderProfileItems(profile.id, itemType, fromIndex, toIndex)
-  );
-
   const handleSyncFromMasterData = createUpdateHandler(syncFromMasterData);
 
   const handleApplyOptimizations = createUpdateHandler(
@@ -136,7 +124,6 @@ export default function BuilderPage() {
               profile={profile}
               data={data}
               onUpdateProfile={handleUpdateProfile}
-              onReorderItems={handleReorderItems}
               onUpdateProfileExperience={handleUpdateProfileExperience}
               onUpdateProfileProject={handleUpdateProfileProject}
               onUpdateProfileSkill={handleUpdateProfileSkill}

@@ -1,9 +1,9 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { useProfilesStore } from '@/lib/store';
+import { useProfilesStore } from '@/shared/lib/store';
 import { useEffect, useMemo } from 'react';
-import { Resume } from '@/components/Resume';
+import { Resume } from '@/shared/components/Resume';
 
 export default function PrintPage() {
   const params = useParams<{ id: string }>();

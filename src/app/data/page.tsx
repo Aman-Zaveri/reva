@@ -1,14 +1,14 @@
 "use client";
 
-import { useProfilesStore } from '@/lib/store';
+import { useProfilesStore } from '@/shared/lib/store';
 import Link from 'next/link';
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { RichTextEditor } from '@/components/ui/rich-text-editor';
-import { PersonalInfoForm } from '@/components/PersonalInfoForm';
+import { Button } from '@/shared/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/shared/components/ui/card';
+import { Input } from '@/shared/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
+import { RichTextEditor } from '@/shared/components/ui/rich-text-editor';
+import { PersonalInfoForm } from '@/features/data-management/components/PersonalInfoForm';
 
 export default function DataManagerPage() {
   const {

@@ -1,12 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useProfilesStore } from '@/lib/store';
+import { useProfilesStore } from '@/shared/lib/store';
 import { Plus, FileText, Database, Target, Zap, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { ModeToggle } from '@/components/theme/mode-toggle';
+import { Button } from '@/shared/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card';
+import { Badge } from '@/shared/components/ui/badge';
+import { ModeToggle } from '@/shared/components/theme/mode-toggle';
 
 export default function Page() {
   const { profiles, createProfile, cloneProfile } = useProfilesStore();
