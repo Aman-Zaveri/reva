@@ -5,6 +5,7 @@ import {
   useSensor,
   useSensors,
   PointerSensor,
+  DragEndEvent,
 } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -113,9 +114,14 @@ export function UnifiedItemPicker({
     })
   );
 
-  const handleDragEnd = (event: any) => {
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    if (active.id !== over?.id) {
+    
+    if (!over) {
+      return;
+    }
+    
+    if (active.id !== over.id) {
       const oldIndex = items.findIndex((item) => item.id === active.id);
       const newIndex = items.findIndex((item) => item.id === over.id);
       const newOrder = arrayMove(

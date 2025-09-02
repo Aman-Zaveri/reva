@@ -3,7 +3,7 @@
 import type { DataBundle, Profile } from '@/lib/types';
 import { getEffectiveProfileData } from '@/lib/utils';
 import { RichTextDisplay } from '@/components/ui/rich-text-editor';
-import clsx from 'classnames';
+import { clsx } from 'clsx';
 
 export function Resume({ profile, data, compact }: { profile: Profile; data: DataBundle; compact?: boolean }) {
   const effectiveData = getEffectiveProfileData(profile, data);

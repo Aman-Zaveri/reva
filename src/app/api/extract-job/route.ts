@@ -26,7 +26,6 @@ export async function GET(req: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Job extraction error:', error);
     
     if (error instanceof Error) {
       return NextResponse.json(

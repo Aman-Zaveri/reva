@@ -35,7 +35,6 @@ export class LocalStorageProfileRepository implements ProfileRepository {
       
       return { success: true };
     } catch (error) {
-      console.error('Error saving profiles:', error);
       return { 
         success: false, 
         error: error instanceof Error ? error.message : 'Unknown error occurred while saving'
@@ -70,7 +69,6 @@ export class LocalStorageProfileRepository implements ProfileRepository {
         data: parsed 
       };
     } catch (error) {
-      console.error('Error loading profiles:', error);
       return { 
         success: false, 
         error: error instanceof Error ? error.message : 'Unknown error occurred while loading'
@@ -104,7 +102,6 @@ export class LocalStorageProfileRepository implements ProfileRepository {
 
       return { success: true, data: backupString };
     } catch (error) {
-      console.error('Error creating backup:', error);
       return { 
         success: false, 
         error: error instanceof Error ? error.message : 'Unknown error occurred while backing up'
@@ -131,7 +128,6 @@ export class LocalStorageProfileRepository implements ProfileRepository {
       
       return { success: true };
     } catch (error) {
-      console.error('Error restoring backup:', error);
       return { 
         success: false, 
         error: error instanceof Error ? error.message : 'Unknown error occurred while restoring backup'
@@ -153,7 +149,6 @@ export class LocalStorageProfileRepository implements ProfileRepository {
       
       return { success: true };
     } catch (error) {
-      console.error('Error clearing data:', error);
       return { 
         success: false, 
         error: error instanceof Error ? error.message : 'Unknown error occurred while clearing data'
@@ -164,18 +159,28 @@ export class LocalStorageProfileRepository implements ProfileRepository {
   /**
    * Check if storage data is valid
    */
-  private isValidStorageData(data: any): data is { profiles: Profile[]; data: DataBundle } {
-    return (
-      data &&
-      typeof data === 'object' &&
-      Array.isArray(data.profiles) &&
-      data.data &&
-      typeof data.data === 'object' &&
-      Array.isArray(data.data.experiences) &&
-      Array.isArray(data.data.projects) &&
-      Array.isArray(data.data.skills) &&
-      Array.isArray(data.data.education)
-    );
+  private isValidStorageData(data: unknown): data is { profiles: Profile[]; data: DataBundle } {
+    try {
+      if (!data || typeof data !== 'object' || data === null) {
+        return false;
+      }
+      
+      const obj = data as Record<string, unknown>;
+      const dataObj = obj.data as Record<string, unknown>;
+      
+      return !!(
+        Array.isArray(obj.profiles) &&
+        obj.data &&
+        typeof obj.data === 'object' &&
+        obj.data !== null &&
+        Array.isArray(dataObj.experiences) &&
+        Array.isArray(dataObj.projects) &&
+        Array.isArray(dataObj.skills) &&
+        Array.isArray(dataObj.education)
+      );
+    } catch {
+      return false;
+    }
   }
 
   /**

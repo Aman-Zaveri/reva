@@ -1,22 +1,5 @@
 import { z } from 'zod';
 
-// Helper function to validate URLs that might be missing protocol
-const isValidUrlOrPartial = (val: string | undefined | null): boolean => {
-  if (!val || val === '') return true;
-  
-  // If it already has a protocol, validate as normal URL
-  if (val.startsWith('http://') || val.startsWith('https://')) {
-    return z.string().url().safeParse(val).success;
-  }
-  
-  // If it looks like a domain (contains a dot), it's probably valid
-  if (val.includes('.') && !val.includes(' ')) {
-    return true;
-  }
-  
-  return false;
-};
-
 // Validation schemas
 export const PersonalInfoSchema = z.object({
   fullName: z.string().min(1, 'Full name is required'),
@@ -92,6 +75,7 @@ export const OptimizeResumeRequestSchema = z.object({
   jobDescription: z.string().optional(),
   profile: ProfileSchema,
   data: DataBundleSchema,
+  glazeLevel: z.number().int().min(1).max(5).optional().default(2),
 }).refine(
   (data) => data.jobUrl || data.jobDescription,
   {

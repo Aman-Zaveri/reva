@@ -5,6 +5,7 @@ export interface OptimizationRequest {
   jobDescription: string;
   profile: Profile;
   data: DataBundle;
+  glazeLevel?: number;
 }
 
 export interface OptimizationResult {
@@ -44,7 +45,7 @@ export class ResumeOptimizationService {
    * Optimize a resume profile based on job description
    */
   static async optimizeResume(request: OptimizationRequest): Promise<ProfileUpdates> {
-    const { jobDescription, profile, data } = request;
+    const { jobDescription, profile, data, glazeLevel = 2 } = request;
     
     // Validate input
     this.validateOptimizationRequest(request);
@@ -55,7 +56,8 @@ export class ResumeOptimizationService {
     // Generate optimization prompt
     const { systemPrompt, userPrompt } = this.buildOptimizationPrompt(
       jobDescription,
-      profileData
+      profileData,
+      glazeLevel
     );
     
     // Get AI optimization suggestions
@@ -125,17 +127,23 @@ export class ResumeOptimizationService {
   /**
    * Build optimization prompts
    */
-  private static buildOptimizationPrompt(jobDescription: string, profileData: any) {
-    const systemPrompt = `You are an expert resume optimization AI. Your task is to analyze a job description and optimize a resume to better match the requirements while keeping the content truthful and authentic.
+  private static buildOptimizationPrompt(
+    jobDescription: string, 
+    profileData: {
+      personalInfo: Profile['personalInfo'];
+      experiences: Experience[];
+      projects: Project[];
+      skills: Skill[];
+      education: Education[];
+    }, 
+    glazeLevel: number = 2
+  ) {
+    // Define glaze level characteristics
+    const glazeInstructions = this.getGlazeInstructions(glazeLevel);
+    
+    const systemPrompt = `You are an expert resume optimization AI. Your task is to analyze a job description and optimize a resume to better match the requirements.
 
-Guidelines:
-1. Only suggest modifications that are truthful and based on existing experience
-2. Optimize bullet points to highlight relevant skills and achievements
-3. Suggest skill emphasis that matches the job requirements
-4. Recommend summary changes that align with the role
-5. Prioritize experiences and projects that are most relevant
-6. Use industry keywords from the job description when appropriate
-7. Maintain professional tone and formatting
+${glazeInstructions}
 
 IMPORTANT: Return ONLY a valid JSON object with no markdown formatting, code blocks, or additional text. The response must be parseable JSON.
 
@@ -281,5 +289,66 @@ Please optimize this resume to better match the job description while keeping al
     
     const currentHash = this.generateJobDescriptionHash(currentJobDescription);
     return currentHash !== profile.aiOptimization.jobDescriptionHash;
+  }
+
+  /**
+   * Get glaze-level specific instructions for AI optimization
+   */
+  private static getGlazeInstructions(glazeLevel: number): string {
+    switch (glazeLevel) {
+      case 1:
+        return `Enhancement Level: CONSERVATIVE (1/5)
+Guidelines:
+1. Only suggest modifications that are completely truthful and based on existing experience
+2. Use exact facts and achievements without embellishment
+3. Focus on better phrasing and organization rather than content changes
+4. Maintain very professional and modest tone
+5. Avoid any language that could be considered exaggerated`;
+
+      case 2:
+        return `Enhancement Level: PROFESSIONAL (2/5) 
+Guidelines:
+1. Optimize bullet points to highlight relevant skills and achievements
+2. Use strong action verbs and quantified results when available
+3. Suggest skill emphasis that matches job requirements
+4. Recommend summary changes that align with the role
+5. Maintain professional tone and truthful representation
+6. Use industry keywords from the job description when appropriate`;
+
+      case 3:
+        return `Enhancement Level: CONFIDENT (3/5)
+Guidelines:
+1. Use bold, assertive language to present achievements
+2. Emphasize impact and leadership aspects of experiences
+3. Frame responsibilities in terms of outcomes and value delivered
+4. Use confident phrasing like "led," "drove," "delivered," "achieved"
+5. Highlight potential and growth trajectory
+6. Present experience in most favorable but truthful light`;
+
+      case 4:
+        return `Enhancement Level: AGGRESSIVE (4/5) - Use with caution
+Guidelines:
+1. Amplify achievements and use generous interpretations of experience
+2. Present responsibilities as if they had maximum possible impact
+3. Use superlative language where reasonable ("key," "critical," "essential")
+4. Stretch timelines and scope within reasonable bounds
+5. Present learning experiences as expertise where plausible
+6. Focus on potential applications of skills rather than just demonstrated use
+WARNING: Ensure enhanced content could reasonably be defended in an interview`;
+
+      case 5:
+        return `Enhancement Level: MAXIMUM (5/5) - EXTREME CAUTION REQUIRED
+Guidelines:
+1. Use maximum enhancement and ambitious interpretations
+2. Present any exposure to technology/skill as proficiency
+3. Frame any team participation as leadership experience  
+4. Amplify project scope and personal contribution significantly
+5. Use strongest possible language for all achievements
+6. Present aspirational skills as current capabilities
+CRITICAL WARNING: This level may produce content that significantly embellishes reality. Review carefully for accuracy and ethical considerations.`;
+
+      default:
+        return this.getGlazeInstructions(2); // Default to professional
+    }
   }
 }

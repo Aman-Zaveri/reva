@@ -7,7 +7,7 @@ export interface GeminiConfig {
   maxOutputTokens?: number;
 }
 
-export interface GeminiResponse<T = any> {
+export interface GeminiResponse<T = unknown> {
   data: T;
   usage?: {
     inputTokens: number;
@@ -53,7 +53,7 @@ export class GeminiService {
   /**
    * Generate content using Gemini AI
    */
-  static async generateContent<T = any>(
+  static async generateContent<T = unknown>(
     prompt: string,
     config: GeminiConfig = {}
   ): Promise<GeminiResponse<T>> {
@@ -81,7 +81,7 @@ export class GeminiService {
       let data: T;
       try {
         data = JSON.parse(cleanedText) as T;
-      } catch (parseError) {
+      } catch {
         // If it's not JSON, return as string
         data = cleanedText as T;
       }
@@ -94,7 +94,6 @@ export class GeminiService {
         }
       };
     } catch (error) {
-      console.error('Gemini generation error:', error);
       
       if (error instanceof Error) {
         if (error.message.includes('API key')) {
@@ -130,7 +129,7 @@ export class GeminiService {
   /**
    * Generate structured JSON response
    */
-  static async generateStructuredResponse<T = any>(
+  static async generateStructuredResponse<T = unknown>(
     systemPrompt: string,
     userPrompt: string,
     config: GeminiConfig = {}

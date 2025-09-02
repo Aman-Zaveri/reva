@@ -42,9 +42,9 @@ export function ItemDisplay({
                 </Badge>
               )}
             </div>
-            {('subtitle' in item && (item as any).subtitle) && (
+            {item.subtitle && (
               <div className="text-sm text-muted-foreground mt-1 truncate">
-                {(item as any).subtitle}
+                {item.subtitle}
               </div>
             )}
           </div>

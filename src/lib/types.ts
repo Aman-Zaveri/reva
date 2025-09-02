@@ -74,17 +74,17 @@ export type Profile = {
 // Enhanced type definitions with better error handling and API types
 
 // API Response types
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
-  details?: any;
+  details?: Record<string, unknown>;
 }
 
 export interface ApiError {
   message: string;
   code: string;
-  details?: any;
+  details?: Record<string, unknown>;
 }
 
 // Validation types
@@ -94,7 +94,7 @@ export interface ValidationError {
   code: string;
 }
 
-export interface ValidationResult<T = any> {
+export interface ValidationResult<T = unknown> {
   success: boolean;
   data?: T;
   errors?: ValidationError[];
@@ -108,13 +108,13 @@ export interface StoreState {
 }
 
 export interface AsyncAction<T = void> {
-  (...args: any[]): Promise<T>;
+  (...args: unknown[]): Promise<T>;
 }
 
 // Event types
 export interface StoreEvent {
   type: string;
-  payload?: any;
+  payload?: Record<string, unknown>;
   timestamp: Date;
 }
 

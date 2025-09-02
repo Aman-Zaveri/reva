@@ -1,21 +1,16 @@
 'use client';
 
-import type { Profile, DataBundle } from '@/lib/types';
+import type { Profile, DataBundle, Experience, Project, Skill, Education } from '@/lib/types';
 import { UnifiedItemPicker } from '@/components/pickers';
 
 interface ContentSectionsProps {
   profile: Profile;
   data: DataBundle;
   onUpdateProfile: (patch: Partial<Profile>) => void;
-  onReorderItems: (
-    itemType: 'experienceIds' | 'projectIds' | 'skillIds' | 'educationIds',
-    fromIndex: number,
-    toIndex: number
-  ) => void;
-  onUpdateProfileExperience: (itemId: string, patch: any) => void;
-  onUpdateProfileProject: (itemId: string, patch: any) => void;
-  onUpdateProfileSkill: (itemId: string, patch: any) => void;
-  onUpdateProfileEducation: (itemId: string, patch: any) => void;
+  onUpdateProfileExperience: (itemId: string, patch: Partial<Experience>) => void;
+  onUpdateProfileProject: (itemId: string, patch: Partial<Project>) => void;
+  onUpdateProfileSkill: (itemId: string, patch: Partial<Skill>) => void;
+  onUpdateProfileEducation: (itemId: string, patch: Partial<Education>) => void;
   onResetProfileOverride: (itemType: string, itemId: string) => void;
 }
 
@@ -23,7 +18,6 @@ export function ContentSections({
   profile,
   data,
   onUpdateProfile,
-  onReorderItems,
   onUpdateProfileExperience,
   onUpdateProfileProject,
   onUpdateProfileSkill,
@@ -31,7 +25,7 @@ export function ContentSections({
   onResetProfileOverride,
 }: ContentSectionsProps) {
   // Create visibility states from profile selections
-  const createVisibilityState = (ids: string[], allItems: any[]) => {
+  const createVisibilityState = (ids: string[], allItems: Array<{ id: string }>) => {
     const state: Record<string, boolean> = {};
     allItems.forEach(item => {
       state[item.id] = ids.includes(item.id);

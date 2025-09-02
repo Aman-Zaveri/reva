@@ -43,6 +43,6 @@ export function getEffectiveProfileData(profile: Profile, masterData: DataBundle
 // Check if an item has profile-specific overrides
 export function hasProfileOverride(profile: Profile, itemType: 'experience' | 'project' | 'skill' | 'education', itemId: string): boolean {
   const overrideKey = `${itemType}Overrides` as keyof Profile;
-  const overrides = profile[overrideKey] as Record<string, any> | undefined;
+  const overrides = profile[overrideKey] as Record<string, Partial<Experience | Project | Skill | Education>> | undefined;
   return !!(overrides && overrides[itemId] && Object.keys(overrides[itemId]).length > 0);
 }

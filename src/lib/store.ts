@@ -3,7 +3,7 @@
 import { create } from 'zustand';
 import { nanoid } from './utils';
 import { LocalStorageProfileRepository } from '@/repositories/profile.repository';
-import { STORAGE_KEYS, SUCCESS_MESSAGES, ERROR_MESSAGES } from '@/utils/constants';
+import { ERROR_MESSAGES } from '@/utils/constants';
 import type { Profile, DataBundle, Experience, Project, Skill, Education, PersonalInfo } from './types';
 
 // Repository instance
@@ -149,8 +149,7 @@ export const useProfilesStore = create<ProfilesState>((set, get) => ({
         // Save default data
         await profileRepository.saveProfiles(defaultProfiles, seedData);
       }
-    } catch (error) {
-      console.error('Failed to load from storage:', error);
+    } catch {
       set({ 
         error: ERROR_MESSAGES.LOAD_ERROR,
         loading: false
@@ -173,8 +172,7 @@ export const useProfilesStore = create<ProfilesState>((set, get) => ({
       } else {
         set({ error: result.error || ERROR_MESSAGES.SAVE_ERROR });
       }
-    } catch (error) {
-      console.error('Failed to save to storage:', error);
+    } catch {
       set({ error: ERROR_MESSAGES.SAVE_ERROR });
     }
   },
@@ -361,7 +359,7 @@ export const useProfilesStore = create<ProfilesState>((set, get) => ({
     const updatedProfiles = get().profiles.map((p) => {
       if (p.id === profileId) {
         const overrideKey = `${itemType}Overrides` as keyof Profile;
-        const overrides = { ...(p[overrideKey] as Record<string, any> || {}) };
+        const overrides = { ...(p[overrideKey] as Record<string, Partial<Experience | Project | Skill | Education>> || {}) };
         delete overrides[itemId];
         return { ...p, [overrideKey]: overrides };
       }
@@ -522,7 +520,7 @@ export const useProfilesStore = create<ProfilesState>((set, get) => ({
           loading: false
         });
       }
-    } catch (error) {
+    } catch {
       set({ 
         error: ERROR_MESSAGES.GENERAL_ERROR,
         loading: false
