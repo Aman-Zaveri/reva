@@ -4,6 +4,25 @@ import { ResumeOptimizationService } from '@/features/ai-optimization/services/r
 import { validateOptimizeRequest } from '@/shared/utils/validation';
 import { ERROR_MESSAGES } from '@/shared/utils/constants';
 
+/**
+ * API Route: POST /api/optimize-resume
+ * 
+ * Handles AI-powered resume optimization requests. This endpoint:
+ * 1. Validates the incoming request data
+ * 2. Extracts job descriptions from LinkedIn URLs (if provided)
+ * 3. Sends resume data and job requirements to AI for optimization
+ * 4. Returns optimized content suggestions
+ * 
+ * Request body should contain:
+ * - jobUrl (optional): LinkedIn job posting URL to extract description from
+ * - jobDescription (optional): Manual job description text
+ * - profile: Resume profile to optimize
+ * - data: Master data bundle with experiences, projects, etc.
+ * - glazeLevel (optional): Optimization aggressiveness level (1-5)
+ * 
+ * @param req - Next.js request object containing optimization parameters
+ * @returns JSON response with optimization results or error information
+ */
 export async function POST(req: NextRequest) {
   try {
     const requestData = await req.json();
@@ -24,7 +43,8 @@ export async function POST(req: NextRequest) {
 
     let finalJobDescription = jobDescription;
 
-    // If URL is provided, extract job description from it
+    // If LinkedIn URL is provided, extract job description from it
+    // This allows users to simply paste a LinkedIn job URL instead of copying the description
     if (jobUrl && !jobDescription) {
       try {
         const jobInfo = await ScrapingService.extractJobInfo(jobUrl);
@@ -47,7 +67,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Optimize the resume
+    // Send resume and job data to AI for optimization
+    // This is the core AI processing step that analyzes the job requirements
+    // and generates optimized resume content suggestions
     const optimizations = await ResumeOptimizationService.optimizeResume({
       jobDescription: finalJobDescription,
       profile,
@@ -63,7 +85,8 @@ export async function POST(req: NextRequest) {
 
   } catch (error) {
     
-    // Handle specific error types
+    // Provide specific error handling for different types of failures
+    // This helps users understand what went wrong and how to fix it
     if (error instanceof Error) {
       if (error.message.includes('API key')) {
         return NextResponse.json(

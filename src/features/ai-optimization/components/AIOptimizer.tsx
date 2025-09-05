@@ -19,6 +19,20 @@ import { useJobExtraction } from "../hooks/useJobExtraction";
 import { useResumeOptimization } from "../hooks/useResumeOptimization";
 import type { AIOptimizerProps, TabType, GlazeLevel } from "../types";
 
+/**
+ * AI Resume Optimizer Dialog Component
+ * 
+ * This component provides a complete AI-powered resume optimization workflow:
+ * 1. Job input (URL extraction or manual description entry)
+ * 2. Glaze level selection for optimization aggressiveness
+ * 3. AI-powered analysis and optimization
+ * 4. Results review and application
+ * 
+ * The component manages the entire optimization flow including job extraction,
+ * AI processing, and applying results back to the user's profile.
+ * 
+ * @param props - Component props containing profile data and callbacks
+ */
 export function AIOptimizer({
   profile,
   data,
@@ -30,6 +44,7 @@ export function AIOptimizer({
   const [jobDescription, setJobDescription] = useState("");
   const [glazeLevel, setGlazeLevel] = useState<GlazeLevel>(2); // Default to Professional level
 
+  // Hooks for job extraction and resume optimization
   const {
     jobInfo,
     isExtractingJob,
@@ -47,16 +62,24 @@ export function AIOptimizer({
     resetOptimization,
   } = useResumeOptimization();
 
-  // Extract job info when URL changes
+  // Automatically extract job info when URL changes (debounced)
   useEffect(() => {
     const timeoutId = setTimeout(() => extractJobInfo(jobUrl), 1000);
     return () => clearTimeout(timeoutId);
   }, [jobUrl, extractJobInfo]);
 
+  /**
+   * Initiates the AI optimization process
+   * Sends job description and profile data to the optimization service
+   */
   const handleOptimize = () => {
     optimizeResume(jobUrl, jobDescription, profile, data, activeTab, glazeLevel);
   };
 
+  /**
+   * Applies the AI-generated optimizations to the user's profile
+   * Closes the dialog and resets the optimization state
+   */
   const handleApplyOptimizations = () => {
     if (result) {
       onApplyOptimizations(result.optimizations);
@@ -65,6 +88,10 @@ export function AIOptimizer({
     }
   };
 
+  /**
+   * Resets all optimization state and form inputs
+   * Used when starting over or canceling the optimization
+   */
   const handleReset = () => {
     resetOptimization();
     setJobUrl("");

@@ -1,34 +1,56 @@
 import type { Profile, DataBundle, Experience, Project, Skill, Education } from '@/shared/lib/types';
 import { GeminiService } from '@/shared/services/gemini.service';
 
+/**
+ * Request parameters for resume optimization
+ */
 export interface OptimizationRequest {
+  /** Job description text to optimize the resume against */
   jobDescription: string;
+  /** Profile to be optimized */
   profile: Profile;
+  /** Master data bundle containing all experiences, projects, etc. */
   data: DataBundle;
+  /** AI enhancement level (1-5, where 1 is conservative and 5 is aggressive) */
   glazeLevel?: number;
 }
 
+/**
+ * AI-generated optimization suggestions for a resume
+ */
 export interface OptimizationResult {
+  /** Optimized personal information (summary, etc.) */
   personalInfo?: {
     summary?: string;
   };
+  /** Optimized experience bullet points and tags */
   experienceOptimizations?: Array<{
     id: string;
     bullets: string[];
     tags: string[];
   }>;
+  /** Optimized project bullet points and tags */
   projectOptimizations?: Array<{
     id: string;
     bullets: string[];
     tags: string[];
   }>;
+  /** Recommended order for experience items (most relevant first) */
   recommendedExperienceOrder?: string[];
+  /** Recommended order for project items (most relevant first) */
   recommendedProjectOrder?: string[];
+  /** Recommended order for skill categories (most relevant first) */
   recommendedSkillOrder?: string[];
+  /** Key insights about what was optimized and why */
   keyInsights: string[];
 }
 
+/**
+ * Profile updates structure for applying AI optimizations
+ * Extends Profile with partial updates that can be applied selectively
+ */
 export interface ProfileUpdates extends Partial<Profile> {
+  /** AI optimization metadata for tracking and caching */
   aiOptimization?: {
     timestamp: string;
     keyInsights: string[];
@@ -37,12 +59,40 @@ export interface ProfileUpdates extends Partial<Profile> {
 }
 
 /**
- * Service for AI-powered resume optimization
+ * Service for AI-powered resume optimization using Google Gemini
+ * 
+ * This service analyzes job descriptions and automatically optimizes resumes by:
+ * - Rewriting bullet points to better match job requirements
+ * - Suggesting new professional summaries
+ * - Reordering sections based on relevance
+ * - Adding relevant keywords and tags
+ * - Providing insights about the changes made
+ * 
+ * The service supports different "glaze levels" for controlling how aggressive
+ * the optimization should be, from conservative (truthful, minor improvements)
+ * to aggressive (maximum enhancement while staying plausible).
  */
 export class ResumeOptimizationService {
   
   /**
-   * Optimize a resume profile based on job description
+   * Optimizes a resume profile based on a job description using AI
+   * 
+   * This is the main entry point for resume optimization. It coordinates the entire
+   * process from validation through AI generation to profile update creation.
+   * 
+   * @param request - Optimization request containing job description, profile, and settings
+   * @returns Promise resolving to profile updates that can be applied to the resume
+   * @throws Error if validation fails or AI generation encounters issues
+   * 
+   * @example
+   * ```typescript
+   * const updates = await ResumeOptimizationService.optimizeResume({
+   *   jobDescription: "Software Engineer position requiring React and Node.js...",
+   *   profile: userProfile,
+   *   data: masterData,
+   *   glazeLevel: 2
+   * });
+   * ```
    */
   static async optimizeResume(request: OptimizationRequest): Promise<ProfileUpdates> {
     const { jobDescription, profile, data, glazeLevel = 2 } = request;
@@ -73,7 +123,14 @@ export class ResumeOptimizationService {
   }
 
   /**
-   * Validate optimization request
+   * Validates the optimization request parameters
+   * 
+   * Ensures all required fields are present and meet minimum quality requirements.
+   * Throws descriptive errors for any validation failures.
+   * 
+   * @param request - The optimization request to validate
+   * @throws Error with specific message if validation fails
+   * @private
    */
   private static validateOptimizationRequest(request: OptimizationRequest): void {
     const { jobDescription, profile, data } = request;
@@ -96,7 +153,15 @@ export class ResumeOptimizationService {
   }
 
   /**
-   * Extract relevant data from profile
+   * Extracts relevant data from profile and master data bundle
+   * 
+   * Resolves profile item IDs to actual data objects and filters out any
+   * missing items. This creates a clean dataset for AI optimization.
+   * 
+   * @param profile - The profile containing item IDs
+   * @param data - Master data bundle containing all available items
+   * @returns Structured profile data with resolved objects
+   * @private
    */
   private static extractProfileData(profile: Profile, data: DataBundle) {
     const currentExperiences = profile.experienceIds
@@ -125,7 +190,17 @@ export class ResumeOptimizationService {
   }
 
   /**
-   * Build optimization prompts
+   * Builds system and user prompts for AI optimization
+   * 
+   * Creates detailed prompts that instruct the AI on how to optimize the resume
+   * based on the specified glaze level. The system prompt defines the role and
+   * output format, while the user prompt provides the specific data to optimize.
+   * 
+   * @param jobDescription - The job description to optimize against
+   * @param profileData - Structured profile data to be optimized
+   * @param glazeLevel - Enhancement level (1-5) controlling optimization aggressiveness
+   * @returns Object containing system and user prompts for AI generation
+   * @private
    */
   private static buildOptimizationPrompt(
     jobDescription: string, 
@@ -201,7 +276,17 @@ Please optimize this resume to better match the job description while keeping al
   }
 
   /**
-   * Convert AI optimization results to profile updates
+   * Converts AI optimization results into profile updates structure
+   * 
+   * Transforms the AI's suggested changes into the proper profile update format
+   * that can be applied to the user's profile. Preserves existing data while
+   * adding optimization overrides and metadata.
+   * 
+   * @param optimizations - AI-generated optimization suggestions
+   * @param profile - Original profile being optimized
+   * @param jobDescription - Job description used for optimization (for metadata)
+   * @returns Profile updates object ready to be applied
+   * @private
    */
   private static convertToProfileUpdates(
     optimizations: OptimizationResult,
@@ -218,7 +303,9 @@ Please optimize this resume to better match the job description while keeping al
       };
     }
 
-    // Create experience overrides
+    // Create profile-specific overrides for experiences
+    // This allows customizing experience bullet points for this profile
+    // without affecting the master data used by other profiles
     if (optimizations.experienceOptimizations) {
       profileUpdates.experienceOverrides = { ...profile.experienceOverrides };
       optimizations.experienceOptimizations.forEach((opt) => {
@@ -231,7 +318,8 @@ Please optimize this resume to better match the job description while keeping al
       });
     }
 
-    // Create project overrides
+    // Create profile-specific overrides for projects
+    // Similar to experiences, this allows per-profile customization
     if (optimizations.projectOptimizations) {
       profileUpdates.projectOverrides = { ...profile.projectOverrides };
       optimizations.projectOptimizations.forEach((opt) => {
@@ -266,14 +354,28 @@ Please optimize this resume to better match the job description while keeping al
   }
 
   /**
-   * Generate a job description hash for caching
+   * Generates a short hash of the job description for caching and comparison
+   * 
+   * Used to track whether an optimization is still valid for the same job
+   * description, enabling intelligent caching of optimization results.
+   * 
+   * @param jobDescription - Job description text to hash
+   * @returns Short base64 hash string
    */
   static generateJobDescriptionHash(jobDescription: string): string {
     return Buffer.from(jobDescription).toString('base64').slice(0, 20);
   }
 
   /**
-   * Check if optimization is still valid based on job description
+   * Determines if an existing optimization is outdated and should be refreshed
+   * 
+   * Checks both the age of the optimization and whether the job description
+   * has changed since the optimization was generated.
+   * 
+   * @param profile - Profile containing potential optimization metadata
+   * @param currentJobDescription - Current job description to compare against
+   * @param maxAgeHours - Maximum age in hours before optimization is considered stale
+   * @returns true if optimization should be regenerated, false if still valid
    */
   static isOptimizationStale(
     profile: Profile,
@@ -292,7 +394,18 @@ Please optimize this resume to better match the job description while keeping al
   }
 
   /**
-   * Get glaze-level specific instructions for AI optimization
+   * Gets glaze-level specific instructions for AI optimization
+   * 
+   * Each glaze level represents a different approach to resume enhancement:
+   * - Level 1: Conservative, truthful improvements only
+   * - Level 2: Professional optimization with industry keywords
+   * - Level 3: Confident presentation of achievements
+   * - Level 4: Aggressive enhancement (use with caution)
+   * - Level 5: Maximum enhancement (requires careful review)
+   * 
+   * @param glazeLevel - Enhancement level (1-5)
+   * @returns Detailed instructions for the AI on how to optimize content
+   * @private
    */
   private static getGlazeInstructions(glazeLevel: number): string {
     switch (glazeLevel) {

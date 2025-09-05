@@ -1,28 +1,62 @@
 import type { Profile, DataBundle } from '@/shared/lib/types';
 
+/**
+ * Result wrapper for repository operations
+ * Provides consistent success/error handling across all repository methods
+ */
 export interface StorageResult<T> {
+  /** Whether the operation completed successfully */
   success: boolean;
+  /** Data returned from successful operations */
   data?: T;
+  /** Error message for failed operations */
   error?: string;
 }
 
+/**
+ * Interface defining the contract for profile data persistence
+ * 
+ * This interface allows for different storage implementations (localStorage,
+ * IndexedDB, remote API, etc.) while maintaining consistent method signatures.
+ */
 export interface ProfileRepository {
+  /** Saves profiles and master data to storage */
   saveProfiles(profiles: Profile[], data: DataBundle): Promise<StorageResult<void>>;
+  /** Loads profiles and master data from storage */
   loadProfiles(): Promise<StorageResult<{ profiles: Profile[]; data: DataBundle }>>;
+  /** Creates a backup string of all data */
   backupData(): Promise<StorageResult<string>>;
+  /** Restores data from a backup string */
   restoreData(backup: string): Promise<StorageResult<void>>;
+  /** Clears all stored data */
   clearData(): Promise<StorageResult<void>>;
 }
 
 /**
- * Repository for managing profile data persistence
+ * localStorage-based implementation of ProfileRepository
+ * 
+ * This repository provides persistent storage using the browser's localStorage API.
+ * It handles data serialization, validation, and error recovery. All operations
+ * are wrapped in try-catch blocks to handle storage quota exceeded errors and
+ * other localStorage-specific issues.
+ * 
+ * Storage format: JSON objects with version information for future migration support.
  */
 export class LocalStorageProfileRepository implements ProfileRepository {
+  /** Storage key for main profile data */
   private static readonly STORAGE_KEY = 'resume_profiles_v2';
+  /** Storage key for backup data */
   private static readonly BACKUP_KEY = 'resume_profiles_backup';
 
   /**
-   * Save profiles and data to localStorage
+   * Saves profiles and master data to localStorage
+   * 
+   * Serializes the data as JSON and stores it under the main storage key.
+   * Handles localStorage quota exceeded errors gracefully.
+   * 
+   * @param profiles - Array of profile objects to save
+   * @param data - Master data bundle to save
+   * @returns Promise resolving to operation result
    */
   async saveProfiles(profiles: Profile[], data: DataBundle): Promise<StorageResult<void>> {
     try {
@@ -43,7 +77,12 @@ export class LocalStorageProfileRepository implements ProfileRepository {
   }
 
   /**
-   * Load profiles and data from localStorage
+   * Loads profiles and master data from localStorage
+   * 
+   * Retrieves and parses stored data, validating its structure before returning.
+   * Returns an error result if no data exists or if the data is corrupted.
+   * 
+   * @returns Promise resolving to stored profiles and data, or error result
    */
   async loadProfiles(): Promise<StorageResult<{ profiles: Profile[]; data: DataBundle }>> {
     try {
@@ -77,7 +116,12 @@ export class LocalStorageProfileRepository implements ProfileRepository {
   }
 
   /**
-   * Create a backup of current data
+   * Creates a timestamped backup of current data
+   * 
+   * Generates a backup string that includes version information and timestamp
+   * for data recovery purposes. The backup can be saved to a file or shared.
+   * 
+   * @returns Promise resolving to backup string or error result
    */
   async backupData(): Promise<StorageResult<string>> {
     try {
@@ -110,7 +154,13 @@ export class LocalStorageProfileRepository implements ProfileRepository {
   }
 
   /**
-   * Restore data from backup
+   * Restores data from a backup string
+   * 
+   * Parses and validates a backup string, then restores the data to localStorage.
+   * Validates backup format and version information before proceeding.
+   * 
+   * @param backup - Backup string created by backupData method
+   * @returns Promise resolving to operation result
    */
   async restoreData(backup: string): Promise<StorageResult<void>> {
     try {
@@ -157,7 +207,15 @@ export class LocalStorageProfileRepository implements ProfileRepository {
   }
 
   /**
-   * Check if storage data is valid
+   * Validates the structure of loaded storage data
+   * 
+   * Performs basic type checking to ensure the loaded data has the expected
+   * structure with profiles and data arrays. Prevents runtime errors from
+   * corrupted or outdated data formats.
+   * 
+   * @param data - Raw data loaded from storage
+   * @returns true if data structure is valid, false otherwise
+   * @private
    */
   private isValidStorageData(data: unknown): data is { profiles: Profile[]; data: DataBundle } {
     try {
@@ -184,7 +242,13 @@ export class LocalStorageProfileRepository implements ProfileRepository {
   }
 
   /**
-   * Get storage usage information
+   * Estimates localStorage usage and capacity
+   * 
+   * Provides information about current storage usage for monitoring and
+   * warning users when approaching storage limits. Uses estimates since
+   * browser storage APIs don't provide exact quota information.
+   * 
+   * @returns Object containing usage statistics in bytes and percentages
    */
   async getStorageInfo(): Promise<{ used: number; available: number; percentage: number }> {
     if (typeof window === 'undefined') {

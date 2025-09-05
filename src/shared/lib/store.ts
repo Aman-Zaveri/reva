@@ -6,74 +6,124 @@ import { LocalStorageProfileRepository } from '@/shared/repositories/profile.rep
 import { ERROR_MESSAGES } from '@/shared/utils/constants';
 import type { Profile, DataBundle, Experience, Project, Skill, Education, PersonalInfo } from './types';
 
-// Repository instance
+// Repository instance for data persistence
 const profileRepository = new LocalStorageProfileRepository();
 
+/**
+ * State interface for the profiles store
+ * 
+ * This store manages the entire application state including profiles, master data,
+ * loading states, and all operations for creating, updating, and managing resume data.
+ * Uses Zustand for state management with localStorage persistence.
+ */
 export type ProfilesState = {
+  /** Array of all user-created resume profiles */
   profiles: Profile[];
+  /** Master data bundle containing all experiences, projects, skills, education */
   data: DataBundle;
+  /** Loading state for async operations */
   loading: boolean;
+  /** Current error message, if any */
   error: string | null;
+  /** Timestamp of last successful save operation */
   lastSaved: string | null;
   
   // Core profile operations
+  /** Creates a new empty profile and adds it to the store */
   createProfile: () => Promise<void>;
+  /** Updates an existing profile with partial data */
   updateProfile: (id: string, patch: Partial<Profile>) => Promise<void>;
+  /** Permanently deletes a profile */
   deleteProfile: (id: string) => Promise<void>;
+  /** Creates a copy of an existing profile */
   cloneProfile: (id: string) => Promise<void>;
   
   // Profile item management
+  /** Reorders items within a profile (drag & drop support) */
   reorderProfileItems: (profileId: string, itemType: 'experienceIds' | 'projectIds' | 'skillIds' | 'educationIds', fromIndex: number, toIndex: number) => Promise<void>;
   
   // Personal info management
+  /** Updates personal info for a specific profile */
   updatePersonalInfo: (id: string, patch: Partial<PersonalInfo>) => Promise<void>;
+  /** Updates master personal info (affects all profiles by default) */
   updateMasterPersonalInfo: (patch: Partial<PersonalInfo>) => Promise<void>;
   
-  // Profile-specific overrides
+  // Profile-specific overrides (allows customizing content per profile without affecting master data)
+  /** Creates profile-specific override for an experience item */
   updateProfileExperience: (profileId: string, experienceId: string, patch: Partial<Experience>) => Promise<void>;
+  /** Creates profile-specific override for a project item */
   updateProfileProject: (profileId: string, projectId: string, patch: Partial<Project>) => Promise<void>;
+  /** Creates profile-specific override for a skill item */
   updateProfileSkill: (profileId: string, skillId: string, patch: Partial<Skill>) => Promise<void>;
+  /** Creates profile-specific override for an education item */
   updateProfileEducation: (profileId: string, educationId: string, patch: Partial<Education>) => Promise<void>;
+  /** Removes a profile-specific override, reverting to master data */
   resetProfileOverride: (profileId: string, itemType: 'experience' | 'project' | 'skill' | 'education', itemId: string) => Promise<void>;
   
   // Master data management
+  /** Updates the master data bundle */
   updateData: (patch: Partial<DataBundle>) => Promise<void>;
   
-  // Experience management
+  // Experience management (affects master data used by all profiles)
+  /** Updates an existing experience in master data */
   updateExperience: (id: string, patch: Partial<Experience>) => Promise<void>;
+  /** Adds a new experience to master data */
   addExperience: () => Promise<void>;
+  /** Removes an experience from master data and all profiles */
   deleteExperience: (id: string) => Promise<void>;
   
-  // Project management
+  // Project management (affects master data used by all profiles)
+  /** Updates an existing project in master data */
   updateProject: (id: string, patch: Partial<Project>) => Promise<void>;
+  /** Adds a new project to master data */
   addProject: () => Promise<void>;
+  /** Removes a project from master data and all profiles */
   deleteProject: (id: string) => Promise<void>;
   
-  // Skill management
+  // Skill management (affects master data used by all profiles)
+  /** Updates an existing skill category in master data */
   updateSkill: (id: string, patch: Partial<Skill>) => Promise<void>;
+  /** Adds a new skill category to master data */
   addSkill: () => Promise<void>;
+  /** Removes a skill category from master data and all profiles */
   deleteSkill: (id: string) => Promise<void>;
   
-  // Education management
+  // Education management (affects master data used by all profiles)
+  /** Updates an existing education item in master data */
   updateEducation: (id: string, patch: Partial<Education>) => Promise<void>;
+  /** Adds a new education item to master data */
   addEducation: () => Promise<void>;
+  /** Removes an education item from master data and all profiles */
   deleteEducation: (id: string) => Promise<void>;
   
   // Data operations
+  /** Resets all data to default seed values */
   resetAll: () => Promise<void>;
+  /** Loads data from localStorage */
   loadFromStorage: () => Promise<void>;
+  /** Saves current state to localStorage */
   saveToStorage: () => Promise<void>;
+  /** Creates a backup string of current data */
   backupData: () => Promise<string>;
+  /** Restores data from a backup string */
   restoreData: (backup: string) => Promise<void>;
   
   // Error handling
+  /** Clears the current error state */
   clearError: () => void;
 };
 
-// Default seed data
+// Default seed data import
 import { data as seedData } from './data';
 
-// Helper function to create default profiles
+/**
+ * Creates default profiles with sample data for new users
+ * 
+ * These profiles demonstrate the application's capabilities and provide
+ * a starting point for users to understand the profile system.
+ * 
+ * @returns Array of sample profiles (AI Resume and General Software)
+ */
 const createDefaultProfiles = (): Profile[] => [
   {
     id: nanoid(),
@@ -115,7 +165,19 @@ const createDefaultProfiles = (): Profile[] => [
   }
 ];
 
-// Initialize store
+/**
+ * Main Zustand store for resume management
+ * 
+ * This store implements the complete state management for the resume application,
+ * including profiles, master data, and all operations. It automatically persists
+ * to localStorage and provides optimistic updates for better UX.
+ * 
+ * Key concepts:
+ * - Master Data: Single source of truth for experiences, projects, skills, education
+ * - Profiles: Collections of master data items with optional per-profile overrides
+ * - Profile Overrides: Allow customizing content for specific profiles without affecting master data
+ * - Automatic Persistence: All operations automatically save to localStorage
+ */
 export const useProfilesStore = create<ProfilesState>((set, get) => ({
   profiles: [],
   data: seedData,
@@ -123,7 +185,12 @@ export const useProfilesStore = create<ProfilesState>((set, get) => ({
   error: null,
   lastSaved: null,
 
-  // Load initial data
+  /**
+   * Loads initial data from localStorage or creates default data
+   * 
+   * This method is called on app initialization to restore the user's data.
+   * If no saved data exists, it creates default sample profiles to get users started.
+   */
   loadFromStorage: async () => {
     set({ loading: true, error: null });
     
@@ -157,7 +224,12 @@ export const useProfilesStore = create<ProfilesState>((set, get) => ({
     }
   },
 
-  // Save to storage
+  /**
+   * Saves current state to localStorage
+   * 
+   * Called automatically after most operations to persist changes.
+   * Updates the lastSaved timestamp on successful save.
+   */
   saveToStorage: async () => {
     const { profiles, data } = get();
     
@@ -177,7 +249,12 @@ export const useProfilesStore = create<ProfilesState>((set, get) => ({
     }
   },
 
-  // Create profile
+  /**
+   * Creates a new empty profile and adds it to the store
+   * 
+   * New profiles start with master personal info but empty item lists.
+   * The new profile is added to the top of the profiles list.
+   */
   createProfile: async () => {
     const masterPersonalInfo = get().data.personalInfo;
     const newProfile: Profile = {
@@ -274,7 +351,17 @@ export const useProfilesStore = create<ProfilesState>((set, get) => ({
     await get().saveToStorage();
   },
 
-  // Profile experience overrides
+  /**
+   * Updates profile-specific experience overrides
+   * 
+   * Profile overrides allow customizing specific items for individual profiles
+   * without affecting the master data used by other profiles. This enables
+   * targeting the same experience differently for different job applications.
+   * 
+   * @param profileId - ID of the profile to update
+   * @param experienceId - ID of the experience item to override
+   * @param patch - Partial experience data to override
+   */
   updateProfileExperience: async (profileId, experienceId, patch) => {
     const updatedProfiles = get().profiles.map((p) => {
       if (p.id === profileId) {
