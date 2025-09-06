@@ -176,3 +176,23 @@ export const FILE_LIMITS = {
   MAX_SIZE: 5 * 1024 * 1024, // 5MB
   ALLOWED_TYPES: ['application/json', 'text/plain'],
 } as const;
+
+// A4 paper dimensions and resume layout constants
+export const A4_DIMENSIONS = {
+  // A4 dimensions in millimeters
+  WIDTH_MM: 210,
+  HEIGHT_MM: 297,
+  // A4 dimensions in pixels at 96 DPI (web standard) - full size
+  WIDTH_PX_FULL: 794, // 210mm * 96dpi / 25.4mm per inch
+  HEIGHT_PX_FULL: 1123, // 297mm * 96dpi / 25.4mm per inch
+  // A4 dimensions scaled for preview (maintain aspect ratio but fit in viewport)
+  WIDTH_PX: 650, // Increased width for better appearance
+  HEIGHT_PX: 920, // Maintains A4 aspect ratio (297/210 = 1.414)
+  // A4 dimensions in CSS units (using 1px = 0.75pt conversion)
+  WIDTH_PT: 595, // 210mm * 72pt / 25.4mm per inch
+  HEIGHT_PT: 842, // 297mm * 72pt / 25.4mm per inch
+  // Margins for resume content (in mm)
+  MARGIN_MM: 20,
+  // Scale factor for preview vs print
+  SCALE_FACTOR: 0.82, // 650/794 = 0.82 (increased from 0.73)
+} as const;

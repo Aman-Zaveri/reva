@@ -179,4 +179,57 @@
   .hide-scrollbar::-webkit-scrollbar {
     display: none;  /* Safari and Chrome */
   }
+
+  /* Print styles for A4 paper */
+  @media print {
+    @page {
+      size: A4;
+      margin: 0;
+    }
+    
+    body {
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+    
+    /* Ensure proper page breaks */
+    .page-break-before {
+      page-break-before: always;
+    }
+    
+    .page-break-after {
+      page-break-after: always;
+    }
+    
+    .page-break-inside-avoid {
+      page-break-inside: avoid;
+    }
+    
+    /* Hide non-essential elements in print */
+    .print-hidden {
+      display: none !important;
+    }
+    
+    /* Ensure black text for print */
+    .print-black {
+      color: black !important;
+    }
+    
+    /* Scale resume to full size for print */
+    .resume-container {
+      transform: none !important;
+      width: 794px !important;
+      height: 1123px !important;
+    }
+  }
+
+  /* Responsive font scaling for resume preview */
+  .resume-preview {
+    font-size: clamp(10px, 1.2vw, 14px);
+  }
+
+  /* Smooth transitions for hover effects */
+  .hover-tooltip {
+    transition: opacity 0.2s ease-in-out;
+  }
 }

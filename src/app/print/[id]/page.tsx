@@ -3,7 +3,7 @@
 import { useParams } from 'next/navigation';
 import { useProfilesStore } from '@/shared/lib/store';
 import { useEffect, useMemo } from 'react';
-import { Resume } from '@/shared/components/Resume';
+import { A4Resume } from '@/shared/components/A4Resume';
 
 export default function PrintPage() {
   const params = useParams<{ id: string }>();
@@ -21,8 +21,8 @@ export default function PrintPage() {
   if (!profile) return <div className="p-6">Profile not found.</div>;
 
   return (
-    <div className="mx-auto max-w-3xl bg-white p-8">
-      <Resume profile={profile} data={data} compact />
+    <div className="mx-auto bg-white print:p-0">
+      <A4Resume profile={profile} data={data} compact showPrintView />
     </div>
   );
 }

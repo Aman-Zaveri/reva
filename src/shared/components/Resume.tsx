@@ -27,7 +27,7 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
               <section>
                 <h2 className="text-xs font-bold uppercase tracking-wide text-foreground">Experience</h2>
                 {experiences.map(experience => (
-                  <div key={experience.id} className="mt-1">
+                  <div key={experience.id} className="mt-1 experience-item">
                     <div className="flex justify-between text-[11px] font-medium"><span className="text-foreground">{experience.title} @ {experience.company}</span><span className="text-muted-foreground">{experience.date}</span></div>
                     <ul className="ml-4 list-disc">
                       {experience.bullets.slice(0,3).map((bullet,index)=>(<li key={index}><RichTextDisplay content={bullet} /></li>))}
@@ -40,7 +40,7 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
               <section>
                 <h2 className="text-xs font-bold uppercase tracking-wide text-foreground">Projects</h2>
                 {projects.map(project => (
-                  <div key={project.id} className="mt-1">
+                  <div key={project.id} className="mt-1 project-item">
                     <div className="flex justify-between text-[11px] font-medium"><span className="text-foreground">{project.title}</span><span className="text-muted-foreground">{project.link||''}</span></div>
                     <ul className="ml-4 list-disc">
                       {project.bullets.slice(0,2).map((bullet,index)=>(<li key={index}><RichTextDisplay content={bullet} /></li>))}
@@ -63,7 +63,7 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
               <section>
                 <h2 className="text-xs font-bold uppercase tracking-wide text-foreground">Education</h2>
                 <ul className="ml-4 list-disc">
-                  {education.map(educationItem => <li key={educationItem.id}>{educationItem.title} — <RichTextDisplay content={educationItem.details} className="inline" /></li>)}
+                  {education.map(educationItem => <li key={educationItem.id} className="education-item">{educationItem.title} — <RichTextDisplay content={educationItem.details} className="inline" /></li>)}
                 </ul>
               </section>
             )}
@@ -76,7 +76,7 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
   return (
     <div className={clsx('text-[14px] leading-relaxed', compact ? 'space-y-4' : 'space-y-6')}>
       {/* Header */}
-      <header className="border-b border-border pb-3">
+      <header className="border-b border-border pb-3 section-header">
         <h1 className={clsx('font-semibold text-foreground', compact ? 'text-xl' : 'text-2xl')}>
           {profile.personalInfo?.fullName || 'Your Name'}
         </h1>
@@ -99,7 +99,7 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
 
       {/* Skills */}
       {skills.length > 0 && (
-        <section>
+        <section className="section-header">
           <h2 className={clsx('font-bold uppercase tracking-wide text-foreground', compact ? 'text-sm' : 'text-sm')}>
             Skills
           </h2>
@@ -115,13 +115,13 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
 
       {/* Experience */}
       {experiences.length > 0 && (
-        <section>
+        <section className="section-header">
           <h2 className={clsx('font-bold uppercase tracking-wide text-foreground', compact ? 'text-sm' : 'text-sm')}>
             Work Experiences
           </h2>
           <div className="mt-1 space-y-3">
             {experiences.map((experience) => (
-              <div key={experience.id}>
+              <div key={experience.id} className="experience-item">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <div className={clsx('font-semibold text-foreground', compact ? 'text-[13px]' : 'text-[14px]')}>
                     {experience.title} | {experience.company}
@@ -143,13 +143,13 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
 
       {/* Projects */}
       {projects.length > 0 && (
-        <section>
+        <section className="section-header">
           <h2 className={clsx('font-bold uppercase tracking-wide text-foreground', compact ? 'text-sm' : 'text-sm')}>
             Projects
           </h2>
           <div className="mt-1 space-y-3">
             {projects.map((project) => (
-              <div key={project.id}>
+              <div key={project.id} className="project-item">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <div className={clsx('font-semibold text-foreground', compact ? 'text-[13px]' : 'text-[14px]')}>
                     {project.title}
@@ -171,13 +171,13 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
 
       {/* Education */}
       {education.length > 0 && (
-        <section>
+        <section className="section-header">
           <h2 className={clsx('font-bold uppercase tracking-wide text-foreground', compact ? 'text-sm' : 'text-sm')}>
             Education
           </h2>
           <div className={clsx('ml-5 space-y-1', compact ? 'text-[12px]' : 'text-[13px]')}>
             {education.map((educationItem) => (
-              <div key={educationItem.id} className="overflow-hidden">
+              <div key={educationItem.id} className="overflow-hidden education-item">
                 <span className="font-medium text-foreground">{educationItem.title}</span> — <RichTextDisplay content={educationItem.details} className="truncate inline-block max-w-xs" />
               </div>
             ))}
