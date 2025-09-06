@@ -5,14 +5,22 @@ export type BaseItem = {
   subtitle?: string; // optional secondary line
 };
 
+export type HyperlinkInfo = {
+  url?: string;
+  displayText?: string;
+};
+
 export type PersonalInfo = {
   fullName: string;
   email: string;
   phone: string;
   location: string;
   linkedin?: string;
+  linkedinHyperlink?: HyperlinkInfo;
   github?: string;
+  githubHyperlink?: HyperlinkInfo;
   website?: string;
+  websiteHyperlink?: HyperlinkInfo;
   summary?: string;
 };
 

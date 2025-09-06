@@ -4,6 +4,7 @@ import { PersonalInfo } from '@/shared/lib/types';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
 import { RichTextEditor } from '@/shared/components/ui/rich-text-editor';
+import { HyperlinkInput } from '@/shared/components/ui/hyperlink-input';
 
 interface PersonalInfoFormProps {
   personalInfo: PersonalInfo;
@@ -60,39 +61,39 @@ export function PersonalInfoForm({ personalInfo, onUpdate }: PersonalInfoFormPro
           />
         </div>
         
-        <div className="space-y-2">
-          <Label htmlFor="linkedin">LinkedIn</Label>
-          <Input
-            id="linkedin"
-            value={personalInfo.linkedin || ''}
-            onChange={(e) => onUpdate({ linkedin: e.target.value })}
-            placeholder="linkedin.com/in/yourprofile"
-            className="border-border focus:border-primary"
-          />
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="github">GitHub</Label>
-          <Input
-            id="github"
-            value={personalInfo.github || ''}
-            onChange={(e) => onUpdate({ github: e.target.value })}
-            placeholder="github.com/yourusername"
-            className="border-border focus:border-primary"
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="website">Website</Label>
-        <Input
-          id="website"
-          value={personalInfo.website || ''}
-          onChange={(e) => onUpdate({ website: e.target.value })}
-          placeholder="https://yourwebsite.com"
+        <HyperlinkInput
+          id="linkedin"
+          label="LinkedIn"
+          value={personalInfo.linkedin || ''}
+          onChange={(value) => onUpdate({ linkedin: value })}
+          placeholder="linkedin.com/in/yourprofile"
           className="border-border focus:border-primary"
+          hyperlinkInfo={personalInfo.linkedinHyperlink}
+          onHyperlinkChange={(hyperlinkInfo) => onUpdate({ linkedinHyperlink: hyperlinkInfo })}
+        />
+        
+        <HyperlinkInput
+          id="github"
+          label="GitHub"
+          value={personalInfo.github || ''}
+          onChange={(value) => onUpdate({ github: value })}
+          placeholder="github.com/yourusername"
+          className="border-border focus:border-primary"
+          hyperlinkInfo={personalInfo.githubHyperlink}
+          onHyperlinkChange={(hyperlinkInfo) => onUpdate({ githubHyperlink: hyperlinkInfo })}
         />
       </div>
+
+      <HyperlinkInput
+        id="website"
+        label="Website"
+        value={personalInfo.website || ''}
+        onChange={(value) => onUpdate({ website: value })}
+        placeholder="https://yourwebsite.com"
+        className="border-border focus:border-primary"
+        hyperlinkInfo={personalInfo.websiteHyperlink}
+        onHyperlinkChange={(hyperlinkInfo) => onUpdate({ websiteHyperlink: hyperlinkInfo })}
+      />
       
       <div className="space-y-2">
         <Label htmlFor="summary">Professional Summary</Label>

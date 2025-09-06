@@ -106,7 +106,7 @@ export function RichTextEditor({
     <div className={cn('relative', className)}>
       {/* Toolbar */}
       <div className={cn(
-        "flex items-center gap-1 p-2 border border-border bg-muted/50 rounded-t-md",
+        "flex items-center gap-1 p border border-border bg-muted/50 rounded-t-md",
         isFocused && "border-primary"
       )}>
         <Tooltip>

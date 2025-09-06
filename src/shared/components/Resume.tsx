@@ -3,6 +3,7 @@
 import type { DataBundle, Profile } from '@/shared/lib/types';
 import { getEffectiveProfileData } from '@/shared/lib/utils';
 import { RichTextDisplay } from '@/shared/components/ui/rich-text-editor';
+import { PersonalInfoLink } from '@/shared/components/ui/personal-info-link';
 import { clsx } from 'clsx';
 
 export function Resume({ profile, data, compact }: { profile: Profile; data: DataBundle; compact?: boolean }) {
@@ -85,9 +86,34 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
             profile.personalInfo?.location,
             profile.personalInfo?.phone,
             profile.personalInfo?.email,
-            profile.personalInfo?.linkedin,
-            profile.personalInfo?.github
           ].filter(Boolean).join(' | ')}
+          {(profile.personalInfo?.linkedin || profile.personalInfo?.github || profile.personalInfo?.website) && ' | '}
+          {[
+            profile.personalInfo?.linkedin && (
+              <PersonalInfoLink
+                key="linkedin"
+                value={profile.personalInfo.linkedin}
+                hyperlinkInfo={profile.personalInfo.linkedinHyperlink}
+              />
+            ),
+            profile.personalInfo?.github && (
+              <PersonalInfoLink
+                key="github"
+                value={profile.personalInfo.github}
+                hyperlinkInfo={profile.personalInfo.githubHyperlink}
+              />
+            ),
+            profile.personalInfo?.website && (
+              <PersonalInfoLink
+                key="website"
+                value={profile.personalInfo.website}
+                hyperlinkInfo={profile.personalInfo.websiteHyperlink}
+              />
+            ),
+          ].filter(Boolean).reduce((acc, item, index, arr) => {
+            if (index === 0) return [item];
+            return [...acc, ' | ', item];
+          }, [] as React.ReactNode[])}
         </div>
         {profile.personalInfo?.summary && (
           <RichTextDisplay 

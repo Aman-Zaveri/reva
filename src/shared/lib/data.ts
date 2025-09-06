@@ -7,8 +7,11 @@ export const data: DataBundle = {
     phone: '647-676-8981',
     location: 'Toronto, ON',
     linkedin: 'linkedin.com/in/aman-zaveri',
+    linkedinHyperlink: undefined,
     github: 'github.com/azaveri7',
+    githubHyperlink: undefined,
     website: '',
+    websiteHyperlink: undefined,
     summary: ''
   },
   experiences: [
