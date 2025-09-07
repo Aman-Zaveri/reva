@@ -71,128 +71,189 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
   const template = profile.template || 'classic';
 
   if (template === 'compact') {
-    const nameStyles = getStyleWithFormatting('text-xl font-semibold text-foreground', profile.formatting, 'name');
-    const headerStyles = getStyleWithFormatting('text-xs font-bold uppercase tracking-wide text-foreground', profile.formatting, 'header');
-    const bodyStyles = getStyleWithFormatting('text-[11px] font-medium', profile.formatting, 'body');
-    const metadataStyles = getStyleWithFormatting('text-muted-foreground', profile.formatting, 'metadata');
+    const nameStyles = getStyleWithFormatting(
+      'text-xl font-semibold text-foreground', // Slightly smaller than classic
+      profile.formatting, 
+      'name'
+    );
+    const headerStyles = getStyleWithFormatting(
+      'text-sm font-bold uppercase tracking-wide text-foreground', // Same as classic
+      profile.formatting, 
+      'header'
+    );
+    const bodyStyles = getStyleWithFormatting(
+      'break-words text-[12px]', // Smaller font than classic
+      profile.formatting, 
+      'body'
+    );
+    const metadataStyles = getStyleWithFormatting(
+      'text-muted-foreground text-[11px]', // Smaller font than classic
+      profile.formatting, 
+      'metadata'
+    );
 
     return (
-      <div className={clsx('text-[12px] leading-snug space-y-4')}>        
-        <header className="border-b border-border pb-3 text-center section-header">
+      <div className="text-[13px] leading-tight space-y-3"> {/* Reduced spacing and line height */}
+        {/* Header - same layout as classic but tighter */}
+        <header className="border-b border-border pb-2 section-header text-center"> {/* Reduced padding */}
           <h1 className={nameStyles.className} style={nameStyles.style}>
             {profile.personalInfo?.fullName || 'Your Name'}
           </h1>
+          <div className="mt-1 text-muted-foreground break-words text-[11px]"> {/* Smaller text */}
+            {[
+              profile.personalInfo?.location,
+              profile.personalInfo?.phone,
+              profile.personalInfo?.email,
+            ].filter(Boolean).join(' | ')}
+            {(profile.personalInfo?.linkedin || profile.personalInfo?.github || profile.personalInfo?.website) && ' | '}
+            {[
+              profile.personalInfo?.linkedin && (
+                <PersonalInfoLink
+                  key="linkedin"
+                  value={profile.personalInfo.linkedin}
+                  hyperlinkInfo={profile.personalInfo.linkedinHyperlink}
+                />
+              ),
+              profile.personalInfo?.github && (
+                <PersonalInfoLink
+                  key="github"
+                  value={profile.personalInfo.github}
+                  hyperlinkInfo={profile.personalInfo.githubHyperlink}
+                />
+              ),
+              profile.personalInfo?.website && (
+                <PersonalInfoLink
+                  key="website"
+                  value={profile.personalInfo.website}
+                  hyperlinkInfo={profile.personalInfo.websiteHyperlink}
+                />
+              ),
+            ].filter(Boolean).reduce((acc, item, index, arr) => {
+              if (index === 0) return [item];
+              return [...acc, ' | ', item];
+            }, [] as React.ReactNode[])}
+          </div>
           {profile.personalInfo?.summary && (
             <RichTextDisplay 
               content={profile.personalInfo.summary} 
-              className={clsx('mt-1', bodyStyles.className)} 
+              className={clsx('mt-1', bodyStyles.className)}
               style={bodyStyles.style}
             />
           )}
         </header>
-        <div className="grid grid-cols-3 gap-4">
-          <div className="col-span-2 space-y-4">
-            {experiences.length>0 && (
-              <section className={clsx('section-header', projects.length > 0 && 'border-b border-border pb-3')}>
-                <h2 className={headerStyles.className} style={headerStyles.style}>Experience</h2>
-                <div className="mt-2 space-y-3">
-                  {experiences.map(experience => (
-                    <div key={experience.id} className="experience-item">
-                      <div className="flex justify-between">
-                        <span className={clsx(bodyStyles.className)} style={bodyStyles.style}>
-                          {experience.title} @ {experience.company}
-                        </span>
-                        <span className={clsx(metadataStyles.className)} style={metadataStyles.style}>
-                          {experience.date}
-                        </span>
-                      </div>
-                      <ul className="ml-4 list-disc space-y-1 mt-1">
-                        {experience.bullets.slice(0,3).map((bullet,index)=>(
-                          <li key={index}>
-                            <RichTextDisplay 
-                              content={bullet} 
-                              className={bodyStyles.className} 
-                              style={bodyStyles.style} 
-                            />
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
+
+        {/* Skills - same as classic but tighter spacing */}
+        {skills.length > 0 && (
+          <section className={clsx('section-header', (experiences.length > 0 || projects.length > 0 || education.length > 0) && 'border-b border-border pb-2')}>
+            <h2 className={headerStyles.className} style={headerStyles.style}>
+              Skills
+            </h2>
+            <div className="mt-1 space-y-0.5"> {/* Reduced spacing */}
+              {skills.map((skill) => (
+                <div key={skill.id} className={bodyStyles.className} style={bodyStyles.style}>
+                  <span className="font-medium">
+                    {skill.name}:
+                  </span>{' '}
+                  <RichTextDisplay 
+                    content={skill.details} 
+                    className="inline" 
+                    style={bodyStyles.style}
+                  />
                 </div>
-              </section>
-            )}
-            {projects.length>0 && (
-              <section className="section-header">
-                <h2 className={headerStyles.className} style={headerStyles.style}>Projects</h2>
-                <div className="mt-2 space-y-3">
-                  {projects.map(project => (
-                    <div key={project.id} className="project-item">
-                      <div className="flex justify-between">
-                        <span className={clsx(bodyStyles.className)} style={bodyStyles.style}>
-                          {project.title}
-                        </span>
-                        <span className={clsx(metadataStyles.className)} style={metadataStyles.style}>
-                          {project.link||''}
-                        </span>
-                      </div>
-                      <ul className="ml-4 list-disc space-y-1 mt-1">
-                        {project.bullets.slice(0,2).map((bullet,index)=>(
-                          <li key={index}>
-                            <RichTextDisplay 
-                              content={bullet} 
-                              className={bodyStyles.className} 
-                              style={bodyStyles.style} 
-                            />
-                          </li>
-                        ))}
-                      </ul>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Experience - same as classic but tighter spacing */}
+        {experiences.length > 0 && (
+          <section className={clsx('section-header', (projects.length > 0 || education.length > 0) && 'border-b border-border pb-2')}>
+            <h2 className={headerStyles.className} style={headerStyles.style}>
+              Work Experiences
+            </h2>
+            <div className="mt-1 space-y-2"> {/* Reduced spacing */}
+              {experiences.map((experience) => (
+                <div key={experience.id} className="experience-item">
+                  <div className="flex flex-wrap items-baseline justify-between gap-1"> {/* Reduced gap */}
+                    <div className={clsx('font-semibold', bodyStyles.className)} style={bodyStyles.style}>
+                      {experience.title} | {experience.company}
                     </div>
-                  ))}
-                </div>
-              </section>
-            )}
-          </div>
-          <div className="col-span-1 space-y-4">
-            {skills.length>0 && (
-              <section className={clsx('section-header', education.length > 0 && 'border-b border-border pb-3')}>
-                <h2 className={headerStyles.className} style={headerStyles.style}>Skills</h2>
-                <ul className="mt-2 space-y-1">
-                  {skills.map(skill => (
-                    <li key={skill.id}>
-                      <span className={clsx(bodyStyles.className, 'font-medium')} style={bodyStyles.style}>
-                        {skill.name}:
-                      </span>{' '}
-                      <RichTextDisplay 
-                        content={skill.details} 
-                        className={clsx('inline', bodyStyles.className)} 
-                        style={bodyStyles.style}
-                      />
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
-            {education.length>0 && (
-              <section className="section-header">
-                <h2 className={headerStyles.className} style={headerStyles.style}>Education</h2>
-                <div className="mt-2 space-y-2">
-                  {education.map(educationItem => (
-                    <div key={educationItem.id} className="education-item">
-                      <span className={clsx(bodyStyles.className, 'font-medium')} style={bodyStyles.style}>
-                        {educationItem.title}
-                      </span> — <RichTextDisplay 
-                        content={educationItem.details} 
-                        className={clsx('inline', bodyStyles.className)} 
-                        style={bodyStyles.style}
-                      />
+                    <div className={metadataStyles.className} style={metadataStyles.style}>
+                      {experience.date}
                     </div>
-                  ))}
+                  </div>
+                  <ul className="ml-4 list-disc space-y-0.5 mt-0.5"> {/* Reduced spacing */}
+                    {experience.bullets.slice(0, 3).map((bullet, index) => ( // Limit to 3 bullets for compactness
+                      <li key={index} className="break-words">
+                        <RichTextDisplay 
+                          content={bullet} 
+                          className={bodyStyles.className}
+                          style={bodyStyles.style}
+                        />
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-              </section>
-            )}
-          </div>
-        </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Projects - same as classic but tighter spacing */}
+        {projects.length > 0 && (
+          <section className={clsx('section-header', education.length > 0 && 'border-b border-border pb-2')}>
+            <h2 className={headerStyles.className} style={headerStyles.style}>
+              Projects
+            </h2>
+            <div className="mt-1 space-y-2"> {/* Reduced spacing */}
+              {projects.map((project) => (
+                <div key={project.id} className="project-item">
+                  <div className="flex flex-wrap items-baseline justify-between gap-1"> {/* Reduced gap */}
+                    <div className={clsx('font-semibold', bodyStyles.className)} style={bodyStyles.style}>
+                      {project.title}
+                    </div>
+                    <div className={metadataStyles.className} style={metadataStyles.style}>
+                      {project.link || ''}
+                    </div>
+                  </div>
+                  <ul className="ml-4 list-disc space-y-0.5 mt-0.5"> {/* Reduced spacing */}
+                    {project.bullets.slice(0, 2).map((bullet, index) => ( // Limit to 2 bullets for compactness
+                      <li key={index} className="break-words">
+                        <RichTextDisplay 
+                          content={bullet} 
+                          className={bodyStyles.className}
+                          style={bodyStyles.style}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Education - same as classic but tighter spacing */}
+        {education.length > 0 && (
+          <section className="section-header">
+            <h2 className={headerStyles.className} style={headerStyles.style}>
+              Education
+            </h2>
+            <div className="mt-1 space-y-1"> {/* Reduced spacing */}
+              {education.map((educationItem) => (
+                <div key={educationItem.id} className="education-item">
+                  <span className={clsx('font-medium', bodyStyles.className)} style={bodyStyles.style}>
+                    {educationItem.title}
+                  </span> — <RichTextDisplay 
+                    content={educationItem.details} 
+                    className={clsx('inline', bodyStyles.className)} 
+                    style={bodyStyles.style}
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     );
   }

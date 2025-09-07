@@ -260,6 +260,17 @@
       margin-bottom: 0.25rem !important;
     }
     
+    /* Compact template adjustments for even tighter spacing in print */
+    .text-\[13px\] .section-header {
+      margin-top: 1rem !important;
+      margin-bottom: 0.375rem !important;
+    }
+    
+    .text-\[13px\] .experience-item,
+    .text-\[13px\] .project-item {
+      margin-bottom: 0.5rem !important;
+    }
+    
     body {
       print-color-adjust: exact;
       -webkit-print-color-adjust: exact;
