@@ -13,8 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/shared/components/ui/select';
-import type { Profile, PersonalInfo } from '@/shared/lib/types';
+import type { Profile, PersonalInfo, FormattingOptions } from '@/shared/lib/types';
 import { PersonalInfoForm } from '@/features/data-management/components/PersonalInfoForm';
+import { FormattingSettings } from './FormattingSettings';
 
 interface ProfileSettingsProps {
   profile: Profile;
@@ -158,6 +159,14 @@ export function ProfileSettings({
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Formatting Settings Card */}
+      <div className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
+        <FormattingSettings
+          formatting={profile.formatting || {}}
+          onUpdate={(formatting: FormattingOptions) => onUpdateProfile({ formatting })}
+        />
       </div>
     </div>
   );

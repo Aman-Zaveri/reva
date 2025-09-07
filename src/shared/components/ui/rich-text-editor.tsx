@@ -99,8 +99,6 @@ export function RichTextEditor({
     setIsBold(false);
     setIsItalic(false);
   };
-  
-  const setFontSize = (size: string) => execCommand('fontSize', size);
 
   return (
     <div className={cn('relative', className)}>
@@ -170,30 +168,6 @@ export function RichTextEditor({
             <p>Remove formatting</p>
           </TooltipContent>
         </Tooltip>
-        
-        <div className="w-px h-4 bg-border mx-1" />
-        
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Select onValueChange={setFontSize} disabled={disabled}>
-              <SelectTrigger className="h-8 w-18 text-xs border-0 bg-transparent focus:ring-0 focus:ring-offset-0">
-                <SelectValue placeholder="Size" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">10px</SelectItem>
-                <SelectItem value="2">12px</SelectItem>
-                <SelectItem value="3">14px</SelectItem>
-                <SelectItem value="4">16px</SelectItem>
-                <SelectItem value="5">18px</SelectItem>
-                <SelectItem value="6">20px</SelectItem>
-                <SelectItem value="7">24px</SelectItem>
-              </SelectContent>
-            </Select>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Font size</p>
-          </TooltipContent>
-        </Tooltip>
       </div>
 
       {/* Editor */}
@@ -242,11 +216,12 @@ export function RichTextEditor({
   );
 }
 
-export function RichTextDisplay({ content, className }: { content: string; className?: string }) {
+export function RichTextDisplay({ content, className, style }: { content: string; className?: string; style?: React.CSSProperties }) {
   return (
     <>
       <div
         className={cn('prose prose-sm max-w-none', className)}
+        style={style}
         dangerouslySetInnerHTML={{ __html: content }}
       />
       <style jsx>{`

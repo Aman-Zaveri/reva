@@ -57,6 +57,24 @@ export type DataBundle = {
   education: Education[];
 };
 
+export type FormattingOptions = {
+  // Name/Title formatting
+  nameColor?: string;
+  nameFontSize?: string;
+  
+  // Header formatting (Skills, Experience, Projects, Education)
+  headerColor?: string;
+  headerFontSize?: string;
+  
+  // Body text formatting
+  bodyTextColor?: string;
+  bodyTextFontSize?: string;
+  
+  // Date/metadata text formatting
+  metadataTextColor?: string;
+  metadataTextFontSize?: string;
+};
+
 export type Profile = {
   id: string;
   name: string;
@@ -71,6 +89,7 @@ export type Profile = {
   skillOverrides?: Record<string, Partial<Skill>>;
   educationOverrides?: Record<string, Partial<Education>>;
   template?: 'classic' | 'compact';
+  formatting?: FormattingOptions;
   // AI optimization metadata
   aiOptimization?: {
     timestamp: string;
