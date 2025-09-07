@@ -15,51 +15,94 @@ const getStyleWithFormatting = (
 ) => {
   const styles: React.CSSProperties = {};
   
-  if (formatting && type) {
-    switch (type) {
-      case 'name':
-        if (formatting.nameColor) styles.color = formatting.nameColor;
-        break;
-      case 'header':
-        if (formatting.headerColor) styles.color = formatting.headerColor;
-        break;
-      case 'body':
-        if (formatting.bodyTextColor) styles.color = formatting.bodyTextColor;
-        break;
-      case 'metadata':
-        if (formatting.metadataTextColor) styles.color = formatting.metadataTextColor;
-        break;
+  if (formatting) {
+    // Apply global font family to all text
+    if (formatting.fontFamily) {
+      styles.fontFamily = formatting.fontFamily;
+    }
+    
+    // Apply primary color to name and headers
+    if (formatting.primaryColor && (type === 'name' || type === 'header')) {
+      styles.color = formatting.primaryColor;
+    }
+    
+    // Apply font sizes directly as inline styles
+    if (type && formatting) {
+      const getFontSizeFromClass = (fontSizeClass: string): string | null => {
+        // Handle custom pixel values like 'text-[16px]'
+        const pixelMatch = fontSizeClass.match(/text-\[(\d+)px\]/);
+        if (pixelMatch) {
+          return `${pixelMatch[1]}px`;
+        }
+        
+        // Handle legacy Tailwind classes
+        const sizeMap: Record<string, string> = {
+          'text-xs': '12px',
+          'text-sm': '14px',
+          'text-base': '16px',
+          'text-lg': '18px',
+          'text-xl': '20px',
+          'text-2xl': '24px',
+          'text-3xl': '30px',
+        };
+        
+        return sizeMap[fontSizeClass] || null;
+      };
+      
+      switch (type) {
+        case 'name':
+          if (formatting.nameFontSize) {
+            const fontSize = getFontSizeFromClass(formatting.nameFontSize);
+            if (fontSize) styles.fontSize = fontSize;
+          }
+          break;
+        case 'header':
+          if (formatting.headerFontSize) {
+            const fontSize = getFontSizeFromClass(formatting.headerFontSize);
+            if (fontSize) styles.fontSize = fontSize;
+          }
+          break;
+        case 'body':
+          if (formatting.bodyTextFontSize) {
+            const fontSize = getFontSizeFromClass(formatting.bodyTextFontSize);
+            if (fontSize) styles.fontSize = fontSize;
+          }
+          break;
+        case 'metadata':
+          if (formatting.metadataTextFontSize) {
+            const fontSize = getFontSizeFromClass(formatting.metadataTextFontSize);
+            if (fontSize) styles.fontSize = fontSize;
+          }
+          break;
+      }
     }
   }
 
-  // Replace font size classes with custom ones if specified
+  // Remove existing font-size classes from defaultClasses when we have custom sizes
   let classes = defaultClasses;
   if (formatting && type) {
-    switch (type) {
-      case 'name':
-        if (formatting.nameFontSize) {
-          classes = classes.replace(/text-\w+/, formatting.nameFontSize);
-        }
-        break;
-      case 'header':
-        if (formatting.headerFontSize) {
-          classes = classes.replace(/text-\w+/, formatting.headerFontSize);
-        }
-        break;
-      case 'body':
-        if (formatting.bodyTextFontSize) {
-          classes = classes.replace(/text-\[\d+px\]|text-\w+/, formatting.bodyTextFontSize);
-        }
-        break;
-      case 'metadata':
-        if (formatting.metadataTextFontSize) {
-          classes = classes.replace(/text-\[\d+px\]|text-\w+/, formatting.metadataTextFontSize);
-        }
-        break;
+    const hasCustomSize = (
+      (type === 'name' && formatting.nameFontSize) ||
+      (type === 'header' && formatting.headerFontSize) ||
+      (type === 'body' && formatting.bodyTextFontSize) ||
+      (type === 'metadata' && formatting.metadataTextFontSize)
+    );
+    
+    if (hasCustomSize) {
+      // Remove any font size classes since we're using inline styles
+      classes = classes.replace(/text-\w+|text-\[\d+px\]/g, '').replace(/\s+/g, ' ').trim();
     }
   }
 
   return { className: classes, style: styles };
+};
+
+// Helper function to get border style for section separators
+const getBorderStyle = (formatting?: FormattingOptions) => {
+  if (formatting?.primaryColor) {
+    return { borderBottomColor: formatting.primaryColor };
+  }
+  return {};
 };
 
 interface SectionRenderProps {
@@ -91,14 +134,17 @@ const renderSkillsSection = ({ skills, profile, template, compact, isLast }: Sec
   const paddingBottom = template === 'compact' ? 'pb-2' : 'pb-3';
 
   return (
-    <section className={clsx('section-header', !isLast && `border-b border-border ${paddingBottom}`)}>
+    <section 
+      className={clsx('section-header', !isLast && `border-b border-border ${paddingBottom}`)}
+      style={!isLast ? getBorderStyle(profile.formatting) : {}}
+    >
       <h2 className={headerStyles.className} style={headerStyles.style}>
         Skills
       </h2>
       <div className={clsx(marginTop, spacing)}>
         {skills.map((skill) => (
           <div key={skill.id} className={bodyStyles.className} style={bodyStyles.style}>
-            <span className="font-medium">
+            <span className="font-bold">
               {skill.name}:
             </span>{' '}
             <RichTextDisplay 
@@ -137,7 +183,10 @@ const renderExperiencesSection = ({ experiences, profile, template, compact, isL
   const listMargin = template === 'compact' ? 'ml-4' : 'ml-5';
 
   return (
-    <section className={clsx('section-header', !isLast && `border-b border-border ${paddingBottom}`)}>
+    <section 
+      className={clsx('section-header', !isLast && `border-b border-border ${paddingBottom}`)}
+      style={!isLast ? getBorderStyle(profile.formatting) : {}}
+    >
       <h2 className={headerStyles.className} style={headerStyles.style}>
         Work Experiences
       </h2>
@@ -194,7 +243,10 @@ const renderProjectsSection = ({ projects, profile, template, compact, isLast }:
   const listMargin = template === 'compact' ? 'ml-4' : 'ml-5';
 
   return (
-    <section className={clsx('section-header', !isLast && `border-b border-border ${paddingBottom}`)}>
+    <section 
+      className={clsx('section-header', !isLast && `border-b border-border ${paddingBottom}`)}
+      style={!isLast ? getBorderStyle(profile.formatting) : {}}
+    >
       <h2 className={headerStyles.className} style={headerStyles.style}>
         Projects
       </h2>
@@ -241,9 +293,13 @@ const renderEducationSection = ({ education, profile, template, compact, isLast 
 
   const spacing = template === 'compact' ? 'space-y-1' : 'space-y-2';
   const marginTop = template === 'compact' ? 'mt-1' : 'mt-2';
+  const paddingBottom = template === 'compact' ? 'pb-2' : 'pb-3';
 
   return (
-    <section className="section-header">
+    <section 
+      className={clsx('section-header', !isLast && `border-b border-border ${paddingBottom}`)}
+      style={!isLast ? getBorderStyle(profile.formatting) : {}}
+    >
       <h2 className={headerStyles.className} style={headerStyles.style}>
         Education
       </h2>
@@ -334,7 +390,10 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
   return (
     <div className={clsx(textSize, mainSpacing)}>
       {/* Header */}
-      <header className={clsx('border-b border-border section-header text-center', headerPadding)}>
+      <header 
+        className={clsx('border-b border-border section-header text-center', headerPadding)}
+        style={getBorderStyle(profile.formatting)}
+      >
         <h1 className={nameStyles.className} style={nameStyles.style}>
           {profile.personalInfo?.fullName || 'Your Name'}
         </h1>

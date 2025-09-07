@@ -140,7 +140,6 @@ export function A4Resume({ profile, data, compact, showPrintView = false, scale 
           style={{
             padding: showPrintView ? `${dimensions.margin}px` : `${dimensions.margin}px`,
             minHeight: `${dimensions.contentHeight}px`,
-            fontSize: showPrintView ? '14px' : `${15 * dimensions.scaleFactor}px`, // Slightly larger base font
             lineHeight: showPrintView ? '1.5' : '1.4',
           }}
         >

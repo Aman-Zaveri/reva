@@ -58,20 +58,16 @@ export type DataBundle = {
 };
 
 export type FormattingOptions = {
-  // Name/Title formatting
-  nameColor?: string;
+  // Global font family for entire resume
+  fontFamily?: string;
+  
+  // Primary color for name, headers, and section separators
+  primaryColor?: string;
+  
+  // Individual font sizes (keeping these separate for flexibility)
   nameFontSize?: string;
-  
-  // Header formatting (Skills, Experience, Projects, Education)
-  headerColor?: string;
   headerFontSize?: string;
-  
-  // Body text formatting
-  bodyTextColor?: string;
   bodyTextFontSize?: string;
-  
-  // Date/metadata text formatting
-  metadataTextColor?: string;
   metadataTextFontSize?: string;
 };
 
