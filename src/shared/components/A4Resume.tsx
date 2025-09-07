@@ -30,14 +30,14 @@ export function A4Resume({ profile, data, compact, showPrintView = false, scale 
   const dimensions = showPrintView ? {
     width: A4_DIMENSIONS.WIDTH_PX_FULL,
     height: A4_DIMENSIONS.HEIGHT_PX_FULL,
-    contentHeight: A4_DIMENSIONS.HEIGHT_PX_FULL - (10 * 3.78 * 2), // Reduced margin for print (≈1047px)
-    margin: 10 * 3.78, // Much smaller margin for print (10mm instead of 20mm)
+    contentHeight: A4_DIMENSIONS.HEIGHT_PX_FULL - (2 * 3.78 * 2), // Minimal margin for print (≈1108px)
+    margin: 2 * 3.78, // Very minimal margin for print (2mm)
     scaleFactor: 1
   } : {
     width: A4_DIMENSIONS.WIDTH_PX,
     height: A4_DIMENSIONS.HEIGHT_PX,
     // Match the print content height ratio to give accurate page calculations
-    contentHeight: Math.floor((A4_DIMENSIONS.HEIGHT_PX_FULL - (10 * 3.78 * 2)) * A4_DIMENSIONS.SCALE_FACTOR), // ≈858px (scales with preview)
+    contentHeight: Math.floor((A4_DIMENSIONS.HEIGHT_PX_FULL - (2 * 3.78 * 2)) * A4_DIMENSIONS.SCALE_FACTOR), // ≈908px (scales with preview)
     margin: 32, // Small, fixed margin for preview
     scaleFactor: scale || A4_DIMENSIONS.SCALE_FACTOR
   };
