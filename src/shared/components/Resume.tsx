@@ -1,6 +1,7 @@
 'use client';
 
-import type { DataBundle, Profile, FormattingOptions } from '@/shared/lib/types';
+import React from 'react';
+import type { DataBundle, Profile, FormattingOptions, SectionType } from '@/shared/lib/types';
 import { getEffectiveProfileData } from '@/shared/lib/utils';
 import { RichTextDisplay } from '@/shared/components/ui/rich-text-editor';
 import { PersonalInfoLink } from '@/shared/components/ui/personal-info-link';
@@ -61,6 +62,210 @@ const getStyleWithFormatting = (
   return { className: classes, style: styles };
 };
 
+interface SectionRenderProps {
+  skills: any[];
+  experiences: any[];
+  projects: any[];
+  education: any[];
+  profile: Profile;
+  template: string;
+  compact?: boolean;
+  isLast: boolean;
+}
+
+// Section rendering functions
+const renderSkillsSection = ({ skills, profile, template, compact, isLast }: SectionRenderProps) => {
+  const headerStyles = getStyleWithFormatting(
+    clsx('font-bold uppercase tracking-wide text-foreground', compact || template === 'compact' ? 'text-sm' : 'text-sm'), 
+    profile.formatting, 
+    'header'
+  );
+  const bodyStyles = getStyleWithFormatting(
+    clsx('break-words', compact || template === 'compact' ? 'text-[12px]' : 'text-[13px]'), 
+    profile.formatting, 
+    'body'
+  );
+
+  const spacing = template === 'compact' ? 'space-y-0.5' : 'space-y-1';
+  const marginTop = template === 'compact' ? 'mt-1' : 'mt-2';
+  const paddingBottom = template === 'compact' ? 'pb-2' : 'pb-3';
+
+  return (
+    <section className={clsx('section-header', !isLast && `border-b border-border ${paddingBottom}`)}>
+      <h2 className={headerStyles.className} style={headerStyles.style}>
+        Skills
+      </h2>
+      <div className={clsx(marginTop, spacing)}>
+        {skills.map((skill) => (
+          <div key={skill.id} className={bodyStyles.className} style={bodyStyles.style}>
+            <span className="font-medium">
+              {skill.name}:
+            </span>{' '}
+            <RichTextDisplay 
+              content={skill.details} 
+              className="inline" 
+              style={bodyStyles.style}
+            />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+const renderExperiencesSection = ({ experiences, profile, template, compact, isLast }: SectionRenderProps) => {
+  const headerStyles = getStyleWithFormatting(
+    clsx('font-bold uppercase tracking-wide text-foreground', compact || template === 'compact' ? 'text-sm' : 'text-sm'), 
+    profile.formatting, 
+    'header'
+  );
+  const bodyStyles = getStyleWithFormatting(
+    clsx('break-words', compact || template === 'compact' ? 'text-[12px]' : 'text-[13px]'), 
+    profile.formatting, 
+    'body'
+  );
+  const metadataStyles = getStyleWithFormatting(
+    clsx('text-muted-foreground', compact || template === 'compact' ? 'text-[11px]' : 'text-xs'), 
+    profile.formatting, 
+    'metadata'
+  );
+
+  const spacing = template === 'compact' ? 'space-y-2' : 'space-y-4';
+  const marginTop = template === 'compact' ? 'mt-1' : 'mt-2';
+  const paddingBottom = template === 'compact' ? 'pb-2' : 'pb-3';
+  const listSpacing = template === 'compact' ? 'space-y-0.5' : 'space-y-1';
+  const listMargin = template === 'compact' ? 'ml-4' : 'ml-5';
+  const bulletLimit = compact || template === 'compact' ? 3 : undefined;
+
+  return (
+    <section className={clsx('section-header', !isLast && `border-b border-border ${paddingBottom}`)}>
+      <h2 className={headerStyles.className} style={headerStyles.style}>
+        Work Experiences
+      </h2>
+      <div className={clsx(marginTop, spacing)}>
+        {experiences.map((experience) => (
+          <div key={experience.id} className="experience-item">
+            <div className={clsx('flex flex-wrap items-baseline justify-between', template === 'compact' ? 'gap-1' : 'gap-2')}>
+              <div className={clsx('font-semibold', bodyStyles.className)} style={bodyStyles.style}>
+                {experience.title} | {experience.company}
+              </div>
+              <div className={metadataStyles.className} style={metadataStyles.style}>
+                {experience.date}
+              </div>
+            </div>
+            <ul className={clsx(listMargin, 'list-disc', listSpacing, template === 'compact' ? 'mt-0.5' : 'mt-1')}>
+              {experience.bullets.slice(0, bulletLimit).map((bullet: string, index: number) => (
+                <li key={index} className="break-words">
+                  <RichTextDisplay 
+                    content={bullet} 
+                    className={bodyStyles.className}
+                    style={bodyStyles.style}
+                  />
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+const renderProjectsSection = ({ projects, profile, template, compact, isLast }: SectionRenderProps) => {
+  const headerStyles = getStyleWithFormatting(
+    clsx('font-bold uppercase tracking-wide text-foreground', compact || template === 'compact' ? 'text-sm' : 'text-sm'), 
+    profile.formatting, 
+    'header'
+  );
+  const bodyStyles = getStyleWithFormatting(
+    clsx('break-words', compact || template === 'compact' ? 'text-[12px]' : 'text-[13px]'), 
+    profile.formatting, 
+    'body'
+  );
+  const metadataStyles = getStyleWithFormatting(
+    clsx('text-muted-foreground', compact || template === 'compact' ? 'text-[11px]' : 'text-xs'), 
+    profile.formatting, 
+    'metadata'
+  );
+
+  const spacing = template === 'compact' ? 'space-y-2' : 'space-y-4';
+  const marginTop = template === 'compact' ? 'mt-1' : 'mt-2';
+  const paddingBottom = template === 'compact' ? 'pb-2' : 'pb-3';
+  const listSpacing = template === 'compact' ? 'space-y-0.5' : 'space-y-1';
+  const listMargin = template === 'compact' ? 'ml-4' : 'ml-5';
+  const bulletLimit = compact || template === 'compact' ? 2 : undefined;
+
+  return (
+    <section className={clsx('section-header', !isLast && `border-b border-border ${paddingBottom}`)}>
+      <h2 className={headerStyles.className} style={headerStyles.style}>
+        Projects
+      </h2>
+      <div className={clsx(marginTop, spacing)}>
+        {projects.map((project) => (
+          <div key={project.id} className="project-item">
+            <div className={clsx('flex flex-wrap items-baseline justify-between', template === 'compact' ? 'gap-1' : 'gap-2')}>
+              <div className={clsx('font-semibold', bodyStyles.className)} style={bodyStyles.style}>
+                {project.title}
+              </div>
+              <div className={metadataStyles.className} style={metadataStyles.style}>
+                {project.link || ''}
+              </div>
+            </div>
+            <ul className={clsx(listMargin, 'list-disc', listSpacing, template === 'compact' ? 'mt-0.5' : 'mt-1')}>
+              {project.bullets.slice(0, bulletLimit).map((bullet: string, index: number) => (
+                <li key={index} className="break-words">
+                  <RichTextDisplay 
+                    content={bullet} 
+                    className={bodyStyles.className}
+                    style={bodyStyles.style}
+                  />
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+const renderEducationSection = ({ education, profile, template, compact, isLast }: SectionRenderProps) => {
+  const headerStyles = getStyleWithFormatting(
+    clsx('font-bold uppercase tracking-wide text-foreground', compact || template === 'compact' ? 'text-sm' : 'text-sm'), 
+    profile.formatting, 
+    'header'
+  );
+  const bodyStyles = getStyleWithFormatting(
+    clsx('break-words', compact || template === 'compact' ? 'text-[12px]' : 'text-[13px]'), 
+    profile.formatting, 
+    'body'
+  );
+
+  const spacing = template === 'compact' ? 'space-y-1' : 'space-y-2';
+  const marginTop = template === 'compact' ? 'mt-1' : 'mt-2';
+
+  return (
+    <section className="section-header">
+      <h2 className={headerStyles.className} style={headerStyles.style}>
+        Education
+      </h2>
+      <div className={clsx(marginTop, spacing)}>
+        {education.map((educationItem) => (
+          <div key={educationItem.id} className="education-item">
+            <span className={clsx('font-medium', bodyStyles.className)} style={bodyStyles.style}>
+              {educationItem.title}
+            </span> — <RichTextDisplay 
+              content={educationItem.details} 
+              className={clsx('inline', bodyStyles.className)} 
+              style={bodyStyles.style}
+            />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+};
+
 export function Resume({ profile, data, compact }: { profile: Profile; data: DataBundle; compact?: boolean }) {
   const effectiveData = getEffectiveProfileData(profile, data);
   const experiences = effectiveData.experiences.filter((experience) => profile.experienceIds.includes(experience.id));
@@ -69,224 +274,73 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
   const education = effectiveData.education.filter((educationItem) => profile.educationIds.includes(educationItem.id));
 
   const template = profile.template || 'classic';
+  
+  // Default section order if not specified
+  const DEFAULT_SECTION_ORDER: SectionType[] = ['skills', 'experiences', 'projects', 'education'];
+  const sectionOrder = profile.sectionOrder || DEFAULT_SECTION_ORDER;
 
-  if (template === 'compact') {
-    const nameStyles = getStyleWithFormatting(
-      'text-xl font-semibold text-foreground', // Slightly smaller than classic
-      profile.formatting, 
-      'name'
-    );
-    const headerStyles = getStyleWithFormatting(
-      'text-sm font-bold uppercase tracking-wide text-foreground', // Same as classic
-      profile.formatting, 
-      'header'
-    );
-    const bodyStyles = getStyleWithFormatting(
-      'break-words text-[12px]', // Smaller font than classic
-      profile.formatting, 
-      'body'
-    );
-    const metadataStyles = getStyleWithFormatting(
-      'text-muted-foreground text-[11px]', // Smaller font than classic
-      profile.formatting, 
-      'metadata'
-    );
+  // Create section rendering functions
+  const renderSection = (sectionType: SectionType, isLast: boolean = false) => {
+    const sectionProps = {
+      skills,
+      experiences,
+      projects,
+      education,
+      profile,
+      template,
+      compact,
+      isLast,
+    };
 
-    return (
-      <div className="text-[13px] leading-tight space-y-3"> {/* Reduced spacing and line height */}
-        {/* Header - same layout as classic but tighter */}
-        <header className="border-b border-border pb-2 section-header text-center"> {/* Reduced padding */}
-          <h1 className={nameStyles.className} style={nameStyles.style}>
-            {profile.personalInfo?.fullName || 'Your Name'}
-          </h1>
-          <div className="mt-1 text-muted-foreground break-words text-[11px]"> {/* Smaller text */}
-            {[
-              profile.personalInfo?.location,
-              profile.personalInfo?.phone,
-              profile.personalInfo?.email,
-            ].filter(Boolean).join(' | ')}
-            {(profile.personalInfo?.linkedin || profile.personalInfo?.github || profile.personalInfo?.website) && ' | '}
-            {[
-              profile.personalInfo?.linkedin && (
-                <PersonalInfoLink
-                  key="linkedin"
-                  value={profile.personalInfo.linkedin}
-                  hyperlinkInfo={profile.personalInfo.linkedinHyperlink}
-                />
-              ),
-              profile.personalInfo?.github && (
-                <PersonalInfoLink
-                  key="github"
-                  value={profile.personalInfo.github}
-                  hyperlinkInfo={profile.personalInfo.githubHyperlink}
-                />
-              ),
-              profile.personalInfo?.website && (
-                <PersonalInfoLink
-                  key="website"
-                  value={profile.personalInfo.website}
-                  hyperlinkInfo={profile.personalInfo.websiteHyperlink}
-                />
-              ),
-            ].filter(Boolean).reduce((acc, item, index, arr) => {
-              if (index === 0) return [item];
-              return [...acc, ' | ', item];
-            }, [] as React.ReactNode[])}
-          </div>
-          {profile.personalInfo?.summary && (
-            <RichTextDisplay 
-              content={profile.personalInfo.summary} 
-              className={clsx('mt-1', bodyStyles.className)}
-              style={bodyStyles.style}
-            />
-          )}
-        </header>
+    switch (sectionType) {
+      case 'skills':
+        return skills.length > 0 ? renderSkillsSection(sectionProps) : null;
+      case 'experiences':
+        return experiences.length > 0 ? renderExperiencesSection(sectionProps) : null;
+      case 'projects':
+        return projects.length > 0 ? renderProjectsSection(sectionProps) : null;
+      case 'education':
+        return education.length > 0 ? renderEducationSection(sectionProps) : null;
+      default:
+        return null;
+    }
+  };
 
-        {/* Skills - same as classic but tighter spacing */}
-        {skills.length > 0 && (
-          <section className={clsx('section-header', (experiences.length > 0 || projects.length > 0 || education.length > 0) && 'border-b border-border pb-2')}>
-            <h2 className={headerStyles.className} style={headerStyles.style}>
-              Skills
-            </h2>
-            <div className="mt-1 space-y-0.5"> {/* Reduced spacing */}
-              {skills.map((skill) => (
-                <div key={skill.id} className={bodyStyles.className} style={bodyStyles.style}>
-                  <span className="font-medium">
-                    {skill.name}:
-                  </span>{' '}
-                  <RichTextDisplay 
-                    content={skill.details} 
-                    className="inline" 
-                    style={bodyStyles.style}
-                  />
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Experience - same as classic but tighter spacing */}
-        {experiences.length > 0 && (
-          <section className={clsx('section-header', (projects.length > 0 || education.length > 0) && 'border-b border-border pb-2')}>
-            <h2 className={headerStyles.className} style={headerStyles.style}>
-              Work Experiences
-            </h2>
-            <div className="mt-1 space-y-2"> {/* Reduced spacing */}
-              {experiences.map((experience) => (
-                <div key={experience.id} className="experience-item">
-                  <div className="flex flex-wrap items-baseline justify-between gap-1"> {/* Reduced gap */}
-                    <div className={clsx('font-semibold', bodyStyles.className)} style={bodyStyles.style}>
-                      {experience.title} | {experience.company}
-                    </div>
-                    <div className={metadataStyles.className} style={metadataStyles.style}>
-                      {experience.date}
-                    </div>
-                  </div>
-                  <ul className="ml-4 list-disc space-y-0.5 mt-0.5"> {/* Reduced spacing */}
-                    {experience.bullets.slice(0, 3).map((bullet, index) => ( // Limit to 3 bullets for compactness
-                      <li key={index} className="break-words">
-                        <RichTextDisplay 
-                          content={bullet} 
-                          className={bodyStyles.className}
-                          style={bodyStyles.style}
-                        />
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Projects - same as classic but tighter spacing */}
-        {projects.length > 0 && (
-          <section className={clsx('section-header', education.length > 0 && 'border-b border-border pb-2')}>
-            <h2 className={headerStyles.className} style={headerStyles.style}>
-              Projects
-            </h2>
-            <div className="mt-1 space-y-2"> {/* Reduced spacing */}
-              {projects.map((project) => (
-                <div key={project.id} className="project-item">
-                  <div className="flex flex-wrap items-baseline justify-between gap-1"> {/* Reduced gap */}
-                    <div className={clsx('font-semibold', bodyStyles.className)} style={bodyStyles.style}>
-                      {project.title}
-                    </div>
-                    <div className={metadataStyles.className} style={metadataStyles.style}>
-                      {project.link || ''}
-                    </div>
-                  </div>
-                  <ul className="ml-4 list-disc space-y-0.5 mt-0.5"> {/* Reduced spacing */}
-                    {project.bullets.slice(0, 2).map((bullet, index) => ( // Limit to 2 bullets for compactness
-                      <li key={index} className="break-words">
-                        <RichTextDisplay 
-                          content={bullet} 
-                          className={bodyStyles.className}
-                          style={bodyStyles.style}
-                        />
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Education - same as classic but tighter spacing */}
-        {education.length > 0 && (
-          <section className="section-header">
-            <h2 className={headerStyles.className} style={headerStyles.style}>
-              Education
-            </h2>
-            <div className="mt-1 space-y-1"> {/* Reduced spacing */}
-              {education.map((educationItem) => (
-                <div key={educationItem.id} className="education-item">
-                  <span className={clsx('font-medium', bodyStyles.className)} style={bodyStyles.style}>
-                    {educationItem.title}
-                  </span> — <RichTextDisplay 
-                    content={educationItem.details} 
-                    className={clsx('inline', bodyStyles.className)} 
-                    style={bodyStyles.style}
-                  />
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-      </div>
-    );
-  }
+  // Filter out empty sections and determine which is the last visible section
+  const visibleSections = sectionOrder.filter(sectionType => {
+    switch (sectionType) {
+      case 'skills':
+        return skills.length > 0;
+      case 'experiences':
+        return experiences.length > 0;
+      case 'projects':
+        return projects.length > 0;
+      case 'education':
+        return education.length > 0;
+      default:
+        return false;
+    }
+  });
 
   const nameStyles = getStyleWithFormatting(
-    clsx('font-semibold text-foreground', compact ? 'text-xl' : 'text-2xl'), 
+    clsx('font-semibold text-foreground', compact || template === 'compact' ? 'text-xl' : 'text-2xl'), 
     profile.formatting, 
     'name'
   );
-  const headerStyles = getStyleWithFormatting(
-    clsx('font-bold uppercase tracking-wide text-foreground', compact ? 'text-sm' : 'text-sm'), 
-    profile.formatting, 
-    'header'
-  );
-  const bodyStyles = getStyleWithFormatting(
-    clsx('break-words', compact ? 'text-[12px]' : 'text-[13px]'), 
-    profile.formatting, 
-    'body'
-  );
-  const metadataStyles = getStyleWithFormatting(
-    clsx('text-muted-foreground', compact ? 'text-[11px]' : 'text-xs'), 
-    profile.formatting, 
-    'metadata'
-  );
+
+  const mainSpacing = template === 'compact' ? 'space-y-3' : 'space-y-5';
+  const headerPadding = template === 'compact' ? 'pb-2' : 'pb-3';
+  const textSize = template === 'compact' ? 'text-[13px] leading-tight' : 'text-[14px] leading-relaxed';
+  const contactTextSize = template === 'compact' ? 'text-[11px]' : 'text-[12px]';
 
   return (
-    <div className={clsx('text-[14px] leading-relaxed', compact ? 'space-y-5' : 'space-y-5')}>
+    <div className={clsx(textSize, mainSpacing)}>
       {/* Header */}
-      <header className="border-b border-border pb-3 section-header text-center">
+      <header className={clsx('border-b border-border section-header text-center', headerPadding)}>
         <h1 className={nameStyles.className} style={nameStyles.style}>
           {profile.personalInfo?.fullName || 'Your Name'}
         </h1>
-        <div className={clsx('mt-1 text-muted-foreground break-words', compact ? 'text-[12px]' : 'text-[12px]')}>
+        <div className={clsx('mt-1 text-muted-foreground break-words', contactTextSize)}>
           {[
             profile.personalInfo?.location,
             profile.personalInfo?.phone,
@@ -323,124 +377,25 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
         {profile.personalInfo?.summary && (
           <RichTextDisplay 
             content={profile.personalInfo.summary} 
-            className={clsx('mt-1', bodyStyles.className)}
-            style={bodyStyles.style}
+            className={clsx('mt-1', getStyleWithFormatting(
+              clsx('break-words', compact || template === 'compact' ? 'text-[12px]' : 'text-[13px]'), 
+              profile.formatting, 
+              'body'
+            ).className)}
+            style={getStyleWithFormatting('', profile.formatting, 'body').style}
           />
         )}
       </header>
 
-      {/* Skills */}
-      {skills.length > 0 && (
-        <section className={clsx('section-header', (experiences.length > 0 || projects.length > 0 || education.length > 0) && 'border-b border-border pb-3')}>
-          <h2 className={headerStyles.className} style={headerStyles.style}>
-            Skills
-          </h2>
-          <div className={clsx('mt-2 space-y-1', compact ? 'grid grid-cols-1' : 'flex flex-col')}>
-            {skills.map((skill) => (
-              <div key={skill.id} className={bodyStyles.className} style={bodyStyles.style}>
-                <span className="font-medium">
-                  {skill.name}:
-                </span>{' '}
-                <RichTextDisplay 
-                  content={skill.details} 
-                  className="inline" 
-                  style={bodyStyles.style}
-                />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Experience */}
-      {experiences.length > 0 && (
-        <section className={clsx('section-header', (projects.length > 0 || education.length > 0) && 'border-b border-border pb-3')}>
-          <h2 className={headerStyles.className} style={headerStyles.style}>
-            Work Experiences
-          </h2>
-          <div className="mt-2 space-y-4">
-            {experiences.map((experience) => (
-              <div key={experience.id} className="experience-item">
-                <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <div className={clsx('font-semibold', bodyStyles.className)} style={bodyStyles.style}>
-                    {experience.title} | {experience.company}
-                  </div>
-                  <div className={metadataStyles.className} style={metadataStyles.style}>
-                    {experience.date}
-                  </div>
-                </div>
-                <ul className="ml-5 list-disc space-y-1 mt-1">
-                  {experience.bullets.slice(0, compact ? 3 : undefined).map((bullet, index) => (
-                    <li key={index} className="break-words">
-                      <RichTextDisplay 
-                        content={bullet} 
-                        className={bodyStyles.className}
-                        style={bodyStyles.style}
-                      />
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Projects */}
-      {projects.length > 0 && (
-        <section className={clsx('section-header', education.length > 0 && 'border-b border-border pb-3')}>
-          <h2 className={headerStyles.className} style={headerStyles.style}>
-            Projects
-          </h2>
-          <div className="mt-2 space-y-4">
-            {projects.map((project) => (
-              <div key={project.id} className="project-item">
-                <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <div className={clsx('font-semibold', bodyStyles.className)} style={bodyStyles.style}>
-                    {project.title}
-                  </div>
-                  <div className={metadataStyles.className} style={metadataStyles.style}>
-                    {project.link || ''}
-                  </div>
-                </div>
-                <ul className="ml-5 list-disc space-y-1 mt-1">
-                  {project.bullets.slice(0, compact ? 2 : undefined).map((bullet, index) => (
-                    <li key={index} className="break-words">
-                      <RichTextDisplay 
-                        content={bullet} 
-                        className={bodyStyles.className}
-                        style={bodyStyles.style}
-                      />
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Education */}
-      {education.length > 0 && (
-        <section className="section-header">
-          <h2 className={headerStyles.className} style={headerStyles.style}>
-            Education
-          </h2>
-          <div className="mt-2 space-y-2">
-            {education.map((educationItem) => (
-              <div key={educationItem.id} className="education-item">
-                <span className={clsx('font-medium', bodyStyles.className)} style={bodyStyles.style}>
-                  {educationItem.title}
-                </span> — <RichTextDisplay 
-                  content={educationItem.details} 
-                  className={clsx('inline', bodyStyles.className)} 
-                  style={bodyStyles.style}
-                />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+      {/* Dynamic Sections */}
+      {visibleSections.map((sectionType, index) => {
+        const isLast = index === visibleSections.length - 1;
+        return (
+          <React.Fragment key={sectionType}>
+            {renderSection(sectionType, isLast)}
+          </React.Fragment>
+        );
+      })}
     </div>
   );
 }

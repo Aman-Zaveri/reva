@@ -11,7 +11,7 @@ import type {
   Education,
 } from "@/shared/lib/types";
 import { useBuilderState } from "@/shared/hooks/useBuilderState";
-import { BuilderHeader, ProfileSettings, ContentSections, ResumePreview } from "@/features/resume-builder";
+import { BuilderHeader, ProfileSettings, ContentSections, ResumePreview, SectionOrderSettings } from "@/features/resume-builder";
 
 export default function BuilderPage() {
   const params = useParams<{ id: string }>();
@@ -118,6 +118,11 @@ export default function BuilderPage() {
               onUpdateProfile={handleUpdateProfile}
               onUpdatePersonalInfo={handleUpdatePersonalInfo}
               onSyncFromMasterData={handleSyncFromMasterData}
+            />
+
+            <SectionOrderSettings
+              profile={profile}
+              onUpdateProfile={handleUpdateProfile}
             />
 
             <ContentSections

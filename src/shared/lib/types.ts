@@ -75,6 +75,8 @@ export type FormattingOptions = {
   metadataTextFontSize?: string;
 };
 
+export type SectionType = 'skills' | 'experiences' | 'projects' | 'education';
+
 export type Profile = {
   id: string;
   name: string;
@@ -90,6 +92,8 @@ export type Profile = {
   educationOverrides?: Record<string, Partial<Education>>;
   template?: 'classic' | 'compact';
   formatting?: FormattingOptions;
+  // Section ordering for the resume
+  sectionOrder?: SectionType[];
   // AI optimization metadata
   aiOptimization?: {
     timestamp: string;
