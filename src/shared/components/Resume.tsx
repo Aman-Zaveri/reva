@@ -135,7 +135,6 @@ const renderExperiencesSection = ({ experiences, profile, template, compact, isL
   const paddingBottom = template === 'compact' ? 'pb-2' : 'pb-3';
   const listSpacing = template === 'compact' ? 'space-y-0.5' : 'space-y-1';
   const listMargin = template === 'compact' ? 'ml-4' : 'ml-5';
-  const bulletLimit = compact || template === 'compact' ? 3 : undefined;
 
   return (
     <section className={clsx('section-header', !isLast && `border-b border-border ${paddingBottom}`)}>
@@ -154,7 +153,7 @@ const renderExperiencesSection = ({ experiences, profile, template, compact, isL
               </div>
             </div>
             <ul className={clsx(listMargin, 'list-disc', listSpacing, template === 'compact' ? 'mt-0.5' : 'mt-1')}>
-              {experience.bullets.slice(0, bulletLimit).map((bullet: string, index: number) => (
+              {experience.bullets.map((bullet: string, index: number) => (
                 <li key={index} className="break-words">
                   <RichTextDisplay 
                     content={bullet} 
@@ -193,7 +192,6 @@ const renderProjectsSection = ({ projects, profile, template, compact, isLast }:
   const paddingBottom = template === 'compact' ? 'pb-2' : 'pb-3';
   const listSpacing = template === 'compact' ? 'space-y-0.5' : 'space-y-1';
   const listMargin = template === 'compact' ? 'ml-4' : 'ml-5';
-  const bulletLimit = compact || template === 'compact' ? 2 : undefined;
 
   return (
     <section className={clsx('section-header', !isLast && `border-b border-border ${paddingBottom}`)}>
@@ -212,7 +210,7 @@ const renderProjectsSection = ({ projects, profile, template, compact, isLast }:
               </div>
             </div>
             <ul className={clsx(listMargin, 'list-disc', listSpacing, template === 'compact' ? 'mt-0.5' : 'mt-1')}>
-              {project.bullets.slice(0, bulletLimit).map((bullet: string, index: number) => (
+              {project.bullets.map((bullet: string, index: number) => (
                 <li key={index} className="break-words">
                   <RichTextDisplay 
                     content={bullet} 
