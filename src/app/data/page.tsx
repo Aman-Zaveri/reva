@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader } from '@/shared/components/ui/card';
 import { Input } from '@/shared/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
 import { RichTextEditor } from '@/shared/components/ui/rich-text-editor';
-import { PersonalInfoForm } from '@/features/data-management/components/PersonalInfoForm';
+import { PersonalInfoForm, StorageSettings } from '@/features/data-management/components';
 
 export default function DataManagerPage() {
   const {
@@ -33,12 +33,13 @@ export default function DataManagerPage() {
       </div>
 
       <Tabs defaultValue="personal" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="personal">Personal Info</TabsTrigger>
           <TabsTrigger value="experiences">Experiences</TabsTrigger>
           <TabsTrigger value="projects">Projects</TabsTrigger>
           <TabsTrigger value="skills">Skills</TabsTrigger>
           <TabsTrigger value="education">Education</TabsTrigger>
+          <TabsTrigger value="storage">Storage</TabsTrigger>
         </TabsList>
 
         <TabsContent value="personal" className="space-y-4">
@@ -251,6 +252,18 @@ export default function DataManagerPage() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="storage" className="space-y-4">
+          <div className="space-y-4">
+            <div>
+              <h2 className="font-medium mb-2">Storage Settings</h2>
+              <p className="text-sm text-muted-foreground mb-4">
+                Choose where to store your resume data. You can migrate between storage types at any time.
+              </p>
+            </div>
+            <StorageSettings />
           </div>
         </TabsContent>
       </Tabs>

@@ -2,12 +2,12 @@
 
 import { create } from 'zustand';
 import { nanoid } from './utils';
-import { LocalStorageProfileRepository } from '@/shared/repositories/profile.repository';
+import { getStorageService } from './storage-manager';
 import { ERROR_MESSAGES } from '@/shared/utils/constants';
 import type { Profile, DataBundle, Experience, Project, Skill, Education, PersonalInfo } from './types';
 
-// Repository instance for data persistence
-const profileRepository = new LocalStorageProfileRepository();
+// Storage service instance - dynamically switches between localStorage and PostgreSQL
+const getStorageRepository = () => getStorageService();
 
 /**
  * State interface for the profiles store
@@ -195,7 +195,7 @@ export const useProfilesStore = create<ProfilesState>((set, get) => ({
     set({ loading: true, error: null });
     
     try {
-      const result = await profileRepository.loadProfiles();
+      const result = await getStorageRepository().loadProfiles();
       
       if (result.success && result.data) {
         set({ 
@@ -214,7 +214,7 @@ export const useProfilesStore = create<ProfilesState>((set, get) => ({
         });
         
         // Save default data
-        await profileRepository.saveProfiles(defaultProfiles, seedData);
+        await getStorageRepository().saveProfiles(defaultProfiles, seedData);
       }
     } catch {
       set({ 
@@ -234,7 +234,7 @@ export const useProfilesStore = create<ProfilesState>((set, get) => ({
     const { profiles, data } = get();
     
     try {
-      const result = await profileRepository.saveProfiles(profiles, data);
+      const result = await getStorageRepository().saveProfiles(profiles, data);
       
       if (result.success) {
         set({ 
@@ -578,12 +578,12 @@ export const useProfilesStore = create<ProfilesState>((set, get) => ({
       error: null,
       lastSaved: null
     });
-    await profileRepository.saveProfiles(defaultProfiles, seedData);
+    await getStorageRepository().saveProfiles(defaultProfiles, seedData);
   },
 
   // Backup data
   backupData: async () => {
-    const result = await profileRepository.backupData();
+    const result = await getStorageRepository().backupData();
     if (!result.success) {
       set({ error: result.error || 'Failed to create backup' });
       throw new Error(result.error);
@@ -596,7 +596,7 @@ export const useProfilesStore = create<ProfilesState>((set, get) => ({
     set({ loading: true, error: null });
     
     try {
-      const result = await profileRepository.restoreData(backup);
+      const result = await getStorageRepository().restoreData(backup);
       
       if (result.success) {
         await get().loadFromStorage();

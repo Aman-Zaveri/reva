@@ -1,1 +1,2 @@
-export { PersonalInfoForm } from './PersonalInfoForm';
+export * from './PersonalInfoForm';
+export * from './StorageSettings';

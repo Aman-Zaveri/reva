@@ -1,0 +1,209 @@
+// This is your Prisma schema file.
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model PersonalInfo {
+  id              String  @id @default(cuid())
+  fullName        String
+  email           String
+  phone           String
+  location        String
+  linkedin        String?
+  linkedinUrl     String?
+  linkedinDisplay String?
+  github          String?
+  githubUrl       String?
+  githubDisplay   String?
+  website         String?
+  websiteUrl      String?
+  websiteDisplay  String?
+  summary         String?
+  
+  // Relations
+  profiles        Profile[]
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@map("personal_info")
+}
+
+model Experience {
+  id        String   @id @default(cuid())
+  title     String
+  company   String
+  date      String
+  bullets   String[]
+  tags      String[]
+  
+  // Relations
+  profiles  ProfileExperience[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("experiences")
+}
+
+model Project {
+  id        String   @id @default(cuid())
+  title     String
+  link      String?
+  bullets   String[]
+  tags      String[]
+  
+  // Relations
+  profiles  ProfileProject[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("projects")
+}
+
+model Skill {
+  id        String   @id @default(cuid())
+  name      String
+  details   String
+  
+  // Relations
+  profiles  ProfileSkill[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("skills")
+}
+
+model Education {
+  id        String   @id @default(cuid())
+  title     String
+  details   String
+  
+  // Relations
+  profiles  ProfileEducation[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("education")
+}
+
+model Profile {
+  id                    String   @id @default(cuid())
+  name                  String
+  template              String   @default("classic") // 'classic' | 'compact'
+  
+  // Personal Info
+  personalInfoId        String?
+  personalInfo          PersonalInfo? @relation(fields: [personalInfoId], references: [id])
+  
+  // Section ordering
+  sectionOrder          String[] @default(["skills", "experiences", "projects", "education"])
+  
+  // Formatting options (stored as JSON)
+  fontFamily            String?
+  primaryColor          String?
+  nameFontSize          String?
+  headerFontSize        String?
+  bodyTextFontSize      String?
+  metadataTextFontSize  String?
+  
+  // AI Optimization metadata
+  aiOptimizationTimestamp     String?
+  aiOptimizationKeyInsights   String[]
+  aiOptimizationJobDescHash   String?
+  
+  // Relations to items (many-to-many with overrides)
+  experiences           ProfileExperience[]
+  projects              ProfileProject[]
+  skills                ProfileSkill[]
+  education             ProfileEducation[]
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  @@map("profiles")
+}
+
+// Junction tables with overrides support
+model ProfileExperience {
+  id          String  @id @default(cuid())
+  profileId   String
+  experienceId String
+  order       Int     @default(0)
+  
+  // Override fields (JSON stored as text for flexibility)
+  titleOverride     String?
+  companyOverride   String?
+  dateOverride      String?
+  bulletsOverride   String[]
+  tagsOverride      String[]
+  
+  profile     Profile    @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  experience  Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+  
+  @@unique([profileId, experienceId])
+  @@map("profile_experiences")
+}
+
+model ProfileProject {
+  id        String  @id @default(cuid())
+  profileId String
+  projectId String
+  order     Int     @default(0)
+  
+  // Override fields
+  titleOverride   String?
+  linkOverride    String?
+  bulletsOverride String[]
+  tagsOverride    String[]
+  
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  @@unique([profileId, projectId])
+  @@map("profile_projects")
+}
+
+model ProfileSkill {
+  id        String  @id @default(cuid())
+  profileId String
+  skillId   String
+  order     Int     @default(0)
+  
+  // Override fields
+  nameOverride    String?
+  detailsOverride String?
+  
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  skill     Skill   @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  
+  @@unique([profileId, skillId])
+  @@map("profile_skills")
+}
+
+model ProfileEducation {
+  id          String  @id @default(cuid())
+  profileId   String
+  educationId String
+  order       Int     @default(0)
+  
+  // Override fields
+  titleOverride   String?
+  detailsOverride String?
+  
+  profile     Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  education   Education @relation(fields: [educationId], references: [id], onDelete: Cascade)
+  
+  @@unique([profileId, educationId])
+  @@map("profile_educations")
+}
