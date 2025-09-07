@@ -30,14 +30,14 @@ export function A4Resume({ profile, data, compact, showPrintView = false, scale 
   const dimensions = showPrintView ? {
     width: A4_DIMENSIONS.WIDTH_PX_FULL,
     height: A4_DIMENSIONS.HEIGHT_PX_FULL,
-    contentHeight: A4_DIMENSIONS.HEIGHT_PX_FULL - (10 * 3.78 * 2), // Reduced margin for print
+    contentHeight: A4_DIMENSIONS.HEIGHT_PX_FULL - (10 * 3.78 * 2), // Reduced margin for print (≈1047px)
     margin: 10 * 3.78, // Much smaller margin for print (10mm instead of 20mm)
     scaleFactor: 1
   } : {
     width: A4_DIMENSIONS.WIDTH_PX,
     height: A4_DIMENSIONS.HEIGHT_PX,
-    // Much more conservative content height to match visual reality
-    contentHeight: 950, // Significantly increased to allow more content per page
+    // Match the print content height ratio to give accurate page calculations
+    contentHeight: Math.floor((A4_DIMENSIONS.HEIGHT_PX_FULL - (10 * 3.78 * 2)) * A4_DIMENSIONS.SCALE_FACTOR), // ≈858px (scales with preview)
     margin: 32, // Small, fixed margin for preview
     scaleFactor: scale || A4_DIMENSIONS.SCALE_FACTOR
   };
@@ -48,10 +48,25 @@ export function A4Resume({ profile, data, compact, showPrintView = false, scale 
 
       const element = resumeRef.current;
       const contentHeight = element.scrollHeight;
-      const containerHeight = dimensions.contentHeight;
       
-      const calculatedPages = Math.ceil(contentHeight / containerHeight);
-      const overflow = contentHeight > containerHeight;
+      // Always use the print dimensions for page calculation to ensure accuracy
+      const printContentHeight = A4_DIMENSIONS.HEIGHT_PX_FULL - (10 * 3.78 * 2); // ≈1047px
+      
+      let effectiveContentHeight = contentHeight;
+      
+      if (!showPrintView) {
+        // Since the print version is significantly more compact than preview due to:
+        // - Different font rendering, line spacing, and CSS print optimizations
+        // - Browser print compression
+        // Use empirical scale factor based on real-world print vs preview measurements
+        const empiricalScaleFactor = 0.85;
+        
+        // Apply the empirical scale factor
+        effectiveContentHeight = contentHeight * empiricalScaleFactor;
+      }
+      
+      const calculatedPages = Math.ceil(effectiveContentHeight / printContentHeight);
+      const overflow = effectiveContentHeight > printContentHeight;
       
       setPages(calculatedPages);
       setIsOverflowing(overflow);
@@ -73,7 +88,7 @@ export function A4Resume({ profile, data, compact, showPrintView = false, scale 
       clearTimeout(timeoutId);
       resizeObserver.disconnect();
     };
-  }, [profile, data, compact, dimensions.contentHeight]);
+  }, [profile, data, compact, showPrintView, dimensions.scaleFactor]);
 
   return (
     <div className={clsx(
