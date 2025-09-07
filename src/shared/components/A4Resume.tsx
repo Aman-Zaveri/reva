@@ -30,8 +30,8 @@ export function A4Resume({ profile, data, compact, showPrintView = false, scale 
   const dimensions = showPrintView ? {
     width: A4_DIMENSIONS.WIDTH_PX_FULL,
     height: A4_DIMENSIONS.HEIGHT_PX_FULL,
-    contentHeight: A4_DIMENSIONS.HEIGHT_PX_FULL - (A4_DIMENSIONS.MARGIN_MM * 3.78 * 2),
-    margin: A4_DIMENSIONS.MARGIN_MM * 3.78,
+    contentHeight: A4_DIMENSIONS.HEIGHT_PX_FULL - (10 * 3.78 * 2), // Reduced margin for print
+    margin: 10 * 3.78, // Much smaller margin for print (10mm instead of 20mm)
     scaleFactor: 1
   } : {
     width: A4_DIMENSIONS.WIDTH_PX,
@@ -76,7 +76,10 @@ export function A4Resume({ profile, data, compact, showPrintView = false, scale 
   }, [profile, data, compact, dimensions.contentHeight]);
 
   return (
-    <div className="space-y-4 relative">
+    <div className={clsx(
+      'space-y-4 relative',
+      showPrintView && 'print:space-y-0 print:p-0 print:m-0'
+    )}>
 
       {/* Compact Warning in Top Right Corner */}
       {isOverflowing && !showPrintView && (
@@ -102,8 +105,10 @@ export function A4Resume({ profile, data, compact, showPrintView = false, scale 
       {/* A4 Resume Container */}
       <div 
         className={clsx(
-          'bg-white shadow-lg mx-auto relative rounded-lg overflow-hidden',
-          showPrintView ? 'print:shadow-none print:rounded-none' : 'border border-gray-200'
+          'bg-white mx-auto relative',
+          showPrintView 
+            ? 'print:shadow-none print:rounded-none print:m-0 print:border-0' 
+            : 'shadow-lg border border-gray-200 rounded-lg overflow-hidden'
         )}
         style={{
           width: `${dimensions.width}px`,
@@ -113,9 +118,12 @@ export function A4Resume({ profile, data, compact, showPrintView = false, scale 
         {/* Resume Content with proper margins */}
         <div
           ref={resumeRef}
-          className="text-black"
+          className={clsx(
+            'text-black',
+            showPrintView && 'print:p-0 print:m-0'
+          )}
           style={{
-            padding: `${dimensions.margin}px`,
+            padding: showPrintView ? `${dimensions.margin}px` : `${dimensions.margin}px`,
             minHeight: `${dimensions.contentHeight}px`,
             fontSize: showPrintView ? '14px' : `${15 * dimensions.scaleFactor}px`, // Slightly larger base font
             lineHeight: showPrintView ? '1.5' : '1.4',

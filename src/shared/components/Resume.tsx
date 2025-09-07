@@ -77,8 +77,8 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
     const metadataStyles = getStyleWithFormatting('text-muted-foreground', profile.formatting, 'metadata');
 
     return (
-      <div className={clsx('text-[12px] leading-snug space-y-3')}>        
-        <header className="border-b border-border pb-3 text-center">
+      <div className={clsx('text-[12px] leading-snug space-y-4')}>        
+        <header className="border-b border-border pb-3 text-center section-header">
           <h1 className={nameStyles.className} style={nameStyles.style}>
             {profile.personalInfo?.fullName || 'Your Name'}
           </h1>
@@ -91,69 +91,73 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
           )}
         </header>
         <div className="grid grid-cols-3 gap-4">
-          <div className="col-span-2 space-y-3">
+          <div className="col-span-2 space-y-4">
             {experiences.length>0 && (
-              <section className={clsx(projects.length > 0 && 'border-b border-border pb-3')}>
+              <section className={clsx('section-header', projects.length > 0 && 'border-b border-border pb-3')}>
                 <h2 className={headerStyles.className} style={headerStyles.style}>Experience</h2>
-                {experiences.map(experience => (
-                  <div key={experience.id} className="mt-1 experience-item">
-                    <div className="flex justify-between">
-                      <span className={clsx(bodyStyles.className)} style={bodyStyles.style}>
-                        {experience.title} @ {experience.company}
-                      </span>
-                      <span className={clsx(metadataStyles.className)} style={metadataStyles.style}>
-                        {experience.date}
-                      </span>
+                <div className="mt-2 space-y-3">
+                  {experiences.map(experience => (
+                    <div key={experience.id} className="experience-item">
+                      <div className="flex justify-between">
+                        <span className={clsx(bodyStyles.className)} style={bodyStyles.style}>
+                          {experience.title} @ {experience.company}
+                        </span>
+                        <span className={clsx(metadataStyles.className)} style={metadataStyles.style}>
+                          {experience.date}
+                        </span>
+                      </div>
+                      <ul className="ml-4 list-disc space-y-1 mt-1">
+                        {experience.bullets.slice(0,3).map((bullet,index)=>(
+                          <li key={index}>
+                            <RichTextDisplay 
+                              content={bullet} 
+                              className={bodyStyles.className} 
+                              style={bodyStyles.style} 
+                            />
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                    <ul className="ml-4 list-disc">
-                      {experience.bullets.slice(0,3).map((bullet,index)=>(
-                        <li key={index}>
-                          <RichTextDisplay 
-                            content={bullet} 
-                            className={bodyStyles.className} 
-                            style={bodyStyles.style} 
-                          />
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </section>
             )}
             {projects.length>0 && (
-              <section>
+              <section className="section-header">
                 <h2 className={headerStyles.className} style={headerStyles.style}>Projects</h2>
-                {projects.map(project => (
-                  <div key={project.id} className="mt-1 project-item">
-                    <div className="flex justify-between">
-                      <span className={clsx(bodyStyles.className)} style={bodyStyles.style}>
-                        {project.title}
-                      </span>
-                      <span className={clsx(metadataStyles.className)} style={metadataStyles.style}>
-                        {project.link||''}
-                      </span>
+                <div className="mt-2 space-y-3">
+                  {projects.map(project => (
+                    <div key={project.id} className="project-item">
+                      <div className="flex justify-between">
+                        <span className={clsx(bodyStyles.className)} style={bodyStyles.style}>
+                          {project.title}
+                        </span>
+                        <span className={clsx(metadataStyles.className)} style={metadataStyles.style}>
+                          {project.link||''}
+                        </span>
+                      </div>
+                      <ul className="ml-4 list-disc space-y-1 mt-1">
+                        {project.bullets.slice(0,2).map((bullet,index)=>(
+                          <li key={index}>
+                            <RichTextDisplay 
+                              content={bullet} 
+                              className={bodyStyles.className} 
+                              style={bodyStyles.style} 
+                            />
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                    <ul className="ml-4 list-disc">
-                      {project.bullets.slice(0,2).map((bullet,index)=>(
-                        <li key={index}>
-                          <RichTextDisplay 
-                            content={bullet} 
-                            className={bodyStyles.className} 
-                            style={bodyStyles.style} 
-                          />
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </section>
             )}
           </div>
-          <div className="col-span-1 space-y-3">
+          <div className="col-span-1 space-y-4">
             {skills.length>0 && (
-              <section className={clsx(education.length > 0 && 'border-b border-border pb-3')}>
+              <section className={clsx('section-header', education.length > 0 && 'border-b border-border pb-3')}>
                 <h2 className={headerStyles.className} style={headerStyles.style}>Skills</h2>
-                <ul className="mt-1 space-y-1">
+                <ul className="mt-2 space-y-1">
                   {skills.map(skill => (
                     <li key={skill.id}>
                       <span className={clsx(bodyStyles.className, 'font-medium')} style={bodyStyles.style}>
@@ -170,11 +174,11 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
               </section>
             )}
             {education.length>0 && (
-              <section>
+              <section className="section-header">
                 <h2 className={headerStyles.className} style={headerStyles.style}>Education</h2>
-                <ul className="ml-4 list-disc">
+                <div className="mt-2 space-y-2">
                   {education.map(educationItem => (
-                    <li key={educationItem.id} className="education-item">
+                    <div key={educationItem.id} className="education-item">
                       <span className={clsx(bodyStyles.className, 'font-medium')} style={bodyStyles.style}>
                         {educationItem.title}
                       </span> — <RichTextDisplay 
@@ -182,9 +186,9 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
                         className={clsx('inline', bodyStyles.className)} 
                         style={bodyStyles.style}
                       />
-                    </li>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </section>
             )}
           </div>
@@ -215,7 +219,7 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
   );
 
   return (
-    <div className={clsx('text-[14px] leading-relaxed', compact ? 'space-y-4' : 'space-y-3')}>
+    <div className={clsx('text-[14px] leading-relaxed', compact ? 'space-y-5' : 'space-y-5')}>
       {/* Header */}
       <header className="border-b border-border pb-3 section-header text-center">
         <h1 className={nameStyles.className} style={nameStyles.style}>
@@ -270,7 +274,7 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
           <h2 className={headerStyles.className} style={headerStyles.style}>
             Skills
           </h2>
-          <div className={clsx('mt-1 gap-1', compact ? 'grid grid-cols-1' : 'flex flex-col')}>
+          <div className={clsx('mt-2 space-y-1', compact ? 'grid grid-cols-1' : 'flex flex-col')}>
             {skills.map((skill) => (
               <div key={skill.id} className={bodyStyles.className} style={bodyStyles.style}>
                 <span className="font-medium">
@@ -293,7 +297,7 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
           <h2 className={headerStyles.className} style={headerStyles.style}>
             Work Experiences
           </h2>
-          <div className="mt-1 space-y-3">
+          <div className="mt-2 space-y-4">
             {experiences.map((experience) => (
               <div key={experience.id} className="experience-item">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -304,7 +308,7 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
                     {experience.date}
                   </div>
                 </div>
-                <ul className="ml-5 list-disc">
+                <ul className="ml-5 list-disc space-y-1 mt-1">
                   {experience.bullets.slice(0, compact ? 3 : undefined).map((bullet, index) => (
                     <li key={index} className="break-words">
                       <RichTextDisplay 
@@ -327,7 +331,7 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
           <h2 className={headerStyles.className} style={headerStyles.style}>
             Projects
           </h2>
-          <div className="mt-1 space-y-3">
+          <div className="mt-2 space-y-4">
             {projects.map((project) => (
               <div key={project.id} className="project-item">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -338,7 +342,7 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
                     {project.link || ''}
                   </div>
                 </div>
-                <ul className="ml-5 list-disc">
+                <ul className="ml-5 list-disc space-y-1 mt-1">
                   {project.bullets.slice(0, compact ? 2 : undefined).map((bullet, index) => (
                     <li key={index} className="break-words">
                       <RichTextDisplay 
@@ -361,14 +365,14 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
           <h2 className={headerStyles.className} style={headerStyles.style}>
             Education
           </h2>
-          <div className="ml-5 space-y-1">
+          <div className="mt-2 space-y-2">
             {education.map((educationItem) => (
-              <div key={educationItem.id} className="overflow-hidden education-item">
+              <div key={educationItem.id} className="education-item">
                 <span className={clsx('font-medium', bodyStyles.className)} style={bodyStyles.style}>
                   {educationItem.title}
                 </span> — <RichTextDisplay 
                   content={educationItem.details} 
-                  className={clsx('truncate inline-block max-w-xs', bodyStyles.className)} 
+                  className={clsx('inline', bodyStyles.className)} 
                   style={bodyStyles.style}
                 />
               </div>

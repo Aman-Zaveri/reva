@@ -21,7 +21,7 @@ export default function PrintPage() {
   if (!profile) return <div className="p-6">Profile not found.</div>;
 
   return (
-    <div className="mx-auto bg-white print:p-0">
+    <div className="print:p-0 print:m-0 bg-white">
       <A4Resume profile={profile} data={data} compact showPrintView />
     </div>
   );
