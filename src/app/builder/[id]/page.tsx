@@ -99,7 +99,7 @@ export default function BuilderPage() {
   );
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="h-screen flex flex-col bg-background overflow-hidden">
       <BuilderHeader
         profile={profile}
         data={data}
@@ -109,7 +109,7 @@ export default function BuilderPage() {
       />
 
       {/* Main Content Area */}
-      <div className="flex-1">
+      <div className="flex-1 overflow-hidden">
         {/* Left Side - Editor (takes up remaining space) */}
         <div className="overflow-y-auto hide-scrollbar p-6" style={{ width: '50vw', height: 'calc(100vh - 73px)' }}>
           <div className="flex flex-col gap-6">
