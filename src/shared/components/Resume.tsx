@@ -18,14 +18,14 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
   if (template === 'compact') {
     return (
       <div className={clsx('text-[12px] leading-snug space-y-3')}>        
-        <header className="border-b border-border pb-2">
+        <header className="border-b border-border pb-3 text-center">
           <h1 className="text-xl font-semibold text-foreground">{profile.personalInfo?.fullName || 'Your Name'}</h1>
           {profile.personalInfo?.summary && <RichTextDisplay content={profile.personalInfo.summary} className="mt-1 text-[11px] text-muted-foreground" />}
         </header>
         <div className="grid grid-cols-3 gap-4">
           <div className="col-span-2 space-y-3">
             {experiences.length>0 && (
-              <section>
+              <section className={clsx(projects.length > 0 && 'border-b border-border pb-3')}>
                 <h2 className="text-xs font-bold uppercase tracking-wide text-foreground">Experience</h2>
                 {experiences.map(experience => (
                   <div key={experience.id} className="mt-1 experience-item">
@@ -53,7 +53,7 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
           </div>
           <div className="col-span-1 space-y-3">
             {skills.length>0 && (
-              <section>
+              <section className={clsx(education.length > 0 && 'border-b border-border pb-3')}>
                 <h2 className="text-xs font-bold uppercase tracking-wide text-foreground">Skills</h2>
                 <ul className="mt-1 space-y-1">
                   {skills.map(skill => <li key={skill.id}><span className="font-medium text-foreground">{skill.name}:</span> <RichTextDisplay content={skill.details} className="inline" /></li>)}
@@ -75,9 +75,9 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
   }
 
   return (
-    <div className={clsx('text-[14px] leading-relaxed', compact ? 'space-y-4' : 'space-y-6')}>
+    <div className={clsx('text-[14px] leading-relaxed', compact ? 'space-y-4' : 'space-y-3')}>
       {/* Header */}
-      <header className="border-b border-border pb-3 section-header">
+      <header className="border-b border-border pb-3 section-header text-center">
         <h1 className={clsx('font-semibold text-foreground', compact ? 'text-xl' : 'text-2xl')}>
           {profile.personalInfo?.fullName || 'Your Name'}
         </h1>
@@ -125,11 +125,11 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
 
       {/* Skills */}
       {skills.length > 0 && (
-        <section className="section-header">
+        <section className={clsx('section-header', (experiences.length > 0 || projects.length > 0 || education.length > 0) && 'border-b border-border pb-3')}>
           <h2 className={clsx('font-bold uppercase tracking-wide text-foreground', compact ? 'text-sm' : 'text-sm')}>
             Skills
           </h2>
-          <div className={clsx('mt-1 gap-2', compact ? 'grid grid-cols-1' : 'grid grid-cols-1 md:grid-cols-2')}>
+          <div className={clsx('mt-1 gap-1', compact ? 'grid grid-cols-1' : 'flex flex-col')}>
             {skills.map((skill) => (
               <div key={skill.id} className={clsx('break-words', compact ? 'text-[12px]' : 'text-[13px]')}>
                 <span className="font-medium text-foreground">{skill.name}:</span> <RichTextDisplay content={skill.details} className="inline" />
@@ -141,7 +141,7 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
 
       {/* Experience */}
       {experiences.length > 0 && (
-        <section className="section-header">
+        <section className={clsx('section-header', (projects.length > 0 || education.length > 0) && 'border-b border-border pb-3')}>
           <h2 className={clsx('font-bold uppercase tracking-wide text-foreground', compact ? 'text-sm' : 'text-sm')}>
             Work Experiences
           </h2>
@@ -169,7 +169,7 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
 
       {/* Projects */}
       {projects.length > 0 && (
-        <section className="section-header">
+        <section className={clsx('section-header', education.length > 0 && 'border-b border-border pb-3')}>
           <h2 className={clsx('font-bold uppercase tracking-wide text-foreground', compact ? 'text-sm' : 'text-sm')}>
             Projects
           </h2>
