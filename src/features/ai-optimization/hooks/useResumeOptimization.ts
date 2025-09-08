@@ -33,8 +33,8 @@ export function useResumeOptimization() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          jobUrl: activeTab === "url" ? jobUrl : "",
-          jobDescription: activeTab === "text" ? jobDescription : "",
+          jobUrl: activeTab === "url" && jobUrl ? jobUrl : undefined,
+          jobDescription: activeTab === "text" && jobDescription ? jobDescription : undefined,
           profile,
           data,
           glazeLevel,
