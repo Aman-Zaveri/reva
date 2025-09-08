@@ -8,3 +8,4 @@ export { JobDescriptionInput } from './JobDescriptionInput';
 export { JobInfoPreview } from './JobInfoPreview';
 export { DiffIndicator } from './DiffIndicator';
 export { getWordDiff } from './WordDiff';
+export { CustomInstructionsInput } from './CustomInstructionsInput';

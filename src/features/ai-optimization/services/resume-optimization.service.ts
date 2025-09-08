@@ -13,6 +13,8 @@ export interface OptimizationRequest {
   data: DataBundle;
   /** AI enhancement level (1-5, where 1 is conservative and 5 is aggressive) */
   glazeLevel?: number;
+  /** Additional custom instructions for the AI optimization */
+  customInstructions?: string;
 }
 
 /**
@@ -95,7 +97,7 @@ export class ResumeOptimizationService {
    * ```
    */
   static async optimizeResume(request: OptimizationRequest): Promise<ProfileUpdates> {
-    const { jobDescription, profile, data, glazeLevel = 2 } = request;
+    const { jobDescription, profile, data, glazeLevel = 2, customInstructions } = request;
     
     // Validate input
     this.validateOptimizationRequest(request);
@@ -107,7 +109,8 @@ export class ResumeOptimizationService {
     const { systemPrompt, userPrompt } = this.buildOptimizationPrompt(
       jobDescription,
       profileData,
-      glazeLevel
+      glazeLevel,
+      customInstructions
     );
     
     // Get AI optimization suggestions
@@ -199,6 +202,7 @@ export class ResumeOptimizationService {
    * @param jobDescription - The job description to optimize against
    * @param profileData - Structured profile data to be optimized
    * @param glazeLevel - Enhancement level (1-5) controlling optimization aggressiveness
+   * @param customInstructions - Additional user-provided instructions for optimization
    * @returns Object containing system and user prompts for AI generation
    * @private
    */
@@ -211,7 +215,8 @@ export class ResumeOptimizationService {
       skills: Skill[];
       education: Education[];
     }, 
-    glazeLevel: number = 2
+    glazeLevel: number = 2,
+    customInstructions?: string
   ) {
     // Define glaze level characteristics
     const glazeInstructions = this.getGlazeInstructions(glazeLevel);
@@ -223,6 +228,13 @@ ${glazeInstructions}
 IMPORTANT: Return ONLY a valid JSON object with no markdown formatting, code blocks, or additional text. The response must be parseable JSON.
 
 CRITICAL RULE FOR SUMMARY: Only include a "summary" field in personalInfo if the user already has an existing summary in their profile. If they have no summary, do not create one - leave the personalInfo object empty or omit it entirely.
+
+${customInstructions ? `
+ADDITIONAL USER INSTRUCTIONS:
+${customInstructions}
+
+Please incorporate these specific instructions into your optimization while following all other guidelines above.
+` : ''}
 
 Return your response as a JSON object with the following structure:
 {

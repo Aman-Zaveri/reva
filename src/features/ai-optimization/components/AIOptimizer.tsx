@@ -15,6 +15,7 @@ import { JobInputTabs } from "./JobInputTabs";
 import { OptimizationResults } from "./OptimizationResults";
 import { OptimizationControls } from "./OptimizationControls";
 import { GlazeControl } from "./GlazeControl";
+import { CustomInstructionsInput } from "./CustomInstructionsInput";
 import { useJobExtraction } from "../hooks/useJobExtraction";
 import { useResumeOptimization } from "../hooks/useResumeOptimization";
 import type { AIOptimizerProps, TabType, GlazeLevel } from "../types";
@@ -43,6 +44,7 @@ export function AIOptimizer({
   const [jobUrl, setJobUrl] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [glazeLevel, setGlazeLevel] = useState<GlazeLevel>(2); // Default to Professional level
+  const [customInstructions, setCustomInstructions] = useState("");
 
   // Hooks for job extraction and resume optimization
   const {
@@ -73,7 +75,7 @@ export function AIOptimizer({
    * Sends job description and profile data to the optimization service
    */
   const handleOptimize = () => {
-    optimizeResume(jobUrl, jobDescription, profile, data, activeTab, glazeLevel);
+    optimizeResume(jobUrl, jobDescription, profile, data, activeTab, glazeLevel, customInstructions);
   };
 
   /**
@@ -100,6 +102,7 @@ export function AIOptimizer({
     setExtractionError("");
     setActiveTab("url");
     setGlazeLevel(2); // Reset to professional level
+    setCustomInstructions(""); // Reset custom instructions
   };
 
   const hasJobInput = Boolean(jobUrl || jobDescription);
@@ -142,6 +145,11 @@ export function AIOptimizer({
                 isExtractingJob={isExtractingJob}
                 extractionError={extractionError}
                 jobInfo={jobInfo}
+              />
+
+              <CustomInstructionsInput
+                value={customInstructions}
+                onChange={setCustomInstructions}
               />
 
               <OptimizationControls

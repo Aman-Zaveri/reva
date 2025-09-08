@@ -13,7 +13,8 @@ export function useResumeOptimization() {
     profile: Profile,
     data: DataBundle,
     activeTab: string,
-    glazeLevel: GlazeLevel
+    glazeLevel: GlazeLevel,
+    customInstructions?: string
   ) => {
     if (!jobUrl && !jobDescription) {
       setError(
@@ -38,6 +39,7 @@ export function useResumeOptimization() {
           profile,
           data,
           glazeLevel,
+          customInstructions,
         }),
       });
 

@@ -85,6 +85,7 @@ export const OptimizeResumeRequestSchema = z.object({
   profile: ProfileSchema,
   data: DataBundleSchema,
   glazeLevel: z.number().int().min(1).max(5).optional().default(2),
+  customInstructions: z.string().optional(),
 }).refine(
   (data) => data.jobUrl || data.jobDescription,
   {

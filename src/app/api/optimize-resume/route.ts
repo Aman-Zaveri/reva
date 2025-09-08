@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { jobUrl, jobDescription, profile, data, glazeLevel = 2 } = validation.data!;
+    const { jobUrl, jobDescription, profile, data, glazeLevel = 2, customInstructions } = validation.data!;
 
     let finalJobDescription = jobDescription;
 
@@ -74,7 +74,8 @@ export async function POST(req: NextRequest) {
       jobDescription: finalJobDescription,
       profile,
       data,
-      glazeLevel
+      glazeLevel,
+      customInstructions
     });
 
     return NextResponse.json({
