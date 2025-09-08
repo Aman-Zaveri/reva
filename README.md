@@ -5,10 +5,10 @@ A powerful Next.js application for building and managing multiple resume profile
 ## Features
 
 - **Multi-Profile Management**: Create and manage multiple resume profiles for different job types
-- **AI-Powered Optimization**: Automatically optimize your resume based on LinkedIn job descriptions using OpenAI
+- **AI-Powered Optimization**: Automatically optimize your resume based on LinkedIn job descriptions using Google's Gemini AI
 - **Real-time Preview**: See your resume changes in real-time with a live preview
 - **Drag & Drop**: Easily reorder sections and items within your resume
-- **Export to PDF**: Generate professional PDF versions of your resume
+- **Export to PDF & Word**: Generate professional PDF and Word document versions of your resume
 - **Profile-Specific Customization**: Override content for specific profiles without affecting master data
 
 ## AI Resume Optimization
@@ -28,6 +28,30 @@ The AI feature analyzes LinkedIn job postings and automatically optimizes your r
 3. The AI will analyze the job requirements and generate optimizations
 4. Review the suggested changes and apply them to your resume
 5. Your resume is now tailored for that specific job application
+
+## Export Options
+
+Your resume can be exported in two professional formats:
+
+### PDF Export
+- Click the "Export" dropdown in the resume builder
+- Select "Export as PDF" 
+- Opens a print-optimized view that automatically triggers the browser's print dialog
+- Perfect for online applications and ATS systems
+
+### Word Document Export
+- Click the "Export" dropdown in the resume builder  
+- Select "Export as Word"
+- Downloads a professionally formatted .docx file
+- Ideal for recruiters who prefer editable documents
+- Maintains formatting, sections, and styling
+- Includes hyperlinks for contact information when available
+
+Both export formats preserve:
+- Your chosen template and formatting
+- Section ordering as configured in your profile
+- All content including experiences, projects, skills, and education
+- Professional styling optimized for readability
 
 ## Setup
 
@@ -99,8 +123,10 @@ src/
 - **UI Components**: Radix UI
 - **AI Integration**: Google Gemini 1.5 Flash (Free)
 - **Web Scraping**: Mozilla Readability + JSDOM
+- **Document Generation**: docx library for Word documents
+- **File Downloads**: file-saver for client-side downloads
 - **TypeScript**: Full type safety
-- **PDF Export**: Browser print functionality
+- **Export Options**: Browser print (PDF) + Word document generation
 
 ## Environment Variables
 

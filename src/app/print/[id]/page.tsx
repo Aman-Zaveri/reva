@@ -50,7 +50,7 @@ export default function PrintPage() {
       <div className="p-6 flex items-center justify-center min-h-screen">
         <div className="text-center">
           <h1 className="text-xl font-semibold mb-2">Profile not found</h1>
-          <p className="text-gray-600 mb-4">The profile with ID "{params.id}" could not be found.</p>
+          <p className="text-gray-600 mb-4">The profile with ID &quot;{params.id}&quot; could not be found.</p>
           <button 
             onClick={() => window.close()} 
             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"

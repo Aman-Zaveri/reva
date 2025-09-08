@@ -2,9 +2,16 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Printer, Save, Check } from 'lucide-react';
+import { ArrowLeft, Save, Check, Download, FileText, ChevronDown } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/shared/components/ui/dropdown-menu';
 import { AIOptimizer } from '@/features/ai-optimization/components/AIOptimizer';
+import { wordExportService } from '@/shared/services';
 import type { Profile, DataBundle } from '@/shared/lib/types';
 
 interface BuilderHeaderProps {
@@ -22,6 +29,22 @@ export function BuilderHeader({ profile, data, saveStatus, onDeleteProfile, onAp
     if (confirm('Delete this profile? This action cannot be undone.')) {
       onDeleteProfile();
       router.replace('/');
+    }
+  };
+
+  const handleExportToPDF = () => {
+    window.open(`/print/${profile.id}`, '_blank');
+  };
+
+  const handleExportToWord = async () => {
+    try {
+      await wordExportService.exportToWord(profile, data, {
+        fileName: `${profile.personalInfo?.fullName || profile.name}_Resume.docx`,
+        includeHyperlinks: true,
+      });
+    } catch (error) {
+      console.error('Failed to export to Word:', error);
+      alert('Failed to export resume to Word document. Please try again.');
     }
   };
 
@@ -69,14 +92,25 @@ export function BuilderHeader({ profile, data, saveStatus, onDeleteProfile, onAp
             onApplyOptimizations={onApplyOptimizations}
           />
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => window.open(`/print/${profile.id}`, '_blank')}
-          >
-            <Printer size={16} className="mr-2" />
-            Export
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Download size={16} className="mr-2" />
+                Export
+                <ChevronDown size={14} className="ml-1" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleExportToPDF}>
+                <FileText size={16} className="mr-2" />
+                Export as PDF
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleExportToWord}>
+                <FileText size={16} className="mr-2" />
+                Export as Word
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           <Button
             variant="destructive"
