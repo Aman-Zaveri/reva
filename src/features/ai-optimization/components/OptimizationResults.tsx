@@ -22,7 +22,11 @@ interface OptimizationResultsProps {
 
 export function OptimizationResults({ result, data, originalProfile, glazeLevel = 2 }: OptimizationResultsProps) {
   // Calculate summary statistics
-  const summaryChanged = Boolean(result.optimizations.personalInfo?.summary && originalProfile.personalInfo?.summary);
+  const summaryChanged = Boolean(
+    result.optimizations.personalInfo?.summary && 
+    originalProfile.personalInfo?.summary &&
+    result.optimizations.personalInfo.summary !== originalProfile.personalInfo.summary
+  );
   const experienceChangesCount = result.optimizations.experienceOverrides ? Object.keys(result.optimizations.experienceOverrides).length : 0;
   const projectChangesCount = result.optimizations.projectOverrides ? Object.keys(result.optimizations.projectOverrides).length : 0;
   const totalChanges = (summaryChanged ? 1 : 0) + experienceChangesCount + projectChangesCount;

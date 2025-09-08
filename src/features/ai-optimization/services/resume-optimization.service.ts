@@ -222,10 +222,12 @@ ${glazeInstructions}
 
 IMPORTANT: Return ONLY a valid JSON object with no markdown formatting, code blocks, or additional text. The response must be parseable JSON.
 
+CRITICAL RULE FOR SUMMARY: Only include a "summary" field in personalInfo if the user already has an existing summary in their profile. If they have no summary, do not create one - leave the personalInfo object empty or omit it entirely.
+
 Return your response as a JSON object with the following structure:
 {
   "personalInfo": {
-    "summary": "optimized summary that aligns with the job"
+    "summary": "optimized summary that aligns with the job" // ONLY if user already has a summary
   },
   "experienceOptimizations": [
     {
@@ -270,6 +272,8 @@ ${JSON.stringify(profileData.skills, null, 2)}
 Education:
 ${JSON.stringify(profileData.education, null, 2)}
 
+IMPORTANT NOTE: The user currently ${profileData.personalInfo?.summary ? 'HAS' : 'DOES NOT HAVE'} a summary in their profile. ${!profileData.personalInfo?.summary ? 'Do not create a new summary - only optimize existing content.' : 'You may optimize the existing summary to better match the job description.'}
+
 Please optimize this resume to better match the job description while keeping all information truthful and authentic.`;
 
     return { systemPrompt, userPrompt };
@@ -301,6 +305,11 @@ Please optimize this resume to better match the job description while keeping al
         ...profile.personalInfo,
         ...optimizations.personalInfo
       };
+      
+      // Safety check: Don't add a summary if the original profile doesn't have one
+      if (!profile.personalInfo.summary && optimizations.personalInfo.summary) {
+        delete profileUpdates.personalInfo.summary;
+      }
     }
 
     // Create profile-specific overrides for experiences
