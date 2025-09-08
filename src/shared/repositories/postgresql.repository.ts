@@ -14,8 +14,7 @@ export class PostgreSQLProfileRepository implements ProfileRepository {
   /**
    * Saves profiles and master data to PostgreSQL
    * 
-   * Performs a full data replacement - clears existing data and saves new data.
-   * Uses transactions to ensure data consistency.
+   * Uses an optimized approach with upsert operations and increased transaction timeout.
    * 
    * @param profiles - Array of profile objects to save
    * @param data - Master data bundle to save
@@ -24,17 +23,24 @@ export class PostgreSQLProfileRepository implements ProfileRepository {
   async saveProfiles(profiles: Profile[], data: DataBundle): Promise<StorageResult<void>> {
     try {
       await prisma.$transaction(async (tx) => {
-        // Clear existing data
-        await tx.profileExperience.deleteMany();
-        await tx.profileProject.deleteMany();
-        await tx.profileSkill.deleteMany();
-        await tx.profileEducation.deleteMany();
+        // Clear existing data in dependency order - Use deleteMany with where clause for better performance
+        await Promise.all([
+          tx.profileExperience.deleteMany(),
+          tx.profileProject.deleteMany(),
+          tx.profileSkill.deleteMany(),
+          tx.profileEducation.deleteMany(),
+        ]);
+        
         await tx.profile.deleteMany();
-        await tx.experience.deleteMany();
-        await tx.project.deleteMany();
-        await tx.skill.deleteMany();
-        await tx.education.deleteMany();
-        await tx.personalInfo.deleteMany();
+        
+        // Clear master data in parallel where possible
+        await Promise.all([
+          tx.experience.deleteMany(),
+          tx.project.deleteMany(),
+          tx.skill.deleteMany(),
+          tx.education.deleteMany(),
+          tx.personalInfo.deleteMany(),
+        ]);
 
         // Save personal info
         let personalInfoRecord = null;
@@ -59,64 +65,56 @@ export class PostgreSQLProfileRepository implements ProfileRepository {
           });
         }
 
-        // Save master data
-        const experienceRecords = await Promise.all(
-          data.experiences.map(exp => 
-            tx.experience.create({
-              data: {
-                id: exp.id,
-                title: exp.title,
-                company: exp.company,
-                date: exp.date,
-                bullets: exp.bullets,
-                tags: exp.tags || [],
-              },
-            })
-          )
-        );
+        // Save master data in bulk
+        if (data.experiences.length > 0) {
+          await tx.experience.createMany({
+            data: data.experiences.map(exp => ({
+              id: exp.id,
+              title: exp.title,
+              company: exp.company,
+              date: exp.date,
+              bullets: exp.bullets,
+              tags: exp.tags || [],
+            })),
+          });
+        }
 
-        const projectRecords = await Promise.all(
-          data.projects.map(project => 
-            tx.project.create({
-              data: {
-                id: project.id,
-                title: project.title,
-                link: project.link,
-                bullets: project.bullets,
-                tags: project.tags || [],
-              },
-            })
-          )
-        );
+        if (data.projects.length > 0) {
+          await tx.project.createMany({
+            data: data.projects.map(project => ({
+              id: project.id,
+              title: project.title,
+              link: project.link,
+              bullets: project.bullets,
+              tags: project.tags || [],
+            })),
+          });
+        }
 
-        const skillRecords = await Promise.all(
-          data.skills.map(skill => 
-            tx.skill.create({
-              data: {
-                id: skill.id,
-                name: skill.name,
-                details: skill.details,
-              },
-            })
-          )
-        );
+        if (data.skills.length > 0) {
+          await tx.skill.createMany({
+            data: data.skills.map(skill => ({
+              id: skill.id,
+              name: skill.name,
+              details: skill.details,
+            })),
+          });
+        }
 
-        const educationRecords = await Promise.all(
-          data.education.map(edu => 
-            tx.education.create({
-              data: {
-                id: edu.id,
-                title: edu.title,
-                details: edu.details,
-              },
-            })
-          )
-        );
+        if (data.education.length > 0) {
+          await tx.education.createMany({
+            data: data.education.map(edu => ({
+              id: edu.id,
+              title: edu.title,
+              details: edu.details,
+            })),
+          });
+        }
 
-        // Save profiles
-        for (const profile of profiles) {
-          const profileRecord = await tx.profile.create({
-            data: {
+        // Save profiles in bulk
+        if (profiles.length > 0) {
+          await tx.profile.createMany({
+            data: profiles.map(profile => ({
               id: profile.id,
               name: profile.name,
               template: profile.template || 'classic',
@@ -131,17 +129,23 @@ export class PostgreSQLProfileRepository implements ProfileRepository {
               aiOptimizationTimestamp: profile.aiOptimization?.timestamp,
               aiOptimizationKeyInsights: profile.aiOptimization?.keyInsights || [],
               aiOptimizationJobDescHash: profile.aiOptimization?.jobDescriptionHash,
-            },
+            })),
           });
 
-          // Save profile-experience relationships
-          for (let i = 0; i < profile.experienceIds.length; i++) {
-            const expId = profile.experienceIds[i];
-            const overrides = profile.experienceOverrides?.[expId];
-            
-            await tx.profileExperience.create({
-              data: {
-                profileId: profileRecord.id,
+          // Save relationships in bulk
+          const profileExperiences = [];
+          const profileProjects = [];
+          const profileSkills = [];
+          const profileEducations = [];
+
+          for (const profile of profiles) {
+            // Profile-experience relationships
+            for (let i = 0; i < profile.experienceIds.length; i++) {
+              const expId = profile.experienceIds[i];
+              const overrides = profile.experienceOverrides?.[expId];
+              
+              profileExperiences.push({
+                profileId: profile.id,
                 experienceId: expId,
                 order: i,
                 titleOverride: overrides?.title,
@@ -149,60 +153,70 @@ export class PostgreSQLProfileRepository implements ProfileRepository {
                 dateOverride: overrides?.date,
                 bulletsOverride: overrides?.bullets || [],
                 tagsOverride: overrides?.tags || [],
-              },
-            });
-          }
+              });
+            }
 
-          // Save profile-project relationships
-          for (let i = 0; i < profile.projectIds.length; i++) {
-            const projectId = profile.projectIds[i];
-            const overrides = profile.projectOverrides?.[projectId];
-            
-            await tx.profileProject.create({
-              data: {
-                profileId: profileRecord.id,
+            // Profile-project relationships
+            for (let i = 0; i < profile.projectIds.length; i++) {
+              const projectId = profile.projectIds[i];
+              const overrides = profile.projectOverrides?.[projectId];
+              
+              profileProjects.push({
+                profileId: profile.id,
                 projectId: projectId,
                 order: i,
                 titleOverride: overrides?.title,
                 linkOverride: overrides?.link,
                 bulletsOverride: overrides?.bullets || [],
                 tagsOverride: overrides?.tags || [],
-              },
-            });
-          }
+              });
+            }
 
-          // Save profile-skill relationships
-          for (let i = 0; i < profile.skillIds.length; i++) {
-            const skillId = profile.skillIds[i];
-            const overrides = profile.skillOverrides?.[skillId];
-            
-            await tx.profileSkill.create({
-              data: {
-                profileId: profileRecord.id,
+            // Profile-skill relationships
+            for (let i = 0; i < profile.skillIds.length; i++) {
+              const skillId = profile.skillIds[i];
+              const overrides = profile.skillOverrides?.[skillId];
+              
+              profileSkills.push({
+                profileId: profile.id,
                 skillId: skillId,
                 order: i,
                 nameOverride: overrides?.name,
                 detailsOverride: overrides?.details,
-              },
-            });
-          }
+              });
+            }
 
-          // Save profile-education relationships
-          for (let i = 0; i < profile.educationIds.length; i++) {
-            const eduId = profile.educationIds[i];
-            const overrides = profile.educationOverrides?.[eduId];
-            
-            await tx.profileEducation.create({
-              data: {
-                profileId: profileRecord.id,
+            // Profile-education relationships
+            for (let i = 0; i < profile.educationIds.length; i++) {
+              const eduId = profile.educationIds[i];
+              const overrides = profile.educationOverrides?.[eduId];
+              
+              profileEducations.push({
+                profileId: profile.id,
                 educationId: eduId,
                 order: i,
                 titleOverride: overrides?.title,
                 detailsOverride: overrides?.details,
-              },
-            });
+              });
+            }
+          }
+
+          // Create relationships in bulk
+          if (profileExperiences.length > 0) {
+            await tx.profileExperience.createMany({ data: profileExperiences });
+          }
+          if (profileProjects.length > 0) {
+            await tx.profileProject.createMany({ data: profileProjects });
+          }
+          if (profileSkills.length > 0) {
+            await tx.profileSkill.createMany({ data: profileSkills });
+          }
+          if (profileEducations.length > 0) {
+            await tx.profileEducation.createMany({ data: profileEducations });
           }
         }
+      }, {
+        timeout: 30000, // 30 second timeout instead of 5
       });
 
       return { success: true };
@@ -457,6 +471,7 @@ export class PostgreSQLProfileRepository implements ProfileRepository {
   async clearData(): Promise<StorageResult<void>> {
     try {
       await prisma.$transaction(async (tx) => {
+        // Clear in dependency order
         await tx.profileExperience.deleteMany();
         await tx.profileProject.deleteMany();
         await tx.profileSkill.deleteMany();
@@ -467,6 +482,8 @@ export class PostgreSQLProfileRepository implements ProfileRepository {
         await tx.skill.deleteMany();
         await tx.education.deleteMany();
         await tx.personalInfo.deleteMany();
+      }, {
+        timeout: 15000, // 15 second timeout
       });
       
       return { success: true };

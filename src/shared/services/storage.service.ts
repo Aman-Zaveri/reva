@@ -8,10 +8,31 @@ import type { StorageResult } from '@/shared/repositories/profile.repository';
  * HTTP calls to API routes that handle database operations.
  */
 export class ApiStorageService {
+  private readonly timeout = 30000; // 30 second timeout
+  
+  private async fetchWithTimeout(url: string, options: RequestInit = {}): Promise<Response> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+    
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+      return response;
+    } catch (error) {
+      clearTimeout(timeoutId);
+      if ((error as Error).name === 'AbortError') {
+        throw new Error('Request timeout - please check your connection');
+      }
+      throw error;
+    }
+  }
   
   async saveProfiles(profiles: Profile[], data: DataBundle): Promise<StorageResult<void>> {
     try {
-      const response = await fetch('/api/profiles', {
+      const response = await this.fetchWithTimeout('/api/profiles', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -19,9 +40,17 @@ export class ApiStorageService {
         body: JSON.stringify({ profiles, data }),
       });
 
+      if (!response.ok) {
+        const errorText = await response.text();
+        return { 
+          success: false, 
+          error: `HTTP ${response.status}: ${errorText || 'Failed to save data'}` 
+        };
+      }
+
       const result = await response.json();
       
-      if (!response.ok || !result.success) {
+      if (!result.success) {
         return { success: false, error: result.error || 'Failed to save data' };
       }
 
@@ -36,7 +65,7 @@ export class ApiStorageService {
 
   async loadProfiles(): Promise<StorageResult<{ profiles: Profile[]; data: DataBundle }>> {
     try {
-      const response = await fetch('/api/profiles');
+      const response = await this.fetchWithTimeout('/api/profiles');
       const result = await response.json();
       
       if (!response.ok || !result.success) {

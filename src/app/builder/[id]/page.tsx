@@ -1,7 +1,7 @@
 "use client";
 
 import { notFound, useParams, useRouter } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useProfilesStore } from "@/shared/lib/store";
 import type {
   PersonalInfo,
@@ -16,6 +16,7 @@ import { BuilderHeader, ProfileSettings, ContentSections, ResumePreview, Section
 export default function BuilderPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
   const {
     profiles,
     updateProfile,
@@ -27,6 +28,7 @@ export default function BuilderPage() {
     updateProfileSkill,
     updateProfileEducation,
     resetProfileOverride,
+    loadFromStorage,
   } = useProfilesStore();
 
   const { saveStatus, createUpdateHandler } = useBuilderState();
@@ -37,11 +39,37 @@ export default function BuilderPage() {
   );
 
   useEffect(() => {
-    if (!profile) {
+    const initializeData = async () => {
+      try {
+        // Ensure data is loaded from database
+        await loadFromStorage();
+      } catch (error) {
+        console.error('Failed to load profile data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeData();
+  }, [loadFromStorage]);
+
+  useEffect(() => {
+    if (!isLoading && !profile) {
       const t = setTimeout(() => router.replace("/"), 800);
       return () => clearTimeout(t);
     }
-  }, [profile, router]);
+  }, [profile, router, isLoading]);
+
+  if (isLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p>Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!profile) return notFound();
 

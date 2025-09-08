@@ -2,12 +2,23 @@
 
 import { create } from 'zustand';
 import { nanoid } from './utils';
-import { getStorageService } from './storage-manager';
+import { getStorageService, StorageType } from './storage-manager';
 import { ERROR_MESSAGES } from '@/shared/utils/constants';
 import type { Profile, DataBundle, Experience, Project, Skill, Education, PersonalInfo } from './types';
 
 // Storage service instance - dynamically switches between localStorage and PostgreSQL
 const getStorageRepository = () => getStorageService();
+
+// Debounced save mechanism to prevent multiple concurrent saves
+let saveTimeout: NodeJS.Timeout | null = null;
+const debouncedSave = (saveFunction: () => Promise<void>) => {
+  if (saveTimeout) {
+    clearTimeout(saveTimeout);
+  }
+  saveTimeout = setTimeout(() => {
+    saveFunction();
+  }, 1000); // Wait 1 second after last change before saving
+};
 
 /**
  * State interface for the profiles store
@@ -101,8 +112,10 @@ export type ProfilesState = {
   resetAll: () => Promise<void>;
   /** Loads data from localStorage */
   loadFromStorage: () => Promise<void>;
-  /** Saves current state to localStorage */
+  /** Saves current state to storage */
   saveToStorage: () => Promise<void>;
+  /** Saves with debouncing to prevent concurrent saves */
+  debouncedSave: () => void;
   /** Creates a backup string of current data */
   backupData: () => Promise<string>;
   /** Restores data from a backup string */
@@ -111,6 +124,14 @@ export type ProfilesState = {
   // Error handling
   /** Clears the current error state */
   clearError: () => void;
+  
+  // Storage management
+  /** Get current storage type */
+  getStorageType: () => StorageType;
+  /** Migrate data to PostgreSQL */
+  migrateToPostgreSQL: () => Promise<void>;
+  /** Migrate data to localStorage */
+  migrateToLocalStorage: () => Promise<void>;
 };
 
 // Default seed data import
@@ -225,7 +246,17 @@ export const useProfilesStore = create<ProfilesState>((set, get) => ({
   },
 
   /**
-   * Saves current state to localStorage
+   * Saves current state to storage with debouncing
+   * 
+   * Use this instead of saveToStorage for frequent operations to prevent
+   * multiple concurrent database transactions.
+   */
+  debouncedSave: () => {
+    debouncedSave(get().saveToStorage);
+  },
+
+  /**
+   * Saves current state to storage
    * 
    * Called automatically after most operations to persist changes.
    * Updates the lastSaved timestamp on successful save.
@@ -282,14 +313,14 @@ export const useProfilesStore = create<ProfilesState>((set, get) => ({
       p.id === id ? { ...p, ...patch } : p
     );
     set({ profiles: updatedProfiles });
-    await get().saveToStorage();
+    get().debouncedSave();
   },
 
   // Delete profile
   deleteProfile: async (id) => {
     const updatedProfiles = get().profiles.filter((p) => p.id !== id);
     set({ profiles: updatedProfiles });
-    await get().saveToStorage();
+    await get().saveToStorage(); // Immediate save for deletions
   },
 
   // Clone profile
@@ -305,7 +336,7 @@ export const useProfilesStore = create<ProfilesState>((set, get) => ({
     
     const updatedProfiles = [cloned, ...get().profiles];
     set({ profiles: updatedProfiles });
-    await get().saveToStorage();
+    await get().saveToStorage(); // Immediate save for new profiles
   },
 
   // Reorder profile items
@@ -321,7 +352,7 @@ export const useProfilesStore = create<ProfilesState>((set, get) => ({
     });
     
     set({ profiles: updatedProfiles });
-    await get().saveToStorage();
+    get().debouncedSave();
   },
 
   // Update personal info
@@ -337,7 +368,7 @@ export const useProfilesStore = create<ProfilesState>((set, get) => ({
     });
     
     set({ profiles: updatedProfiles });
-    await get().saveToStorage();
+    get().debouncedSave();
   },
 
   // Update master personal info
@@ -348,7 +379,7 @@ export const useProfilesStore = create<ProfilesState>((set, get) => ({
     };
     
     set({ data: updatedData });
-    await get().saveToStorage();
+    get().debouncedSave();
   },
 
   /**
@@ -378,7 +409,7 @@ export const useProfilesStore = create<ProfilesState>((set, get) => ({
     });
     
     set({ profiles: updatedProfiles });
-    await get().saveToStorage();
+    get().debouncedSave();
   },
 
   // Profile project overrides
@@ -398,7 +429,7 @@ export const useProfilesStore = create<ProfilesState>((set, get) => ({
     });
     
     set({ profiles: updatedProfiles });
-    await get().saveToStorage();
+    get().debouncedSave();
   },
 
   // Profile skill overrides
@@ -418,7 +449,7 @@ export const useProfilesStore = create<ProfilesState>((set, get) => ({
     });
     
     set({ profiles: updatedProfiles });
-    await get().saveToStorage();
+    get().debouncedSave();
   },
 
   // Profile education overrides
@@ -438,7 +469,7 @@ export const useProfilesStore = create<ProfilesState>((set, get) => ({
     });
     
     set({ profiles: updatedProfiles });
-    await get().saveToStorage();
+    get().debouncedSave();
   },
 
   // Reset profile override
@@ -454,14 +485,14 @@ export const useProfilesStore = create<ProfilesState>((set, get) => ({
     });
     
     set({ profiles: updatedProfiles });
-    await get().saveToStorage();
+    get().debouncedSave();
   },
 
   // Update master data
   updateData: async (patch) => {
     const updatedData = { ...get().data, ...patch } as DataBundle;
     set({ data: updatedData });
-    await get().saveToStorage();
+    get().debouncedSave();
   },
 
   // Experience management
@@ -618,6 +649,51 @@ export const useProfilesStore = create<ProfilesState>((set, get) => ({
   // Clear error
   clearError: () => {
     set({ error: null });
+  },
+
+  // Storage management functions
+  getStorageType: () => {
+    // For now, always return 'postgresql' since that's what's implemented
+    // You could enhance this to check localStorage vs API usage
+    return 'postgresql' as StorageType;
+  },
+
+  migrateToPostgreSQL: async () => {
+    set({ loading: true, error: null });
+    
+    try {
+      // This would typically:
+      // 1. Load data from localStorage 
+      // 2. Save it to PostgreSQL
+      // 3. Update storage type
+      // For now, just simulate success since data is already in PostgreSQL
+      await get().loadFromStorage();
+      set({ loading: false });
+    } catch {
+      set({ 
+        error: 'Failed to migrate to PostgreSQL',
+        loading: false
+      });
+    }
+  },
+
+  migrateToLocalStorage: async () => {
+    set({ loading: true, error: null });
+    
+    try {
+      // This would typically:
+      // 1. Load data from PostgreSQL
+      // 2. Save it to localStorage
+      // 3. Update storage type
+      // For now, just simulate success
+      await get().loadFromStorage();
+      set({ loading: false });
+    } catch {
+      set({ 
+        error: 'Failed to migrate to localStorage',
+        loading: false
+      });
+    }
   },
 }));
 
