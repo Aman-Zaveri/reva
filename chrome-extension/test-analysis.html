@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Extension Analysis Test</title>
+</head>
+<body>
+    <h1>Test Analysis Page Opening</h1>
+    <button id="testBtn">Test Open Analysis Page</button>
+    
+    <script>
+        document.getElementById('testBtn').addEventListener('click', function() {
+            // Test data
+            const testOptimization = {
+                keyInsights: [
+                    "Enhanced technical skills section with React and TypeScript",
+                    "Added AWS and Docker experience to backend projects",
+                    "Restructured experience bullets to highlight relevant technologies"
+                ],
+                newSkills: ["React", "TypeScript", "AWS", "Docker", "Node.js"],
+                skillOptimizations: [
+                    { id: "1", name: "Frontend Development", details: "React, TypeScript" },
+                    { id: "2", name: "Cloud Platforms", details: "AWS, Docker" }
+                ]
+            };
+            
+            const testJob = {
+                title: "Full Stack Developer",
+                company: "Tech Corp",
+                description: "Looking for a developer with React, TypeScript, and AWS experience",
+                requirements: "React, TypeScript, Node.js, AWS",
+                responsibilities: "Build scalable web applications"
+            };
+            
+            // Encode data
+            const encodedOptimization = btoa(JSON.stringify(testOptimization));
+            const encodedJob = btoa(JSON.stringify(testJob));
+            
+            // Open analysis page
+            const analysisUrl = `http://localhost:3000/analysis?data=${encodedOptimization}&job=${encodedJob}`;
+            window.open(analysisUrl, '_blank');
+        });
+    </script>
+</body>
+</html>

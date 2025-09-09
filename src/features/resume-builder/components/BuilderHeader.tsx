@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu';
-import { AIOptimizer } from '@/features/ai-optimization/components/AIOptimizer';
+import { AIOptimizer, AIAnalysisModal, JobInfoModal } from '@/features/ai-optimization/components';
 import { wordExportService } from '@/shared/services';
 import type { Profile, DataBundle } from '@/shared/lib/types';
 
@@ -85,6 +85,10 @@ export function BuilderHeader({ profile, data, saveStatus, onDeleteProfile, onAp
               </div>
             )}
           </div>
+
+          <JobInfoModal profile={profile} />
+
+          <AIAnalysisModal profile={profile} />
 
           <AIOptimizer
             profile={profile}

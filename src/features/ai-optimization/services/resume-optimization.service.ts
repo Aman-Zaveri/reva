@@ -30,12 +30,27 @@ export interface OptimizationResult {
     id: string;
     bullets: string[];
     tags: string[];
+    changes: string[]; // What specific changes were made to this experience
   }>;
   /** Optimized project bullet points and tags */
   projectOptimizations?: Array<{
     id: string;
     bullets: string[];
     tags: string[];
+    changes: string[]; // What specific changes were made to this project
+  }>;
+  /** Optimized skill categories with new technical skills */
+  skillOptimizations?: Array<{
+    id: string;
+    name: string;
+    details: string;
+    changes: string[]; // What specific changes were made to this skill
+  }>;
+  /** New skills to add that are mentioned in job but missing from resume */
+  newSkills?: Array<{
+    name: string;
+    details: string;
+    reason: string; // Why this skill was added (from job requirements)
   }>;
   /** Recommended order for experience items (most relevant first) */
   recommendedExperienceOrder?: string[];
@@ -45,6 +60,23 @@ export interface OptimizationResult {
   recommendedSkillOrder?: string[];
   /** Key insights about what was optimized and why */
   keyInsights: string[];
+  /** Detailed analysis of changes made */
+  changeAnalysis: {
+    /** Overall score of how well the resume matches the job (0-100) */
+    jobAlignmentScore: number;
+    /** Explanation of how the score is calculated */
+    scoreExplanation: string;
+    /** Technologies from job that were added to resume */
+    technologiesAdded: string[];
+    /** Skills that were enhanced or modified */
+    skillsEnhanced: string[];
+    /** Content areas that were rewritten */
+    contentRewritten: string[];
+    /** Keywords from job description that were incorporated */
+    keywordsIncorporated: string[];
+    /** Summary of all changes made */
+    totalChanges: number;
+  };
 }
 
 /**
@@ -57,6 +89,33 @@ export interface ProfileUpdates extends Partial<Profile> {
     timestamp: string;
     keyInsights: string[];
     jobDescriptionHash: string;
+    changeAnalysis?: {
+      jobAlignmentScore: number;
+      scoreExplanation: string;
+      technologiesAdded: string[];
+      skillsEnhanced: string[];
+      contentRewritten: string[];
+      keywordsIncorporated: string[];
+      totalChanges: number;
+    };
+    newSkills?: Array<{
+      name: string;
+      details: string;
+      reason: string;
+    }>;
+    skillOptimizations?: Array<{
+      id: string;
+      name: string;
+      details: string;
+      changes: string[];
+    }>;
+    jobData?: {
+      title: string;
+      company: string;
+      description: string;
+      url: string;
+      extractedAt: string;
+    };
   };
 }
 
@@ -221,9 +280,49 @@ export class ResumeOptimizationService {
     // Define glaze level characteristics
     const glazeInstructions = this.getGlazeInstructions(glazeLevel);
     
-    const systemPrompt = `You are an expert resume optimization AI. Your task is to analyze a job description and optimize a resume to better match the requirements.
+    const systemPrompt = `You are an expert resume optimization AI specializing in technical content enhancement. Your primary task is to analyze job descriptions and aggressively add technical skills, frameworks, and technologies to resumes.
+
+CORE MISSION: Extract EVERY technical term, tool, framework, programming language, platform, and methodology from the job description and integrate them into the resume. YOU MUST MAKE SUBSTANTIAL CHANGES - aim for 15-30+ individual modifications.
 
 ${glazeInstructions}
+
+TECHNICAL CONTENT REQUIREMENTS:
+1. SCAN the job description for ALL technical terms (React, Python, AWS, Docker, Kubernetes, etc.)
+2. ADD these technologies to relevant experience bullets, projects, and skills sections
+3. CREATE new skill categories if needed to accommodate job-required technologies
+4. INJECT specific technical implementations into existing experience descriptions
+5. ENSURE every job-required technology appears somewhere in the optimized resume
+6. REWRITE experience bullets to include specific technologies and methodologies
+7. ENHANCE project descriptions with detailed technical implementations
+8. ADD performance metrics, scalability details, and technical achievements
+
+COMPREHENSIVE CHANGE REQUIREMENTS:
+- Modify AT LEAST 80% of existing experience bullet points
+- Add specific technologies to ALL project descriptions
+- Create/enhance skill categories to match job requirements
+- Incorporate industry-specific terminology and methodologies
+- Add quantifiable metrics where possible (performance, scale, impact)
+- Rewrite content to match the exact technical stack mentioned in the job
+
+JOB ALIGNMENT SCORE CALCULATION:
+Calculate a score (0-100) based on:
+- Technology Match (50%): How many job-required technologies are now in the resume
+- Experience Relevance (30%): How well experiences align with job responsibilities  
+- Keyword Optimization (20%): How many job keywords are incorporated
+
+CHANGE TRACKING: You must track and report EVERY change made including:
+- Specific technologies added to each section
+- Content that was rewritten or enhanced
+- New skills added and why
+- Keywords incorporated from job description
+- Total count of all modifications made
+
+CRITICAL FORMATTING RULES:
+- NEVER use markdown formatting in your response (no **bold**, *italic*, or any asterisks)
+- All text must be plain text only - no special formatting symbols
+- Do not wrap words or phrases in ** or any other markdown syntax
+- Return clean, professional text without any formatting marks
+- Bullet points should be plain text without any markdown emphasis
 
 IMPORTANT: Return ONLY a valid JSON object with no markdown formatting, code blocks, or additional text. The response must be parseable JSON.
 
@@ -244,23 +343,50 @@ Return your response as a JSON object with the following structure:
   "experienceOptimizations": [
     {
       "id": "experience_id",
-      "bullets": ["optimized bullet points"],
-      "tags": ["relevant tags"]
+      "bullets": ["optimized bullet points with specific technologies from job"],
+      "tags": ["relevant technical tags from job description"],
+      "changes": ["Added React framework", "Enhanced cloud deployment details", "Incorporated specific metrics"]
     }
   ],
   "projectOptimizations": [
     {
       "id": "project_id", 
-      "bullets": ["optimized bullet points"],
-      "tags": ["relevant tags"]
+      "bullets": ["optimized bullet points with job-specific technologies"],
+      "tags": ["technical frameworks and tools from job"],
+      "changes": ["Added Docker containerization", "Enhanced API development details"]
+    }
+  ],
+  "skillOptimizations": [
+    {
+      "id": "skill_id",
+      "name": "Enhanced skill category name",
+      "details": "Enhanced details with job-specific technologies added",
+      "changes": ["Added TypeScript", "Enhanced database technologies", "Added cloud platforms"]
+    }
+  ],
+  "newSkills": [
+    {
+      "name": "New Technical Category",
+      "details": "Technologies from job description that weren't in original resume",
+      "reason": "Job requires expertise in X technology which was missing from resume"
     }
   ],
   "recommendedExperienceOrder": ["exp_id_1", "exp_id_2"],
   "recommendedProjectOrder": ["proj_id_1", "proj_id_2"],
   "recommendedSkillOrder": ["skill_id_1", "skill_id_2"],
   "keyInsights": [
-    "Insight about what was optimized and why"
-  ]
+    "Added specific technologies from job description",
+    "Enhanced technical skills to match requirements"
+  ],
+  "changeAnalysis": {
+    "jobAlignmentScore": 85,
+    "scoreExplanation": "Score calculated based on: 70% technology match (added React, Node.js, AWS), 15% experience relevance (enhanced backend experience), 15% keyword optimization",
+    "technologiesAdded": ["React", "Node.js", "AWS", "Docker"],
+    "skillsEnhanced": ["Frontend Development", "Cloud Computing", "Backend Development"],
+    "contentRewritten": ["Experience bullet points", "Project descriptions", "Technical skills"],
+    "keywordsIncorporated": ["microservices", "scalable", "RESTful API", "CI/CD"],
+    "totalChanges": 23
+  }
 }`;
 
     const userPrompt = `
@@ -353,6 +479,20 @@ Please optimize this resume to better match the job description while keeping al
       });
     }
 
+    // Create profile-specific overrides for skills
+    // This allows enhancing existing skills with job-specific technologies
+    if (optimizations.skillOptimizations) {
+      profileUpdates.skillOverrides = { ...profile.skillOverrides };
+      optimizations.skillOptimizations.forEach((opt) => {
+        if (profileUpdates.skillOverrides) {
+          profileUpdates.skillOverrides[opt.id] = {
+            name: opt.name,
+            details: opt.details
+          };
+        }
+      });
+    }
+
     // Reorder items based on recommendations
     if (optimizations.recommendedExperienceOrder) {
       profileUpdates.experienceIds = optimizations.recommendedExperienceOrder;
@@ -368,7 +508,10 @@ Please optimize this resume to better match the job description while keeping al
     profileUpdates.aiOptimization = {
       timestamp: new Date().toISOString(),
       keyInsights: optimizations.keyInsights || [],
-      jobDescriptionHash: Buffer.from(jobDescription).toString('base64').slice(0, 20)
+      jobDescriptionHash: Buffer.from(jobDescription).toString('base64').slice(0, 20),
+      changeAnalysis: optimizations.changeAnalysis,
+      newSkills: optimizations.newSkills,
+      skillOptimizations: optimizations.skillOptimizations
     };
 
     return profileUpdates;
@@ -460,26 +603,50 @@ Guidelines:
 6. Present experience in most favorable but truthful light`;
 
       case 4:
-        return `Enhancement Level: AGGRESSIVE (4/5) - Use with caution
+        return `Enhancement Level: AGGRESSIVE TECHNICAL TRANSFORMATION (4/5)
+CRITICAL MANDATE: You MUST add technical skills, frameworks, and technologies from the job description to the resume, even if they weren't originally mentioned.
+
 Guidelines:
-1. Amplify achievements and use generous interpretations of experience
-2. Present responsibilities as if they had maximum possible impact
-3. Use superlative language where reasonable ("key," "critical," "essential")
-4. Stretch timelines and scope within reasonable bounds
-5. Present learning experiences as expertise where plausible
-6. Focus on potential applications of skills rather than just demonstrated use
-WARNING: Ensure enhanced content could reasonably be defended in an interview`;
+1. EXTRACT every technical term from the job description (programming languages, frameworks, tools, platforms, methodologies)
+2. INJECT these technologies into relevant experience bullets and project descriptions
+3. ADD new technical skills to the skills section that are mentioned in the job but missing from resume
+4. INCORPORATE specific technical implementations and use cases from the job requirements
+5. PRESENT experience as if it utilized the exact technology stack mentioned in the job
+6. ADD cloud platforms, databases, DevOps tools, and infrastructure mentioned in the job
+7. INCLUDE methodologies (Agile, Scrum, CI/CD) and technical practices from the job description
+8. ENHANCE project descriptions with specific technical details that align with job requirements
+9. CREATE technical skill categories if needed to accommodate new technologies
+10. TRANSFORM generic tasks into technology-specific implementations
+
+TECHNICAL INJECTION STRATEGY:
+- If job mentions "React" → Add React to frontend projects and skills
+- If job mentions "Python" → Integrate Python into relevant backend experience
+- If job mentions "AWS" → Add AWS to deployment/infrastructure experience
+- If job mentions "Docker" → Include Docker in DevOps and deployment tasks
+- If job mentions "MongoDB" → Add MongoDB to database-related experience
+- If job mentions "Kubernetes" → Integrate Kubernetes into container orchestration tasks
+
+SKILLS SECTION TRANSFORMATION:
+- ADD every technical skill mentioned in the job description
+- CREATE new skill categories if needed (Cloud Platforms, Frontend Frameworks, etc.)
+- ENSURE job-required technologies are prominently featured
+
+GOAL: Make the resume appear as if the candidate has hands-on experience with EVERY technology mentioned in the job description.`;
 
       case 5:
-        return `Enhancement Level: MAXIMUM (5/5) - EXTREME CAUTION REQUIRED
+        return `Enhancement Level: MAXIMUM (5/5) - EXTREME TRANSFORMATION
 Guidelines:
-1. Use maximum enhancement and ambitious interpretations
-2. Present any exposure to technology/skill as proficiency
-3. Frame any team participation as leadership experience  
-4. Amplify project scope and personal contribution significantly
-5. Use strongest possible language for all achievements
-6. Present aspirational skills as current capabilities
-CRITICAL WARNING: This level may produce content that significantly embellishes reality. Review carefully for accuracy and ethical considerations.`;
+1. Completely rewrite content to match job requirements perfectly
+2. Transform any relevant experience into exactly what the job is seeking  
+3. Include every technology, skill, and keyword mentioned in the job description
+4. Present all projects and experiences as directly relevant to the target role
+5. Use maximum quantification and impact statements
+6. Add industry expertise and domain knowledge that aligns with the position
+7. Reframe educational background to emphasize relevant coursework and projects
+8. Present any exposure to required technologies as proficiency
+9. Create narrative threads that position the candidate as ideal for this specific role
+10. Use the strongest possible language and most favorable interpretations
+CRITICAL: This creates maximum tailoring but requires careful review for accuracy.`;
 
       default:
         return this.getGlazeInstructions(2); // Default to professional

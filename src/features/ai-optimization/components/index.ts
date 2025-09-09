@@ -1,4 +1,6 @@
 export { AIOptimizer } from './AIOptimizer';
+export { AIAnalysisModal } from './AIAnalysisModal';
+export { JobInfoModal } from './JobInfoModal';
 export { JobInputTabs } from './JobInputTabs';
 export { OptimizationResults } from './OptimizationResults';
 export { OptimizationControls } from './OptimizationControls';

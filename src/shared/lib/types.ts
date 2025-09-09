@@ -95,6 +95,34 @@ export type Profile = {
     timestamp: string;
     keyInsights: string[];
     jobDescriptionHash: string;
+    // Additional fields for Chrome extension analysis
+    jobData?: {
+      title?: string;
+      company?: string;
+      description?: string;
+      requirements?: string;
+      responsibilities?: string;
+      qualifications?: string;
+      skills?: string;
+      url?: string;
+      extractedAt?: string;
+    };
+    newSkills?: Array<string | { name: string; details: string; reason?: string }>;
+    skillOptimizations?: Array<{
+      id: string;
+      name: string;
+      details: string;
+      changes?: string[];
+    }>;
+    changeAnalysis?: {
+      jobAlignmentScore: number;
+      scoreExplanation: string;
+      technologiesAdded: string[];
+      skillsEnhanced: string[];
+      contentRewritten: string[];
+      keywordsIncorporated: string[];
+      totalChanges: number;
+    };
   };
 };
 
