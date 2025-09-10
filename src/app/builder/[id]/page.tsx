@@ -17,6 +17,8 @@ export default function BuilderPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
+  const [showAnalysisOnLoad, setShowAnalysisOnLoad] = useState(false);
+  
   const {
     profiles,
     updateProfile,
@@ -37,6 +39,14 @@ export default function BuilderPage() {
     () => profiles.find((p) => p.id === params.id),
     [profiles, params.id]
   );
+
+  // Check for showAnalysis URL parameter
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      setShowAnalysisOnLoad(urlParams.get('showAnalysis') === 'true');
+    }
+  }, []);
 
   useEffect(() => {
     const initializeData = async () => {
@@ -128,15 +138,14 @@ export default function BuilderPage() {
 
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
-      <BuilderHeader
-        profile={profile}
-        data={data}
-        saveStatus={saveStatus}
-        onDeleteProfile={() => deleteProfile(profile.id)}
-        onApplyOptimizations={handleApplyOptimizations}
-      />
-
-      {/* Main Content Area */}
+            <BuilderHeader
+              profile={profile}
+              data={data}
+              saveStatus={saveStatus}
+              onDeleteProfile={() => deleteProfile(profile.id)}
+              onApplyOptimizations={handleApplyOptimizations}
+              showAnalysisOnLoad={showAnalysisOnLoad}
+            />      {/* Main Content Area */}
       <div className="flex-1 overflow-hidden">
         {/* Left Side - Editor (takes up remaining space) */}
         <div className="overflow-y-auto hide-scrollbar p-6" style={{ width: '50vw', height: 'calc(100vh - 73px)' }}>

@@ -20,9 +20,10 @@ interface BuilderHeaderProps {
   saveStatus: 'saved' | 'saving' | 'idle';
   onDeleteProfile: () => void;
   onApplyOptimizations: (optimizations: Partial<Profile>) => void;
+  showAnalysisOnLoad?: boolean;
 }
 
-export function BuilderHeader({ profile, data, saveStatus, onDeleteProfile, onApplyOptimizations }: BuilderHeaderProps) {
+export function BuilderHeader({ profile, data, saveStatus, onDeleteProfile, onApplyOptimizations, showAnalysisOnLoad }: BuilderHeaderProps) {
   const router = useRouter();
 
   const handleDelete = () => {
@@ -88,7 +89,7 @@ export function BuilderHeader({ profile, data, saveStatus, onDeleteProfile, onAp
 
           <JobInfoModal profile={profile} />
 
-          <AIAnalysisModal profile={profile} />
+          <AIAnalysisModal profile={profile} showOnLoad={showAnalysisOnLoad} />
 
           <AIOptimizer
             profile={profile}

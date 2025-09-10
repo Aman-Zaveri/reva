@@ -23,6 +23,16 @@
       color: #1a73e8;
     }
     
+    .auto-detect-badge {
+      display: inline-block;
+      background-color: #34a853;
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 8px;
+    }
+    
     .status {
       padding: 12px;
       border-radius: 8px;
@@ -60,6 +70,22 @@
       border: 1px solid #f28b82;
     }
     
+    .notification-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #ea4335;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 8px;
+      animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.2); opacity: 0.7; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    
     .job-info {
       background-color: #f8f9fa;
       padding: 12px;
@@ -79,48 +105,40 @@
       color: #5f6368;
     }
     
-    .job-description {
-      max-height: 60px;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    .sections-status {
+      margin-top: 8px;
     }
     
-    .action-button {
-      width: 100%;
-      padding: 12px;
-      background-color: #1a73e8;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
+    .section-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 4px 0;
+      font-size: 12px;
+    }
+    
+    .section-label {
+      color: #5f6368;
       font-weight: 500;
-      cursor: pointer;
-      transition: background-color 0.2s;
     }
     
-    .action-button:hover:not(:disabled) {
-      background-color: #1557b0;
+    .status-indicator {
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 500;
     }
     
-    .action-button:disabled {
-      background-color: #dadce0;
-      color: #9aa0a6;
-      cursor: not-allowed;
+    .status-indicator.found {
+      background-color: #e8f5e8;
+      color: #137333;
+      border: 1px solid #c6f6d5;
     }
     
-    .loading-spinner {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid #ffffff;
-      border-radius: 50%;
-      border-top-color: transparent;
-      animation: spin 1s ease-in-out infinite;
-      margin-right: 8px;
-    }
-    
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    .status-indicator.not-found {
+      background-color: #fef7e0;
+      color: #b95000;
+      border: 1px solid #fed7aa;
     }
     
     .progress-container {
@@ -149,39 +167,55 @@
       text-align: center;
     }
     
-    .auto-detect-badge {
-      display: inline-block;
-      background-color: #34a853;
+    .action-button {
+      width: 100%;
+      padding: 12px;
+      background-color: #1a73e8;
       color: white;
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 4px;
-      margin-left: 8px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      margin-bottom: 8px;
     }
     
-    .notification-dot {
-      width: 8px;
-      height: 8px;
-      background-color: #ea4335;
-      border-radius: 50%;
+    .action-button:last-child {
+      margin-bottom: 0;
+    }
+    
+    .action-button.secondary {
+      background-color: #34a853;
+    }
+    
+    .action-button:hover:not(:disabled) {
+      background-color: #1557b0;
+    }
+    
+    .action-button.secondary:hover:not(:disabled) {
+      background-color: #2d8f47;
+    }
+    
+    .action-button:disabled {
+      background-color: #dadce0;
+      color: #9aa0a6;
+      cursor: not-allowed;
+    }
+    
+    .loading-spinner {
       display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spin 1s ease-in-out infinite;
       margin-right: 8px;
-      animation: pulse 1.5s infinite;
     }
     
-    @keyframes pulse {
-      0% {
-        transform: scale(1);
-        opacity: 1;
-      }
-      50% {
-        transform: scale(1.2);
-        opacity: 0.7;
-      }
-      100% {
-        transform: scale(1);
-        opacity: 1;
-      }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
     
     .footer {
@@ -221,11 +255,28 @@
   <div id="jobInfo" class="job-info hidden">
     <h3 id="jobTitle">Job Title</h3>
     <p><strong>Company:</strong> <span id="companyName">Company</span></p>
-    <p class="job-description" id="jobDescription">Job description will appear here...</p>
+    <div class="sections-status">
+      <div class="section-item">
+        <span class="section-label">Job Summary:</span>
+        <span id="summaryStatus" class="status-indicator">Not found</span>
+      </div>
+      <div class="section-item">
+        <span class="section-label">Responsibilities:</span>
+        <span id="responsibilitiesStatus" class="status-indicator">Not found</span>
+      </div>
+      <div class="section-item">
+        <span class="section-label">Skills:</span>
+        <span id="skillsStatus" class="status-indicator">Not found</span>
+      </div>
+    </div>
   </div>
   
   <button id="createResumeBtn" class="action-button" disabled>
     Create Resume
+  </button>
+  
+  <button id="viewResumeBtn" class="action-button secondary hidden">
+    View Resume & AI Analysis
   </button>
   
   <div class="footer">

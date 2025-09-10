@@ -2,14 +2,12 @@
   "manifest_version": 3,
   "name": "Resume Builder for WaterlooWorks",
   "version": "1.0.0",
-  "description": "Automatically create resumes from WaterlooWorks job postings",
+  "description": "Automatically create AI-optimized resumes from WaterlooWorks job postings",
   
   "permissions": [
     "activeTab",
-    "storage",
-    "scripting",
-    "notifications",
-    "tabs"
+    "storage", 
+    "notifications"
   ],
   
   "host_permissions": [

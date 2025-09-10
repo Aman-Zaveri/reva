@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Brain, X, Target, Code, TrendingUp, CheckCircle, AlertCircle, ExternalLink, FileText, Calculator } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import {
@@ -16,13 +16,21 @@ import type { Profile } from '@/shared/lib/types';
 
 interface AIAnalysisModalProps {
   profile: Profile;
+  showOnLoad?: boolean;
 }
 
-export function AIAnalysisModal({ profile }: AIAnalysisModalProps) {
+export function AIAnalysisModal({ profile, showOnLoad }: AIAnalysisModalProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   // Check if this profile has AI optimization data
   const hasAIOptimization = profile.aiOptimization && profile.aiOptimization.timestamp;
+  
+  // Auto-open modal if showOnLoad is true and we have AI optimization data
+  useEffect(() => {
+    if (showOnLoad && hasAIOptimization) {
+      setIsOpen(true);
+    }
+  }, [showOnLoad, hasAIOptimization]);
   
   if (!hasAIOptimization) {
     return null; // Don't show the button if no AI optimization data
