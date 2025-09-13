@@ -21,13 +21,13 @@ export interface StorageResult<T> {
  */
 export interface ProfileRepository {
   /** Saves profiles and master data to storage */
-  saveProfiles(profiles: Profile[], data: DataBundle): Promise<StorageResult<void>>;
+  saveProfiles(profiles: Profile[], data: DataBundle, userId: string): Promise<StorageResult<void>>;
   /** Loads profiles and master data from storage */
-  loadProfiles(): Promise<StorageResult<{ profiles: Profile[]; data: DataBundle }>>;
+  loadProfiles(userId: string): Promise<StorageResult<{ profiles: Profile[]; data: DataBundle }>>;
   /** Creates a backup string of all data */
-  backupData(): Promise<StorageResult<string>>;
+  backupData(userId: string): Promise<StorageResult<string>>;
   /** Restores data from a backup string */
-  restoreData(backup: string): Promise<StorageResult<void>>;
+  restoreData(backup: string, userId: string): Promise<StorageResult<void>>;
   /** Clears all stored data */
-  clearData(): Promise<StorageResult<void>>;
+  clearData(userId: string): Promise<StorageResult<void>>;
 }

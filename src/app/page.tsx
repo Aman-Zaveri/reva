@@ -7,6 +7,7 @@ import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
 import { ModeToggle } from '@/shared/components/theme/mode-toggle';
+import { UserMenu } from '@/shared/components/auth/UserMenu';
 
 export default function Page() {
   const { profiles, createProfile, cloneProfile } = useProfilesStore();
@@ -31,6 +32,29 @@ export default function Page() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Navigation Header */}
+      <header className="border-b">
+        <div className="mx-auto max-w-6xl px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Link href="/" className="text-xl font-bold text-purple-600">
+                Resume Manager
+              </Link>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Button variant="ghost" asChild>
+                <Link href="/data">Data</Link>
+              </Button>
+              <Button variant="ghost" asChild>
+                <Link href="/analysis">Analysis</Link>
+              </Button>
+              <ModeToggle />
+              <UserMenu />
+            </div>
+          </div>
+        </div>
+      </header>
+
       <div className="mx-auto p-6 max-w-6xl">
         <div className="space-y-16">
           {/* Hero Section */}
@@ -164,13 +188,6 @@ export default function Page() {
               </div>
             )}
           </section>
-        </div>
-        
-        {/* Theme Toggle */}
-        <div className="fixed bottom-6 right-6 z-50">
-          <div className="bg-background border rounded-full p-1 shadow-md">
-            <ModeToggle />
-          </div>
         </div>
       </div>
     </div>

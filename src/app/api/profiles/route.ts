@@ -1,9 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
 import { PostgreSQLProfileRepository } from '@/shared/repositories/postgresql.repository';
 import type { Profile, DataBundle } from '@/shared/lib/types';
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { profiles, data }: { profiles: Profile[]; data: DataBundle } = body;
 
@@ -15,7 +26,7 @@ export async function POST(request: NextRequest) {
     }
 
     const repository = new PostgreSQLProfileRepository();
-    const result = await repository.saveProfiles(profiles, data);
+    const result = await repository.saveProfiles(profiles, data, session.user.id);
 
     if (!result.success) {
       return NextResponse.json(
@@ -36,8 +47,17 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const repository = new PostgreSQLProfileRepository();
-    const result = await repository.loadProfiles();
+    const result = await repository.loadProfiles(session.user.id);
 
     if (!result.success) {
       return NextResponse.json(
