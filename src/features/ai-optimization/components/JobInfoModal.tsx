@@ -37,7 +37,7 @@ export function JobInfoModal({ profile }: JobInfoModalProps) {
       /\b(?:JavaScript|TypeScript|Python|Java|C\+\+|C#|React|Vue|Angular|Node\.js|Express|Django|Flask|Spring|MongoDB|PostgreSQL|MySQL|Redis|Docker|Kubernetes|AWS|Azure|GCP|Git|HTML|CSS|SASS|SCSS|API|REST|GraphQL|JSON|XML|SQL|NoSQL|Linux|Windows|MacOS|Agile|Scrum|CI\/CD|DevOps|Machine Learning|AI|TensorFlow|PyTorch|Pandas|NumPy|jQuery|Bootstrap|Tailwind|PHP|Ruby|Go|Rust|Swift|Kotlin|Android|iOS|Unity|Unreal)\b/gi
     ];
     
-    let technologies = new Set<string>();
+    const technologies = new Set<string>();
     
     techPatterns.forEach(pattern => {
       const matches = text.match(pattern);
@@ -152,7 +152,7 @@ export function JobInfoModal({ profile }: JobInfoModalProps) {
             </h4>
             <div className="text-sm text-blue-700 space-y-2">
               <p>
-                • <strong>Technology Matching:</strong> All technical requirements from this job posting were identified and integrated into your resume's experience descriptions and skills sections.
+                • <strong>Technology Matching:</strong> All technical requirements from this job posting were identified and integrated into your resume&apos;s experience descriptions and skills sections.
               </p>
               <p>
                 • <strong>Keyword Optimization:</strong> Industry-specific terms and methodologies mentioned in the job description were incorporated throughout your resume.

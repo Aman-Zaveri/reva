@@ -21,7 +21,11 @@ model User {
   accounts      Account[]
   sessions      Session[]
   profiles      Profile[]
-  personalInfo  PersonalInfo[]
+  personalInfo  PersonalInfo?
+  experiences   Experience[]
+  educations    Education[]
+  projects      Project[]
+  skills        Skill[]
   
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -42,9 +46,9 @@ model Account {
   scope             String?
   id_token          String? @db.Text
   session_state     String?
-  
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   @@unique([provider, providerAccountId])
   @@map("accounts")
 }
@@ -54,8 +58,7 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
-  
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   @@map("sessions")
 }
@@ -64,213 +67,198 @@ model VerificationToken {
   identifier String
   token      String   @unique
   expires    DateTime
-  
+
   @@unique([identifier, token])
   @@map("verification_tokens")
 }
 
+// Personal Information (normalized - one per user)
 model PersonalInfo {
-  id              String  @id @default(cuid())
-  fullName        String
-  email           String
-  phone           String
-  location        String
-  linkedin        String?
-  linkedinUrl     String?
-  linkedinDisplay String?
-  github          String?
-  githubUrl       String?
-  githubDisplay   String?
-  website         String?
-  websiteUrl      String?
-  websiteDisplay  String?
-  summary         String?
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  firstName String?
+  lastName  String?
+  email     String?
+  phone     String?
+  location  String?
+  website   String?
+  headline  String?
+  summary   String?
   
-  // User relationship
-  userId          String
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  socialLinks SocialLink[]
   
-  // Relations
-  profiles        Profile[]
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   
   @@map("personal_info")
 }
 
-model Experience {
-  id        String   @id @default(cuid())
-  title     String
-  company   String
-  date      String
-  bullets   String[]
-  tags      String[]
+model SocialLink {
+  id             String      @id @default(cuid())
+  personalInfoId String
+  platform       String      // e.g., "linkedin", "github", "twitter"
+  url            String
   
-  // Relations
-  profiles  ProfileExperience[]
+  personalInfo   PersonalInfo @relation(fields: [personalInfoId], references: [id], onDelete: Cascade)
   
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  @@map("experiences")
+  @@unique([personalInfoId, platform])
+  @@map("social_links")
 }
 
-model Project {
-  id        String   @id @default(cuid())
-  title     String
-  link      String?
-  bullets   String[]
-  tags      String[]
-  
-  // Relations
-  profiles  ProfileProject[]
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  @@map("projects")
-}
-
-model Skill {
-  id        String   @id @default(cuid())
-  name      String
-  details   String
-  
-  // Relations
-  profiles  ProfileSkill[]
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  @@map("skills")
-}
-
-model Education {
-  id        String   @id @default(cuid())
-  title     String
-  details   String
-  
-  // Relations
-  profiles  ProfileEducation[]
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  @@map("education")
-}
-
+// Profile System
 model Profile {
-  id                    String   @id @default(cuid())
-  name                  String
-  template              String   @default("classic") // 'classic' | 'compact'
+  id                       String    @id @default(cuid())
+  userId                   String
+  profileName              String
+  templateName             String?
   
-  // User relationship
-  userId                String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // JSON configuration for resume customization
+  resumeConfiguration      Json?     // Colors, fonts, layout preferences
   
-  // Personal Info
-  personalInfoId        String?
-  personalInfo          PersonalInfo? @relation(fields: [personalInfoId], references: [id])
+  // AI Optimization tracking
+  aiOptimizationJobUrl     String?
+  aiOptimizationJobDescHash String?
   
-  // Section ordering
-  sectionOrder          String[] @default(["skills", "experiences", "projects", "education"])
+  user                     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  // Formatting options (stored as JSON)
-  fontFamily            String?
-  primaryColor          String?
-  nameFontSize          String?
-  headerFontSize        String?
-  bodyTextFontSize      String?
-  metadataTextFontSize  String?
+  // Profile items (polymorphic relationship)
+  items                    ProfileItem[]
   
-  // AI Optimization metadata
-  aiOptimizationTimestamp     String?
-  aiOptimizationKeyInsights   String[]
-  aiOptimizationJobDescHash   String?
-  
-  // Relations to items (many-to-many with overrides)
-  experiences           ProfileExperience[]
-  projects              ProfileProject[]
-  skills                ProfileSkill[]
-  education             ProfileEducation[]
-  
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
   
   @@map("profiles")
 }
 
-// Junction tables with overrides support
-model ProfileExperience {
-  id          String  @id @default(cuid())
-  profileId   String
-  experienceId String
-  order       Int     @default(0)
+// Generic profile item system (replaces 4 junction tables)
+model ProfileItem {
+  id        String   @id @default(cuid())
+  profileId String
+  itemType  String   // "experience", "education", "project", "skill"
+  itemId    String   // Reference to the actual item
+  order     Int      // Display order within the profile
   
-  // Override fields (JSON stored as text for flexibility)
-  titleOverride     String?
-  companyOverride   String?
-  dateOverride      String?
-  bulletsOverride   String[]
-  tagsOverride      String[]
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
   
-  profile     Profile    @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  experience  Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   
-  @@unique([profileId, experienceId])
-  @@map("profile_experiences")
+  @@unique([profileId, itemType, itemId])
+  @@index([profileId, itemType, order])
+  @@map("profile_items")
 }
 
-model ProfileProject {
+// Experience System
+model Experience {
+  id          String   @id @default(cuid())
+  userId      String
+  company     String
+  title       String
+  location    String?
+  startDate   DateTime
+  endDate     DateTime?
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bullets     ExperienceBullet[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([userId, startDate])
+  @@map("experiences")
+}
+
+model ExperienceBullet {
+  id           String     @id @default(cuid())
+  experienceId String
+  content      String
+  order        Int
+  
+  experience   Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+  
+  @@index([experienceId, order])
+  @@map("experience_bullets")
+}
+
+// Education System
+model Education {
+  id          String   @id @default(cuid())
+  userId      String
+  institution String
+  degree      String
+  field       String?
+  location    String?
+  startDate   DateTime
+  endDate     DateTime?
+  gpa         String?
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([userId, startDate])
+  @@map("educations")
+}
+
+// Project System
+model Project {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  link      String?
+  startDate DateTime?
+  endDate   DateTime?
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bullets   ProjectBullet[]
+  tags      ProjectTag[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([userId])
+  @@map("projects")
+}
+
+model ProjectBullet {
   id        String  @id @default(cuid())
-  profileId String
   projectId String
-  order     Int     @default(0)
+  content   String
+  order     Int
   
-  // Override fields
-  titleOverride   String?
-  linkOverride    String?
-  bulletsOverride String[]
-  tagsOverride    String[]
-  
-  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   
-  @@unique([profileId, projectId])
-  @@map("profile_projects")
+  @@index([projectId, order])
+  @@map("project_bullets")
 }
 
-model ProfileSkill {
+model ProjectTag {
   id        String  @id @default(cuid())
-  profileId String
-  skillId   String
-  order     Int     @default(0)
+  projectId String
+  name      String
   
-  // Override fields
-  nameOverride    String?
-  detailsOverride String?
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   
-  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  skill     Skill   @relation(fields: [skillId], references: [id], onDelete: Cascade)
-  
-  @@unique([profileId, skillId])
-  @@map("profile_skills")
+  @@index([projectId])
+  @@map("project_tags")
 }
 
-model ProfileEducation {
-  id          String  @id @default(cuid())
-  profileId   String
-  educationId String
-  order       Int     @default(0)
+// Skill System
+model Skill {
+  id       String @id @default(cuid())
+  userId   String
+  name     String
+  details  String?
+  category String? // e.g., "Technical", "Language", "Soft Skills"
+  level    String? // e.g., "Beginner", "Intermediate", "Advanced"
   
-  // Override fields
-  titleOverride   String?
-  detailsOverride String?
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  profile     Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  education   Education @relation(fields: [educationId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   
-  @@unique([profileId, educationId])
-  @@map("profile_educations")
+  @@index([userId, category])
+  @@map("skills")
 }

@@ -60,7 +60,7 @@ function AnalysisContent() {
       /\b[A-Z]{2,}\b/g
     ];
     
-    let technologies = new Set<string>();
+    const technologies = new Set<string>();
     
     techPatterns.forEach(pattern => {
       const matches = text.match(pattern);
