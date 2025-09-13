@@ -5,6 +5,7 @@ import { AlertTriangle } from 'lucide-react';
 import { A4_DIMENSIONS } from '@/shared/utils/constants';
 import { clsx } from 'clsx';
 import { Resume } from './Resume';
+import { Alert, AlertDescription } from '@/shared/components/ui/alert';
 import type { DataBundle, Profile } from '@/shared/lib/types';
 
 interface A4ResumeProps {
@@ -96,24 +97,16 @@ export function A4Resume({ profile, data, compact, showPrintView = false, scale 
       showPrintView && 'print:space-y-0 print:p-0 print:m-0'
     )}>
 
-      {/* Compact Warning in Top Right Corner */}
+      {/* Resume Length Warning */}
       {isOverflowing && !showPrintView && (
-        <div className="absolute top-3 right-8 z-20 group">
-          <div className="bg-amber-100 border border-amber-300 rounded-lg p-2 shadow-sm cursor-help">
+        <div className="absolute top-3 right-8 z-20 max-w-[280px]">
+          <Alert className="border-amber-300 bg-amber-50">
             <AlertTriangle className="h-4 w-4 text-amber-600" />
-          </div>
-          {/* Hover tooltip */}
-          <div className="absolute top-full right-0 mt-2 bg-amber-50 border border-amber-300 rounded-lg p-3 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none min-w-[250px]">
-            <div className="text-sm text-amber-800">
-              <strong>Resume Length Warning</strong>
-              <p className="mt-1">
-                Your resume is {pages > 1 ? `${pages} pages long` : 'exceeding one page'}. 
-                Consider using the compact template or removing some content for better readability.
-              </p>
-            </div>
-            {/* Arrow pointing up */}
-            <div className="absolute bottom-full right-4 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-amber-300"></div>
-          </div>
+            <AlertDescription className="text-amber-800">
+              <strong>Resume Length Warning:</strong> Your resume is {pages > 1 ? `${pages} pages long` : 'exceeding one page'}. 
+              Consider using the compact template or removing some content for better readability.
+            </AlertDescription>
+          </Alert>
         </div>
       )}
 

@@ -69,7 +69,7 @@ export default function ImportResumePage() {
           
           <div className="mb-6">
             <p className="text-gray-600 mb-4">
-              Upload your existing resume and we'll automatically extract all the information 
+              Upload your existing resume and we&apos;ll automatically extract all the information 
               to populate your master data. This saves you from entering everything manually!
             </p>
             

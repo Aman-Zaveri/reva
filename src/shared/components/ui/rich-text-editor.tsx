@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/shared/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/components/ui/tooltip';
+import { Separator } from '@/shared/components/ui/separator';
 import { Bold, Italic, Type } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 
@@ -149,7 +150,7 @@ export function RichTextEditor({
           </TooltipContent>
         </Tooltip>
         
-        <div className="w-px h-4 bg-border mx-1" />
+        <Separator orientation="vertical" className="h-4 mx-1" />
         
         <Tooltip>
           <TooltipTrigger asChild>

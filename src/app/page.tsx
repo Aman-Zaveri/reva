@@ -1,16 +1,28 @@
 'use client';
 
 import Link from 'next/link';
+import { useSession, signIn } from 'next-auth/react';
 import { useProfilesStore } from '@/shared/lib/store';
-import { Plus, FileText, Database, Target, Zap, Sparkles } from 'lucide-react';
+import { Plus, FileText, Database, Target, Zap, Sparkles, Upload, CheckCircle } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
+import { Alert, AlertDescription } from '@/shared/components/ui/alert';
 import { ModeToggle } from '@/shared/components/theme/mode-toggle';
 import { UserMenu } from '@/shared/components/auth/UserMenu';
 
 export default function Page() {
-  const { profiles, createProfile, cloneProfile } = useProfilesStore();
+  const { data: session } = useSession();
+  const { profiles, createProfile, cloneProfile, data } = useProfilesStore();
+
+  // Check if user has master data filled out
+  const hasMasterData = data.personalInfo?.fullName || 
+                       data.experiences.length > 0 || 
+                       data.projects.length > 0 || 
+                       data.skills.length > 0 || 
+                       data.education.length > 0;
+
+  const isNewUser = session && !hasMasterData;
 
   const features = [
     {
@@ -33,21 +45,36 @@ export default function Page() {
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation Header */}
-      <header className="border-b">
-        <div className="mx-auto max-w-6xl px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link href="/" className="text-xl font-bold text-purple-600">
-                Resume Manager
+      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-8">
+              <Link href="/" className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
+                  <Sparkles className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-xl font-bold text-foreground">Resume Manager</span>
               </Link>
+              
+              {session && (
+                <nav className="hidden md:flex items-center space-x-1">
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link href="/data">
+                      <Database className="w-4 h-4 mr-2" />
+                      Master Data
+                    </Link>
+                  </Button>
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link href="/analysis">
+                      <Target className="w-4 h-4 mr-2" />
+                      Analysis
+                    </Link>
+                  </Button>
+                </nav>
+              )}
             </div>
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" asChild>
-                <Link href="/data">Data</Link>
-              </Button>
-              <Button variant="ghost" asChild>
-                <Link href="/analysis">Analysis</Link>
-              </Button>
+            
+            <div className="flex items-center space-x-3">
               <ModeToggle />
               <UserMenu />
             </div>
@@ -55,53 +82,139 @@ export default function Page() {
         </div>
       </header>
 
-      <div className="mx-auto p-6 max-w-6xl">
-        <div className="space-y-16">
-          {/* Hero Section */}
-          <section className="text-center space-y-8 py-20">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-50 dark:bg-purple-950/30 border">
-              <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-              <span className="text-sm font-medium text-purple-700 dark:text-purple-300">
-                Professional Resume Builder
-              </span>
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+        <div className="space-y-20">
+          {/* Welcome Alert for New Users */}
+          {isNewUser && (
+            <div className="mt-8">
+              <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950/30">
+                <CheckCircle className="h-4 w-4 text-blue-600" />
+                <AlertDescription className="text-blue-800 dark:text-blue-200">
+                  <strong>Welcome to Resume Manager!</strong> Get started by{' '}
+                  <Link href="/import-resume" className="underline font-medium hover:text-blue-600">
+                    importing your existing resume
+                  </Link>{' '}
+                  or{' '}
+                  <Link href="/data" className="underline font-medium hover:text-blue-600">
+                    manually adding your information
+                  </Link>{' '}
+                  to create your master data.
+                </AlertDescription>
+              </Alert>
             </div>
-            
-            <div className="space-y-6">
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight">
-                <span className="text-purple-600">
-                  Build Perfect
-                </span>
-                <br />
-                <span className="text-foreground">Resumes</span>
-              </h1>
-              
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                Create multiple targeted resumes from one comprehensive profile. 
-                Manage experiences, projects, and skills efficiently.
-              </p>
-            </div>
+          )}
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-              <Button 
-                size="lg" 
-                className="bg-purple-600 hover:bg-purple-700 text-white"
-                onClick={() => createProfile()}
-              >
-                <Plus className="w-5 h-5 mr-2" />
-                Create Your Resume
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                size="lg" 
-                asChild
-              >
-                <Link href="/data">
-                  <Database className="w-5 h-5 mr-2" />
-                  Manage Data
-                </Link>
-              </Button>
-            </div>
+          {/* Hero Section */}
+          <section className="text-center space-y-8 py-16 lg:py-24">
+            {!session ? (
+              <>
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800">
+                  <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                  <span className="text-sm font-medium text-purple-700 dark:text-purple-300">
+                    Professional Resume Builder
+                  </span>
+                </div>
+                
+                <div className="space-y-6">
+                  <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight">
+                    <span className="text-purple-600">
+                      Build Perfect
+                    </span>
+                    <br />
+                    <span className="text-foreground">Resumes</span>
+                  </h1>
+                  
+                  <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+                    Create multiple targeted resumes from one comprehensive profile. 
+                    Manage experiences, projects, and skills efficiently with AI-powered optimization.
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+                  <Button 
+                    size="lg" 
+                    className="bg-purple-600 hover:bg-purple-700 text-white"
+                    onClick={() => signIn()}
+                  >
+                    <Sparkles className="w-5 h-5 mr-2" />
+                    Get Started Free
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    size="lg"
+                  >
+                    <FileText className="w-5 h-5 mr-2" />
+                    View Features
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="space-y-4">
+                  <h1 className="text-3xl md:text-5xl font-bold tracking-tight">
+                    Welcome back, {session.user?.name?.split(' ')[0] || 'there'}!
+                  </h1>
+                  
+                  <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                    {profiles.length === 0 
+                      ? "Ready to create your first professional resume?" 
+                      : `Continue working on your ${profiles.length} resume profile${profiles.length !== 1 ? 's' : ''}`
+                    }
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                  {!hasMasterData ? (
+                    <>
+                      <Button 
+                        size="lg" 
+                        className="bg-purple-600 hover:bg-purple-700 text-white"
+                        asChild
+                      >
+                        <Link href="/import-resume">
+                          <Upload className="w-5 h-5 mr-2" />
+                          Import Resume
+                        </Link>
+                      </Button>
+                      
+                      <Button 
+                        variant="outline" 
+                        size="lg" 
+                        asChild
+                      >
+                        <Link href="/data">
+                          <Database className="w-5 h-5 mr-2" />
+                          Add Data Manually
+                        </Link>
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button 
+                        size="lg" 
+                        className="bg-purple-600 hover:bg-purple-700 text-white"
+                        onClick={() => createProfile()}
+                      >
+                        <Plus className="w-5 h-5 mr-2" />
+                        Create New Resume
+                      </Button>
+                      
+                      <Button 
+                        variant="outline" 
+                        size="lg" 
+                        asChild
+                      >
+                        <Link href="/data">
+                          <Database className="w-5 h-5 mr-2" />
+                          Manage Data
+                        </Link>
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </>
+            )}
           </section>
 
           {/* Features Grid */}

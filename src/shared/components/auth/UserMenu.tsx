@@ -10,6 +10,7 @@ import {
 } from "@/shared/components/ui/dropdown-menu"
 import { Button } from "@/shared/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar"
+import { Skeleton } from "@/shared/components/ui/skeleton"
 import { User, LogOut, Settings } from "lucide-react"
 
 export function UserMenu() {
@@ -17,7 +18,7 @@ export function UserMenu() {
 
   if (status === "loading") {
     return (
-      <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
+      <Skeleton className="w-8 h-8 rounded-full" />
     )
   }
 

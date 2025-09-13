@@ -10,6 +10,18 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/shared/components/ui/alert-dialog';
+import { Separator } from '@/shared/components/ui/separator';
 import { AIOptimizer, AIAnalysisModal, JobInfoModal } from '@/features/ai-optimization/components';
 import { wordExportService } from '@/shared/services';
 import type { Profile, DataBundle } from '@/shared/lib/types';
@@ -27,10 +39,8 @@ export function BuilderHeader({ profile, data, saveStatus, onDeleteProfile, onAp
   const router = useRouter();
 
   const handleDelete = () => {
-    if (confirm('Delete this profile? This action cannot be undone.')) {
-      onDeleteProfile();
-      router.replace('/');
-    }
+    onDeleteProfile();
+    router.replace('/');
   };
 
   const handleExportToPDF = () => {
@@ -63,7 +73,7 @@ export function BuilderHeader({ profile, data, saveStatus, onDeleteProfile, onAp
               Back to Home
             </Link>
           </Button>
-          <div className="h-6 w-px bg-border" />
+          <Separator orientation="vertical" className="h-6" />
           <div>
             <h1 className="text-lg font-semibold">{profile.name}</h1>
             <p className="text-xs text-muted-foreground">Resume Builder</p>
@@ -117,13 +127,30 @@ export function BuilderHeader({ profile, data, saveStatus, onDeleteProfile, onAp
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={handleDelete}
-          >
-            Delete
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="destructive"
+                size="sm"
+              >
+                Delete
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Resume Profile</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete this profile? This action cannot be undone and will permanently remove all data associated with this resume.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                  Delete Profile
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
     </div>
