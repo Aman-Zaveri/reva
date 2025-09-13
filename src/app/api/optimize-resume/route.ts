@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { jobUrl, jobDescription, profile, data, glazeLevel = 2, customInstructions } = validation.data!;
+    const { jobUrl, jobDescription, isAutomaticExtraction, profile, data, glazeLevel = 2, customInstructions } = validation.data!;
 
     let finalJobDescription = jobDescription;
 

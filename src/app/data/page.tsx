@@ -23,13 +23,21 @@ export default function DataManagerPage() {
   return (
     <div className="mx-auto p-6">
       <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <Button variant="ghost" size="sm" asChild>
-          <Link href="/">
-            <ArrowLeft size={16} /> Back
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/">
+              <ArrowLeft size={16} /> Back
+            </Link>
+          </Button>
+          <h1 className="ml-2 text-xl font-semibold">Master Data Manager</h1>
+        </div>
+        
+        <Button variant="outline" asChild>
+          <Link href="/import-resume">
+            📄 Import Resume
           </Link>
         </Button>
-        <h1 className="ml-2 text-xl font-semibold">Master Data Manager</h1>
       </div>
 
       <Tabs defaultValue="personal" className="space-y-4">

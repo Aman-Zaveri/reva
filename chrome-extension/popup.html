@@ -70,6 +70,19 @@
       border: 1px solid #f28b82;
     }
     
+    .status.auth-required {
+      background-color: #fef7e0;
+      color: #b95000;
+      border: 1px solid #fed7aa;
+      font-weight: bold;
+    }
+    
+    .status.authenticated {
+      background-color: #e8f5e8;
+      color: #137333;
+      border: 1px solid #c6f6d5;
+    }
+    
     .notification-dot {
       width: 8px;
       height: 8px;
@@ -201,6 +214,24 @@
       background-color: #dadce0;
       color: #9aa0a6;
       cursor: not-allowed;
+    }
+    
+    .auth-btn {
+      width: 100%;
+      padding: 12px;
+      background-color: #f59e0b;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      margin-bottom: 8px;
+    }
+    
+    .auth-btn:hover {
+      background-color: #d97706;
     }
     
     .loading-spinner {

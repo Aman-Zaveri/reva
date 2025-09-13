@@ -82,6 +82,7 @@ export const DataBundleSchema = z.object({
 export const OptimizeResumeRequestSchema = z.object({
   jobUrl: z.string().url('Invalid job URL').optional(),
   jobDescription: z.string().optional(),
+  isAutomaticExtraction: z.boolean().optional().default(false), // Flag for Chrome extension auto-extraction
   profile: ProfileSchema,
   data: DataBundleSchema,
   glazeLevel: z.number().int().min(1).max(5).optional().default(2),
@@ -93,7 +94,12 @@ export const OptimizeResumeRequestSchema = z.object({
     path: ["jobUrl"],
   }
 ).refine(
-  (data) => !data.jobDescription || data.jobDescription.length >= 50,
+  (data) => {
+    // Skip length validation if it's automatic extraction (Chrome extension)
+    if (data.isAutomaticExtraction) return true;
+    // Apply length validation only for manual job descriptions
+    return !data.jobDescription || data.jobDescription.length >= 50;
+  },
   {
     message: "Job description must be at least 50 characters when provided",
     path: ["jobDescription"],
