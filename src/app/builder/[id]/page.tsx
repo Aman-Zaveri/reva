@@ -11,8 +11,10 @@ import type {
   Education,
 } from "@/shared/lib/types";
 import { useBuilderState } from "@/shared/hooks/useBuilderState";
-import { BuilderHeader, ProfileSettings, ContentSections, ResumePreview, SectionOrderSettings } from "@/features/resume-builder";
+import { BuilderHeader, ProfileSettings, ContentSections, SectionOrderSettings } from "@/features/resume-builder";
+import { A4Resume } from "@/shared/components/A4Resume";
 import { AIFloatingActions } from "@/shared/components/shared/AIFloatingActions";
+import { ScrollArea } from "@/shared/components/ui/scroll-area";
 
 export default function BuilderPage() {
   const params = useParams<{ id: string }>();
@@ -240,49 +242,57 @@ export default function BuilderPage() {
   );
 
   return (
-    <div className="h-screen flex flex-col bg-background overflow-hidden">
-            <BuilderHeader
-              profile={profile}
-              data={data}
-              saveStatus={saveStatus}
-              onDeleteProfile={() => deleteProfile(profile.id)}
-              onApplyOptimizations={handleApplyOptimizations}
-              showAnalysisOnLoad={showAnalysisOnLoad}
-            />      {/* Main Content Area */}
-      <div className="flex-1 overflow-hidden">
-        {/* Left Side - Editor (takes up remaining space) */}
-        <div className="overflow-y-auto hide-scrollbar p-6" style={{ width: '50vw', height: 'calc(100vh - 73px)' }}>
-          <div className="flex flex-col gap-6">
-            <ProfileSettings
-              profile={profile}
-              onUpdateProfile={handleUpdateProfile}
-              onUpdatePersonalInfo={handleUpdatePersonalInfo}
-              onSyncFromMasterData={handleSyncFromMasterData}
-            />
+    <div className="flex flex-col h-screen">
+      <BuilderHeader
+        profile={profile}
+        data={data}
+        saveStatus={saveStatus}
+        onDeleteProfile={() => deleteProfile(profile.id)}
+        onApplyOptimizations={handleApplyOptimizations}
+        showAnalysisOnLoad={showAnalysisOnLoad}
+      />
+      
+      <div className="flex p-6 gap-8 min-h-0">
+        {/* Left Side - Editor */}
+        <div className="flex-1 min-w-0">
+          <ScrollArea className="h-full" hideScrollbar>
+            <div className="space-y-6">
+              <ProfileSettings
+                profile={profile}
+                onUpdateProfile={handleUpdateProfile}
+                onUpdatePersonalInfo={handleUpdatePersonalInfo}
+                onSyncFromMasterData={handleSyncFromMasterData}
+              />
 
-            <SectionOrderSettings
-              profile={profile}
-              onUpdateProfile={handleUpdateProfile}
-            />
+              <SectionOrderSettings
+                profile={profile}
+                onUpdateProfile={handleUpdateProfile}
+              />
 
-            <ContentSections
-              profile={profile}
-              data={data}
-              onUpdateProfile={handleUpdateProfile}
-              onUpdateProfileExperience={handleUpdateProfileExperience}
-              onUpdateProfileProject={handleUpdateProfileProject}
-              onUpdateProfileSkill={handleUpdateProfileSkill}
-              onUpdateProfileEducation={handleUpdateProfileEducation}
-              onResetProfileOverride={handleResetProfileOverride}
-            />
-          </div>
+              <ContentSections
+                profile={profile}
+                data={data}
+                onUpdateProfile={handleUpdateProfile}
+                onUpdateProfileExperience={handleUpdateProfileExperience}
+                onUpdateProfileProject={handleUpdateProfileProject}
+                onUpdateProfileSkill={handleUpdateProfileSkill}
+                onUpdateProfileEducation={handleUpdateProfileEducation}
+                onResetProfileOverride={handleResetProfileOverride}
+              />
+            </div>
+          </ScrollArea>
         </div>
 
-        {/* Right Side - Resume Preview (now fixed positioned, not in flex flow) */}
-        <ResumePreview profile={profile} data={data} />
+        {/* Right Side - Resume Preview */}
+        <div className="flex-shrink-0">
+          <ScrollArea className="h-full" hideScrollbar>
+            <div className="bg-white">
+              <A4Resume profile={profile} data={data} />
+            </div>
+          </ScrollArea>
+        </div>
       </div>
 
-      {/* AI Floating Actions */}
       <AIFloatingActions
         context="resume-builder"
         profile={profile}

@@ -1,26 +1,42 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useSession, signIn } from 'next-auth/react';
-import { useProfilesStore } from '@/shared/lib/store';
-import { Plus, FileText, Database, Target, Zap, Sparkles, Upload, CheckCircle } from 'lucide-react';
-import { Button } from '@/shared/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card';
-import { Badge } from '@/shared/components/ui/badge';
-import { Alert, AlertDescription } from '@/shared/components/ui/alert';
-import { ModeToggle } from '@/shared/components/theme/mode-toggle';
-import { UserMenu } from '@/shared/components/auth/UserMenu';
+import Link from "next/link";
+import { useSession, signIn } from "next-auth/react";
+import { useProfilesStore } from "@/shared/lib/store";
+import {
+  Plus,
+  FileText,
+  Database,
+  Target,
+  Zap,
+  Sparkles,
+  Upload,
+  CheckCircle,
+} from "lucide-react";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
+import { Badge } from "@/shared/components/ui/badge";
+import { Alert, AlertDescription } from "@/shared/components/ui/alert";
+import { ModeToggle } from "@/shared/components/theme/mode-toggle";
+import { UserMenu } from "@/shared/components/auth/UserMenu";
 
 export default function Page() {
   const { data: session } = useSession();
   const { profiles, createProfile, cloneProfile, data } = useProfilesStore();
 
   // Check if user has master data filled out
-  const hasMasterData = data.personalInfo?.fullName || 
-                       data.experiences.length > 0 || 
-                       data.projects.length > 0 || 
-                       data.skills.length > 0 || 
-                       data.education.length > 0;
+  const hasMasterData =
+    data.personalInfo?.fullName ||
+    data.experiences.length > 0 ||
+    data.projects.length > 0 ||
+    data.skills.length > 0 ||
+    data.education.length > 0;
 
   const isNewUser = session && !hasMasterData;
 
@@ -28,18 +44,18 @@ export default function Page() {
     {
       icon: Target,
       title: "Single Source of Truth",
-      description: "Centralize all your professional information"
+      description: "Centralize all your professional information",
     },
     {
       icon: Zap,
       title: "Multiple Profiles",
-      description: "Create targeted resumes for any opportunity"
+      description: "Create targeted resumes for any opportunity",
     },
     {
       icon: Sparkles,
       title: "Export Ready",
-      description: "Professional PDFs in seconds"
-    }
+      description: "Professional PDFs in seconds",
+    },
   ];
 
   return (
@@ -53,9 +69,11 @@ export default function Page() {
                 <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
                   <Sparkles className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-xl font-bold text-foreground">Resume Manager</span>
+                <span className="text-xl font-bold text-foreground">
+                  Resume Manager
+                </span>
               </Link>
-              
+
               {session && (
                 <nav className="hidden md:flex items-center space-x-1">
                   <Button variant="ghost" size="sm" asChild>
@@ -73,7 +91,7 @@ export default function Page() {
                 </nav>
               )}
             </div>
-            
+
             <div className="flex items-center space-x-3">
               <ModeToggle />
               <UserMenu />
@@ -90,14 +108,20 @@ export default function Page() {
               <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950/30">
                 <CheckCircle className="h-4 w-4 text-blue-600" />
                 <AlertDescription className="text-blue-800 dark:text-blue-200">
-                  <strong>Welcome to Resume Manager!</strong> Get started by{' '}
-                  <Link href="/import-resume" className="underline font-medium hover:text-blue-600">
+                  <strong>Welcome to Resume Manager!</strong> Get started by{" "}
+                  <Link
+                    href="/import-resume"
+                    className="underline font-medium hover:text-blue-600"
+                  >
                     importing your existing resume
-                  </Link>{' '}
-                  or{' '}
-                  <Link href="/data" className="underline font-medium hover:text-blue-600">
+                  </Link>{" "}
+                  or{" "}
+                  <Link
+                    href="/data"
+                    className="underline font-medium hover:text-blue-600"
+                  >
                     manually adding your information
-                  </Link>{' '}
+                  </Link>{" "}
                   to create your master data.
                 </AlertDescription>
               </Alert>
@@ -114,36 +138,32 @@ export default function Page() {
                     Professional Resume Builder
                   </span>
                 </div>
-                
+
                 <div className="space-y-6">
                   <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight">
-                    <span className="text-purple-600">
-                      Build Perfect
-                    </span>
+                    <span className="text-purple-600">Build Perfect</span>
                     <br />
                     <span className="text-foreground">Resumes</span>
                   </h1>
-                  
+
                   <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                    Create multiple targeted resumes from one comprehensive profile. 
-                    Manage experiences, projects, and skills efficiently with AI-powered optimization.
+                    Create multiple targeted resumes from one comprehensive
+                    profile. Manage experiences, projects, and skills
+                    efficiently with AI-powered optimization.
                   </p>
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-                  <Button 
-                    size="lg" 
+                  <Button
+                    size="lg"
                     className="bg-purple-600 hover:bg-purple-700 text-white"
                     onClick={() => signIn()}
                   >
                     <Sparkles className="w-5 h-5 mr-2" />
                     Get Started Free
                   </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    size="lg"
-                  >
+
+                  <Button variant="outline" size="lg">
                     <FileText className="w-5 h-5 mr-2" />
                     View Features
                   </Button>
@@ -153,22 +173,24 @@ export default function Page() {
               <>
                 <div className="space-y-4">
                   <h1 className="text-3xl md:text-5xl font-bold tracking-tight">
-                    Welcome back, {session.user?.name?.split(' ')[0] || 'there'}!
+                    Welcome back, {session.user?.name?.split(" ")[0] || "there"}
+                    !
                   </h1>
-                  
+
                   <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                    {profiles.length === 0 
-                      ? "Ready to create your first professional resume?" 
-                      : `Continue working on your ${profiles.length} resume profile${profiles.length !== 1 ? 's' : ''}`
-                    }
+                    {profiles.length === 0
+                      ? "Ready to create your first professional resume?"
+                      : `Continue working on your ${
+                          profiles.length
+                        } resume profile${profiles.length !== 1 ? "s" : ""}`}
                   </p>
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                   {!hasMasterData ? (
                     <>
-                      <Button 
-                        size="lg" 
+                      <Button
+                        size="lg"
                         className="bg-purple-600 hover:bg-purple-700 text-white"
                         asChild
                       >
@@ -177,12 +199,8 @@ export default function Page() {
                           Import Resume
                         </Link>
                       </Button>
-                      
-                      <Button 
-                        variant="outline" 
-                        size="lg" 
-                        asChild
-                      >
+
+                      <Button variant="outline" size="lg" asChild>
                         <Link href="/data">
                           <Database className="w-5 h-5 mr-2" />
                           Add Data Manually
@@ -191,20 +209,16 @@ export default function Page() {
                     </>
                   ) : (
                     <>
-                      <Button 
-                        size="lg" 
+                      <Button
+                        size="lg"
                         className="bg-purple-600 hover:bg-purple-700 text-white"
                         onClick={() => createProfile()}
                       >
                         <Plus className="w-5 h-5 mr-2" />
                         Create New Resume
                       </Button>
-                      
-                      <Button 
-                        variant="outline" 
-                        size="lg" 
-                        asChild
-                      >
+
+                      <Button variant="outline" size="lg" asChild>
                         <Link href="/data">
                           <Database className="w-5 h-5 mr-2" />
                           Manage Data
@@ -235,12 +249,15 @@ export default function Page() {
           {/* Profiles Section */}
           <section className="space-y-8">
             <div>
-              <h2 className="text-3xl font-bold text-center mb-3">Your Profiles</h2>
+              <h2 className="text-3xl font-bold text-center mb-3">
+                Your Profiles
+              </h2>
               <p className="text-muted-foreground text-center max-w-2xl mx-auto">
-                {profiles.length === 0 
-                  ? "Ready to create your first professional resume?" 
-                  : `Manage your ${profiles.length} resume profile${profiles.length !== 1 ? 's' : ''}`
-                }
+                {profiles.length === 0
+                  ? "Ready to create your first professional resume?"
+                  : `Manage your ${profiles.length} resume profile${
+                      profiles.length !== 1 ? "s" : ""
+                    }`}
               </p>
             </div>
 
@@ -252,9 +269,10 @@ export default function Page() {
                   </div>
                   <h3 className="text-xl font-semibold mb-3">Get Started</h3>
                   <p className="text-muted-foreground mb-6">
-                    Create your first resume profile and start building professional resumes.
+                    Create your first resume profile and start building
+                    professional resumes.
                   </p>
-                  <Button 
+                  <Button
                     onClick={() => createProfile()}
                     className="bg-purple-600 hover:bg-purple-700 text-white"
                   >
@@ -266,21 +284,30 @@ export default function Page() {
             ) : (
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {profiles.map((profile) => (
-                  <Card key={profile.id} className="group hover:shadow-lg transition-shadow">
-                    <Link href={`/builder/${profile.id}`} className="absolute inset-0 z-10" />
+                  <Card
+                    key={profile.id}
+                    className="group hover:shadow-lg transition-shadow"
+                  >
+                    <Link
+                      href={`/builder/${profile.id}`}
+                      className="absolute inset-0 z-10"
+                    />
                     <CardHeader className="relative">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg font-semibold">{profile.name}</CardTitle>
+                        <CardTitle className="text-lg font-semibold">
+                          {profile.name}
+                        </CardTitle>
                         <FileText className="text-muted-foreground group-hover:text-purple-600 transition-colors" />
                       </div>
                       <CardDescription className="line-clamp-2">
-                        {profile.personalInfo?.summary || 'Click to add a professional summary'}
+                        {profile.personalInfo?.summary ||
+                          "Click to add a professional summary"}
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="relative">
                       <div className="flex items-center justify-between opacity-0 transition-all duration-300 group-hover:opacity-100">
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="sm"
                           onClick={(e) => {
                             e.preventDefault();
@@ -292,7 +319,7 @@ export default function Page() {
                           Clone
                         </Button>
                         <Badge variant="secondary">
-                          {profile.template || 'classic'}
+                          {profile.template || "classic"}
                         </Badge>
                       </div>
                     </CardContent>
