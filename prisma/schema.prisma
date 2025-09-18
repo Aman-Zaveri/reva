@@ -21,6 +21,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   profiles      Profile[]
+  jobs          Job[]
   personalInfo  PersonalInfo?
   experiences   Experience[]
   educations    Education[]
@@ -106,12 +107,38 @@ model SocialLink {
   @@map("social_links")
 }
 
+// Job Tracking System
+model Job {
+  id            String    @id @default(cuid())
+  userId        String
+  title         String
+  company       String
+  description   String?
+  requirements  String?
+  responsibilities String?
+  skills        String?
+  url           String?
+  source        String    @default("manual") // "manual" or "extension"
+  extractedAt   DateTime?
+  
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  profiles      Profile[] // Jobs can have multiple associated profiles/resumes
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  @@index([userId, source])
+  @@index([userId, createdAt])
+  @@map("jobs")
+}
+
 // Profile System
 model Profile {
   id                       String    @id @default(cuid())
   userId                   String
   profileName              String
   templateName             String?
+  jobId                    String?   // Link to the job this profile was created for
   
   // JSON configuration for resume customization
   resumeConfiguration      Json?     // Colors, fonts, layout preferences
@@ -121,6 +148,7 @@ model Profile {
   aiOptimizationJobDescHash String?
   
   user                     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  job                      Job?      @relation(fields: [jobId], references: [id], onDelete: SetNull)
   
   // Profile items (polymorphic relationship)
   items                    ProfileItem[]

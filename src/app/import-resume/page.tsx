@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { AIFloatingActions } from '@/shared/components/shared/AIFloatingActions';
 
 export default function ImportResumePage() {
   const [file, setFile] = useState<File | null>(null);
@@ -148,6 +149,65 @@ export default function ImportResumePage() {
           </div>
         </div>
       </div>
+
+      {/* AI Floating Actions */}
+      <AIFloatingActions
+        context="import"
+        onAIAction={async (actionId: string, params?: any) => {
+          try {
+            // Handle AI actions in the import context
+            switch (actionId) {
+              case 'extract-linkedin':
+                console.log('Triggering AI LinkedIn extraction...');
+                const linkedinUrl = prompt('Please paste your LinkedIn profile URL:');
+                if (linkedinUrl) {
+                  const response = await fetch('/api/ai-agents/single-agent', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      agent: 'resume-builder',
+                      prompt: `Extract professional information from LinkedIn profile: ${linkedinUrl}. Generate structured resume data.`,
+                    }),
+                  });
+                  
+                  if (response.ok) {
+                    const result = await response.json();
+                    alert('LinkedIn extraction complete! Check console for details.');
+                    console.log('LinkedIn Extraction Result:', result);
+                  }
+                }
+                break;
+                
+              case 'parse-resume':
+                console.log('Triggering AI resume parsing...');
+                const resumeText = prompt('Please paste your resume text for AI parsing:');
+                if (resumeText) {
+                  const response = await fetch('/api/ai-agents/single-agent', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      agent: 'resume-builder',
+                      prompt: `Parse this resume text and extract structured data: ${resumeText}`,
+                    }),
+                  });
+                  
+                  if (response.ok) {
+                    const result = await response.json();
+                    alert('Resume parsing complete! Check console for details.');
+                    console.log('Resume Parsing Result:', result);
+                  }
+                }
+                break;
+                
+              default:
+                console.log(`AI Action: ${actionId} not implemented yet`);
+            }
+          } catch (error) {
+            console.error('AI Action failed:', error);
+            alert('AI action failed. Please try again.');
+          }
+        }}
+      />
     </div>
   );
 }

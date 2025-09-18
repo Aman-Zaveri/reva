@@ -82,21 +82,24 @@ export const DataBundleSchema = z.object({
 export const OptimizeResumeRequestSchema = z.object({
   jobUrl: z.string().url('Invalid job URL').optional(),
   jobDescription: z.string().optional(),
+  jobId: z.string().optional(), // ID of job record in database
   isAutomaticExtraction: z.boolean().optional().default(false), // Flag for Chrome extension auto-extraction
   profile: ProfileSchema,
   data: DataBundleSchema,
   glazeLevel: z.number().int().min(1).max(5).optional().default(2),
   customInstructions: z.string().optional(),
 }).refine(
-  (data) => data.jobUrl || data.jobDescription,
+  (data) => data.jobUrl || data.jobDescription || data.jobId,
   {
-    message: "Either jobUrl or jobDescription must be provided",
+    message: "Either jobUrl, jobDescription, or jobId must be provided",
     path: ["jobUrl"],
   }
 ).refine(
   (data) => {
     // Skip length validation if it's automatic extraction (Chrome extension)
     if (data.isAutomaticExtraction) return true;
+    // Skip validation if using jobId (from database)
+    if (data.jobId) return true;
     // Apply length validation only for manual job descriptions
     return !data.jobDescription || data.jobDescription.length >= 50;
   },

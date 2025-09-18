@@ -22,7 +22,7 @@ import {
   AlertDialogTrigger,
 } from '@/shared/components/ui/alert-dialog';
 import { Separator } from '@/shared/components/ui/separator';
-import { AIOptimizer, AIAnalysisModal, JobInfoModal } from '@/features/ai-optimization/components';
+import { AIOptimizer, AIAgentControlPanel, AIAgentConfiguration, AIAnalysisModal, JobInfoModal } from '@/features/ai-optimization/components';
 import { wordExportService } from '@/shared/services';
 import type { Profile, DataBundle } from '@/shared/lib/types';
 
@@ -97,15 +97,20 @@ export function BuilderHeader({ profile, data, saveStatus, onDeleteProfile, onAp
             )}
           </div>
 
-          <JobInfoModal profile={profile} />
+          <JobInfoModal 
+            profile={profile} 
+            onOptimizeWithAI={() => {/* This will be handled by the AIAgentControlPanel */}}
+          />
 
-          <AIAnalysisModal profile={profile} showOnLoad={showAnalysisOnLoad} />
+          <AIAnalysisModal profile={profile} data={data} showOnLoad={showAnalysisOnLoad} />
 
-          <AIOptimizer
+          <AIAgentControlPanel
             profile={profile}
             data={data}
             onApplyOptimizations={onApplyOptimizations}
           />
+
+          <AIAgentConfiguration />
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

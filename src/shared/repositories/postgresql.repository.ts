@@ -1,4 +1,4 @@
-import type { Profile, DataBundle, PersonalInfo, Experience, Project, Skill, Education } from '@/shared/lib/types';
+import type { Profile, DataBundle, PersonalInfo, Experience, Project, Skill, Education, Job } from '@/shared/lib/types';
 import type { StorageResult, ProfileRepository } from './profile.repository';
 import { prisma } from '@/shared/lib/prisma';
 
@@ -206,21 +206,23 @@ export class PostgreSQLProfileRepository implements ProfileRepository {
           });
         }
 
-        // Create profiles with items
-        for (const profile of profiles) {
-          const profileRecord = await tx.profile.create({
-            data: {
-              id: profile.id,
-              userId,
-              profileName: profile.name,
-              templateName: profile.template,
-              resumeConfiguration: profile.formatting ? profile.formatting as any : null,
-              aiOptimizationJobUrl: profile.aiOptimization?.jobData?.url,
-              aiOptimizationJobDescHash: profile.aiOptimization?.jobDescriptionHash,
-            }
-          });
+          // Create profiles with items
+          for (const profile of profiles) {
+            // Use raw SQL for now due to Prisma client not being regenerated
+            await tx.$executeRaw`
+              INSERT INTO profiles (
+                id, "userId", "profileName", "templateName", "jobId",
+                "resumeConfiguration", "aiOptimizationJobUrl", "aiOptimizationJobDescHash",
+                "createdAt", "updatedAt"
+              ) VALUES (
+                ${profile.id}, ${userId}, ${profile.name}, ${profile.template},
+                ${profile.jobId || null}, ${profile.formatting ? JSON.stringify(profile.formatting) : null},
+                ${profile.aiOptimization?.jobData?.url || null}, ${profile.aiOptimization?.jobDescriptionHash || null},
+                NOW(), NOW()
+              )
+            `;
 
-          // Create profile items
+            const profileRecord = { id: profile.id };          // Create profile items
           const profileItemData: Array<{
             profileId: string;
             itemType: string;
@@ -292,14 +294,21 @@ export class PostgreSQLProfileRepository implements ProfileRepository {
     try {
       // Load all user data with relationships
       const [profiles, experiences, projects, skills, educations, personalInfo] = await Promise.all([
-        prisma.profile.findMany({
-          where: { userId },
-          include: {
-            items: {
-              orderBy: { order: 'asc' }
-            }
-          }
-        }),
+        // Use raw SQL for profiles to get jobId
+        prisma.$queryRaw<Array<{
+          id: string;
+          profileName: string;
+          templateName: string | null;
+          jobId: string | null;
+          resumeConfiguration: any;
+          aiOptimizationJobUrl: string | null;
+          aiOptimizationJobDescHash: string | null;
+        }>>`
+          SELECT id, "profileName", "templateName", "jobId", "resumeConfiguration", 
+                 "aiOptimizationJobUrl", "aiOptimizationJobDescHash"
+          FROM profiles 
+          WHERE "userId" = ${userId}
+        `,
         prisma.experience.findMany({
           where: { userId },
           include: {
@@ -334,33 +343,49 @@ export class PostgreSQLProfileRepository implements ProfileRepository {
         })
       ]);
 
+      // Get profile items separately
+      const profileItems = await Promise.all(
+        profiles.map(async (profile) => {
+          const items = await prisma.profileItem.findMany({
+            where: { profileId: profile.id },
+            orderBy: { order: 'asc' }
+          });
+          return { profileId: profile.id, items };
+        })
+      );
+
       // Convert database models to legacy types
-      const mappedProfiles: Profile[] = profiles.map(p => ({
-        id: p.id,
-        name: p.profileName,
-        template: (p.templateName as 'classic' | 'compact') || 'classic',
-        formatting: p.resumeConfiguration ? (p.resumeConfiguration as any) : undefined,
-        experienceIds: p.items
-          .filter(i => i.itemType === 'experience')
-          .map(i => i.itemId),
-        projectIds: p.items
-          .filter(i => i.itemType === 'project') 
-          .map(i => i.itemId),
-        skillIds: p.items
-          .filter(i => i.itemType === 'skill')
-          .map(i => i.itemId),
-        educationIds: p.items
-          .filter(i => i.itemType === 'education')
-          .map(i => i.itemId),
-        aiOptimization: p.aiOptimizationJobUrl ? {
-          timestamp: new Date().toISOString(),
-          keyInsights: [],
-          jobDescriptionHash: p.aiOptimizationJobDescHash || '',
-          jobData: {
-            url: p.aiOptimizationJobUrl
-          }
-        } : undefined
-      }));
+      const mappedProfiles: Profile[] = profiles.map(p => {
+        const profileItemsData = profileItems.find(pi => pi.profileId === p.id)?.items || [];
+        
+        return {
+          id: p.id,
+          name: p.profileName,
+          jobId: p.jobId || undefined,
+          template: (p.templateName as 'classic' | 'compact') || 'classic',
+          formatting: p.resumeConfiguration ? (p.resumeConfiguration as any) : undefined,
+          experienceIds: profileItemsData
+            .filter((i: any) => i.itemType === 'experience')
+            .map((i: any) => i.itemId),
+          projectIds: profileItemsData
+            .filter((i: any) => i.itemType === 'project') 
+            .map((i: any) => i.itemId),
+          skillIds: profileItemsData
+            .filter((i: any) => i.itemType === 'skill')
+            .map((i: any) => i.itemId),
+          educationIds: profileItemsData
+            .filter((i: any) => i.itemType === 'education')
+            .map((i: any) => i.itemId),
+          aiOptimization: p.aiOptimizationJobUrl ? {
+            timestamp: new Date().toISOString(),
+            keyInsights: [],
+            jobDescriptionHash: p.aiOptimizationJobDescHash || '',
+            jobData: {
+              url: p.aiOptimizationJobUrl
+            }
+          } : undefined
+        };
+      });
 
       const mappedExperiences: Experience[] = experiences.map(e => ({
         id: e.id,

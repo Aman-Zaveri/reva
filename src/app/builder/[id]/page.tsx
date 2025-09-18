@@ -12,6 +12,7 @@ import type {
 } from "@/shared/lib/types";
 import { useBuilderState } from "@/shared/hooks/useBuilderState";
 import { BuilderHeader, ProfileSettings, ContentSections, ResumePreview, SectionOrderSettings } from "@/features/resume-builder";
+import { AIFloatingActions } from "@/shared/components/shared/AIFloatingActions";
 
 export default function BuilderPage() {
   const params = useParams<{ id: string }>();
@@ -130,6 +131,108 @@ export default function BuilderPage() {
 
   const handleSyncFromMasterData = createUpdateHandler(syncFromMasterData);
 
+  const handleAIAction = async (actionId: string, params?: any) => {
+    try {
+      // Handle AI actions in the resume builder context
+      switch (actionId) {
+        case 'optimize-resume':
+          // Trigger AI optimization flow
+          if (profile && data) {
+            console.log('Triggering AI optimization...');
+            // Create a simple dialog to get job description
+            const jobDescription = prompt('Please paste the job description for optimization:');
+            if (jobDescription) {
+              const response = await fetch('/api/ai-agents/single-agent', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  agent: 'content-optimizer',
+                  prompt: `Optimize this resume content for the job description. Current profile: ${JSON.stringify(profile)}, Data: ${JSON.stringify(data)}, Job: ${jobDescription}`,
+                }),
+              });
+              
+              if (response.ok) {
+                const result = await response.json();
+                alert('Optimization suggestions generated! Check console for details.');
+                console.log('AI Optimization Result:', result);
+              }
+            }
+          }
+          break;
+          
+        case 'analyze-skills':
+          // Trigger skills analysis
+          const jobDescription2 = prompt('Please paste the job description for skills analysis:');
+          if (jobDescription2) {
+            console.log('Triggering skills analysis...');
+            const response = await fetch('/api/ai-agents/single-agent', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                agent: 'skills-extractor',
+                prompt: `Extract and analyze skills from this job description and compare with current skills: ${JSON.stringify(data?.skills || [])}. Job: ${jobDescription2}`,
+              }),
+            });
+            
+            if (response.ok) {
+              const result = await response.json();
+              alert('Skills analysis complete! Check console for details.');
+              console.log('Skills Analysis Result:', result);
+            }
+          }
+          break;
+          
+        case 'review-resume':
+          // Trigger resume review
+          if (profile && data) {
+            console.log('Triggering resume review...');
+            const response = await fetch('/api/ai-agents/single-agent', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                agent: 'resume-reviewer',
+                prompt: `Review this resume for quality and improvements. Profile: ${JSON.stringify(profile)}, Data: ${JSON.stringify(data)}`,
+              }),
+            });
+            
+            if (response.ok) {
+              const result = await response.json();
+              alert('Resume review complete! Check console for details.');
+              console.log('Resume Review Result:', result);
+            }
+          }
+          break;
+          
+        case 'ats-optimize':
+          // Trigger ATS optimization
+          if (profile && data) {
+            console.log('Triggering ATS optimization...');
+            const response = await fetch('/api/ai-agents/single-agent', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                agent: 'ats-optimizer',
+                prompt: `Optimize this resume for ATS systems. Profile: ${JSON.stringify(profile)}, Data: ${JSON.stringify(data)}`,
+              }),
+            });
+            
+            if (response.ok) {
+              const result = await response.json();
+              alert('ATS optimization complete! Check console for details.');
+              console.log('ATS Optimization Result:', result);
+            }
+          }
+          break;
+          
+        default:
+          console.log(`AI Action: ${actionId} not implemented yet`);
+      }
+    } catch (error) {
+      console.error('AI Action failed:', error);
+      alert('AI action failed. Please try again.');
+    }
+  };
+
   const handleApplyOptimizations = createUpdateHandler(
     (optimizations: Partial<typeof profile>) => {
       updateProfile(profile.id, optimizations);
@@ -178,6 +281,15 @@ export default function BuilderPage() {
         {/* Right Side - Resume Preview (now fixed positioned, not in flex flow) */}
         <ResumePreview profile={profile} data={data} />
       </div>
+
+      {/* AI Floating Actions */}
+      <AIFloatingActions
+        context="resume-builder"
+        profile={profile}
+        data={data}
+        jobContext={profile.aiOptimization?.jobData?.description || undefined}
+        onAIAction={handleAIAction}
+      />
     </div>
   );
 }

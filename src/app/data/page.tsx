@@ -2,16 +2,20 @@
 
 import { useProfilesStore } from '@/shared/lib/store';
 import Link from 'next/link';
-import { ArrowLeft, Plus, Trash2, Edit3 } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Edit3, ExternalLink, Calendar, Building, Chrome, User, Wand2 } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { Input } from '@/shared/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/shared/components/ui/dialog';
 import { RichTextEditor } from '@/shared/components/ui/rich-text-editor';
+import { AIEnhancedBulletEditor } from '@/shared/components/forms/AIEnhancedBulletEditor';
 import { PersonalInfoForm, StorageSettings } from '@/features/data-management/components';
+import { AIFloatingActions } from '@/shared/components/shared/AIFloatingActions';
 import { Separator } from '@/shared/components/ui/separator';
-import { useState } from 'react';
+import { Badge } from '@/shared/components/ui/badge';
+import { useState, useEffect } from 'react';
+import type { Job } from '@/shared/lib/types';
 
 export default function DataManagerPage() {
   const {
@@ -29,6 +33,31 @@ export default function DataManagerPage() {
     bullets?: string[];
   } | null>(null);
 
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loadingJobs, setLoadingJobs] = useState(false);
+
+  // Fetch jobs data
+  useEffect(() => {
+    const fetchJobs = async () => {
+      setLoadingJobs(true);
+      try {
+        const response = await fetch('/api/jobs');
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            setJobs(result.data);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch jobs:', error);
+      } finally {
+        setLoadingJobs(false);
+      }
+    };
+
+    fetchJobs();
+  }, []);
+
   const SkillDetailsEditor = ({ 
     skill, 
     onSave 
@@ -42,17 +71,65 @@ export default function DataManagerPage() {
       onSave(editDetails);
     };
 
+    const handleAIEnhance = async () => {
+      try {
+        // Use the grammar enhancement API to improve skill descriptions
+        const response = await fetch('/api/ai-agents/grammar-enhance', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            text: editDetails,
+            context: `Skills category: ${skill.name}`,
+            improvementType: 'skills-description'
+          }),
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success && result.enhancedText) {
+            setEditDetails(result.enhancedText);
+          }
+        }
+      } catch (error) {
+        console.error('AI enhancement failed:', error);
+        alert('AI enhancement temporarily unavailable. Please try again later.');
+      }
+    };
+
     return (
       <div className="space-y-4 py-4">
-        <RichTextEditor
-          value={editDetails}
-          onChange={setEditDetails}
-          placeholder="List your skills in this category..."
-          className="min-h-[120px]"
-        />
-        <Button onClick={handleSave} className="w-full">
-          Save Changes
-        </Button>
+        <div className="relative">
+          <RichTextEditor
+            value={editDetails}
+            onChange={setEditDetails}
+            placeholder="List your skills in this category..."
+            className="min-h-[120px]"
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            className="absolute top-2 right-2 h-8 w-8 p-0 bg-purple-50 border-purple-200 hover:bg-purple-100"
+            onClick={handleAIEnhance}
+            title="AI enhance skill descriptions"
+          >
+            <Wand2 size={14} className="text-purple-600" />
+          </Button>
+        </div>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={handleAIEnhance}
+            className="flex-1 bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100"
+          >
+            <Wand2 size={16} className="mr-2" />
+            AI Enhance
+          </Button>
+          <Button onClick={handleSave} className="flex-1">
+            Save Changes
+          </Button>
+        </div>
       </div>
     );
   };
@@ -70,17 +147,65 @@ export default function DataManagerPage() {
       onSave(editDetails);
     };
 
+    const handleAIEnhance = async () => {
+      try {
+        // Use the grammar enhancement API to improve education descriptions
+        const response = await fetch('/api/ai-agents/grammar-enhance', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            text: editDetails,
+            context: `Education: ${education.title}`,
+            improvementType: 'education-description'
+          }),
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success && result.enhancedText) {
+            setEditDetails(result.enhancedText);
+          }
+        }
+      } catch (error) {
+        console.error('AI enhancement failed:', error);
+        alert('AI enhancement temporarily unavailable. Please try again later.');
+      }
+    };
+
     return (
       <div className="space-y-4 py-4">
-        <RichTextEditor
-          value={editDetails}
-          onChange={setEditDetails}
-          placeholder="Institution, graduation year, GPA, honors..."
-          className="min-h-[120px]"
-        />
-        <Button onClick={handleSave} className="w-full">
-          Save Changes
-        </Button>
+        <div className="relative">
+          <RichTextEditor
+            value={editDetails}
+            onChange={setEditDetails}
+            placeholder="Institution, graduation year, GPA, honors..."
+            className="min-h-[120px]"
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            className="absolute top-2 right-2 h-8 w-8 p-0 bg-green-50 border-green-200 hover:bg-green-100"
+            onClick={handleAIEnhance}
+            title="AI enhance education description"
+          >
+            <Wand2 size={14} className="text-green-600" />
+          </Button>
+        </div>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={handleAIEnhance}
+            className="flex-1 bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
+          >
+            <Wand2 size={16} className="mr-2" />
+            AI Enhance
+          </Button>
+          <Button onClick={handleSave} className="flex-1">
+            Save Changes
+          </Button>
+        </div>
       </div>
     );
   };
@@ -260,19 +385,33 @@ export default function DataManagerPage() {
           <DialogHeader>
             <DialogTitle>Edit {title}</DialogTitle>
             <DialogDescription>
-              Add and edit bullet points for this item
+              Add and edit bullet points for this item. Click the AI enhancement button for intelligent suggestions.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             {editBullets.map((bullet, index) => (
               <div key={index} className="flex gap-2">
                 <div className="flex-1">
-                  <RichTextEditor
-                    value={bullet}
-                    onChange={(value) => updateBullet(index, value)}
-                    placeholder="Describe your achievement or responsibility..."
-                    className="min-h-[80px]"
-                  />
+                  <div className="relative">
+                    <RichTextEditor
+                      value={bullet}
+                      onChange={(value: string) => updateBullet(index, value)}
+                      placeholder="Describe your achievement or responsibility..."
+                      className="min-h-[80px]"
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="absolute top-2 right-2 h-8 w-8 p-0 bg-blue-50 border-blue-200 hover:bg-blue-100"
+                      onClick={() => {
+                        // TODO: Implement AI enhancement for individual bullet
+                        alert('AI enhancement coming soon! This will provide intelligent suggestions for improving this bullet point.');
+                      }}
+                      title="AI enhance this bullet point"
+                    >
+                      <Wand2 size={14} className="text-blue-600" />
+                    </Button>
+                  </div>
                 </div>
                 <Button
                   variant="ghost"
@@ -333,7 +472,7 @@ export default function DataManagerPage() {
       <Separator />
 
       <Tabs defaultValue="personal" className="space-y-8">
-        <TabsList className="grid w-full grid-cols-6 bg-gray-50 border border-gray-200 rounded-lg p-1">
+        <TabsList className="grid w-full grid-cols-7 bg-gray-50 border border-gray-200 rounded-lg p-1">
           <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-200">
             Personal
           </TabsTrigger>
@@ -348,6 +487,9 @@ export default function DataManagerPage() {
           </TabsTrigger>
           <TabsTrigger value="education" className="data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-200">
             Education
+          </TabsTrigger>
+          <TabsTrigger value="jobs" className="data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-200">
+            Jobs
           </TabsTrigger>
           <TabsTrigger value="storage" className="data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-200">
             Storage
@@ -834,6 +976,151 @@ export default function DataManagerPage() {
           </div>
         </TabsContent>
 
+        <TabsContent value="jobs" className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-3xl font-bold tracking-tight text-gray-900">Job Applications</h2>
+              <p className="text-muted-foreground mt-1">Jobs you've applied to and their corresponding resumes</p>
+            </div>
+          </div>
+
+          {loadingJobs ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center space-y-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+                <p className="text-muted-foreground">Loading jobs...</p>
+              </div>
+            </div>
+          ) : jobs.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="space-y-4">
+                <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                  <Building className="h-8 w-8 text-gray-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">No jobs tracked yet</h3>
+                  <p className="text-muted-foreground">
+                    Jobs will appear here when you create resumes using the Chrome extension
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {jobs.map((job, index) => {
+                const colors = [
+                  { border: 'border-l-blue-400', bg: 'bg-blue-50/80', accent: 'text-blue-700' },
+                  { border: 'border-l-emerald-400', bg: 'bg-emerald-50/80', accent: 'text-emerald-700' },
+                  { border: 'border-l-violet-400', bg: 'bg-violet-50/80', accent: 'text-violet-700' },
+                  { border: 'border-l-amber-400', bg: 'bg-amber-50/80', accent: 'text-amber-700' },
+                  { border: 'border-l-rose-400', bg: 'bg-rose-50/80', accent: 'text-rose-700' },
+                  { border: 'border-l-slate-400', bg: 'bg-slate-50/80', accent: 'text-slate-700' }
+                ];
+                const colorScheme = colors[index % colors.length];
+                
+                return (
+                  <Card key={job.id} className={`${colorScheme.bg} ${colorScheme.border} border-l-3 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5`}>
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <h3 className={`text-xl font-semibold ${colorScheme.accent}`}>
+                              {job.title}
+                            </h3>
+                            <Badge variant={job.source === 'extension' ? 'default' : 'secondary'}>
+                              {job.source === 'extension' ? (
+                                <><Chrome className="h-3 w-3 mr-1" /> Extension</>
+                              ) : (
+                                <><User className="h-3 w-3 mr-1" /> Manual</>
+                              )}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                            <div className="flex items-center space-x-1">
+                              <Building className="h-4 w-4" />
+                              <span>{job.company}</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <Calendar className="h-4 w-4" />
+                              <span>{new Date(job.createdAt).toLocaleDateString()}</span>
+                            </div>
+                            {job.url && (
+                              <a
+                                href={job.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 transition-colors"
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                                <span>View Job</span>
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {job.description && (
+                          <div>
+                            <h4 className="text-sm font-medium text-muted-foreground mb-2">Description</h4>
+                            <div className="bg-white/70 rounded-lg p-3 text-sm">
+                              {job.description.length > 200 
+                                ? `${job.description.substring(0, 200)}...` 
+                                : job.description
+                              }
+                            </div>
+                          </div>
+                        )}
+                        
+                        {job.skills && (
+                          <div>
+                            <h4 className="text-sm font-medium text-muted-foreground mb-2">Skills Required</h4>
+                            <div className="bg-white/70 rounded-lg p-3 text-sm">
+                              {job.skills}
+                            </div>
+                          </div>
+                        )}
+
+                        {(job as any).profiles && (job as any).profiles.length > 0 && (
+                          <div>
+                            <h4 className="text-sm font-medium text-muted-foreground mb-2">
+                              Resumes Created ({(job as any).profiles.length})
+                            </h4>
+                            <div className="space-y-2">
+                              {(job as any).profiles.map((profile: any) => (
+                                <div key={profile.id} className="bg-white/70 rounded-lg p-3 flex items-center justify-between">
+                                  <div>
+                                    <p className="font-medium text-sm">{profile.profileName}</p>
+                                    <p className="text-xs text-muted-foreground">
+                                      Created {new Date(profile.createdAt).toLocaleDateString()}
+                                    </p>
+                                  </div>
+                                  <Button variant="outline" size="sm" asChild>
+                                    <Link href={`/builder/${profile.id}`}>
+                                      View Resume
+                                    </Link>
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {(!(job as any).profiles || (job as any).profiles.length === 0) && (
+                          <div className="bg-white/50 rounded-lg p-4 text-center text-muted-foreground border-2 border-dashed border-gray-200">
+                            <p className="text-sm">No resumes created for this job yet</p>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </TabsContent>
+
         <TabsContent value="storage">
           <Card>
             <CardHeader>
@@ -849,6 +1136,107 @@ export default function DataManagerPage() {
         </TabsContent>
 
       </Tabs>
+
+      {/* AI Floating Actions */}
+      <AIFloatingActions
+        context="data-management"
+        data={data}
+        onAIAction={async (actionId: string, params?: any) => {
+          try {
+            // Handle AI actions in the data management context
+            switch (actionId) {
+              case 'generate-experiences':
+                console.log('Triggering AI experience generation...');
+                const jobRole = prompt('What job role would you like to generate experience for?');
+                if (jobRole) {
+                  const response = await fetch('/api/ai-agents/single-agent', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      agent: 'resume-builder',
+                      prompt: `Generate professional experience bullet points for a ${jobRole} role. Current experiences: ${JSON.stringify(data.experiences)}`,
+                    }),
+                  });
+                  
+                  if (response.ok) {
+                    const result = await response.json();
+                    alert('AI-generated experiences created! Check console for details.');
+                    console.log('Generated Experiences:', result);
+                  }
+                }
+                break;
+                
+              case 'enhance-skills':
+                console.log('Triggering AI skills enhancement...');
+                if (data.skills?.length > 0) {
+                  const response = await fetch('/api/ai-agents/single-agent', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      agent: 'content-optimizer',
+                      prompt: `Enhance and categorize these skills with better descriptions: ${JSON.stringify(data.skills)}`,
+                    }),
+                  });
+                  
+                  if (response.ok) {
+                    const result = await response.json();
+                    alert('Skills enhanced! Check console for details.');
+                    console.log('Enhanced Skills:', result);
+                  }
+                } else {
+                  alert('No skills found to enhance. Please add some skills first.');
+                }
+                break;
+                
+              case 'improve-summary':
+                console.log('Triggering AI summary improvement...');
+                if (data.personalInfo?.summary) {
+                  const response = await fetch('/api/ai-agents/single-agent', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      agent: 'content-optimizer',
+                      prompt: `Improve this professional summary: ${data.personalInfo.summary}. Make it more compelling and professional.`,
+                    }),
+                  });
+                  
+                  if (response.ok) {
+                    const result = await response.json();
+                    alert('Summary improved! Check console for details.');
+                    console.log('Improved Summary:', result);
+                  }
+                } else {
+                  alert('No summary found to improve. Please add a professional summary first.');
+                }
+                break;
+                
+              case 'content-suggestions':
+                console.log('Triggering AI content suggestions...');
+                const response = await fetch('/api/ai-agents/single-agent', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    agent: 'resume-reviewer',
+                    prompt: `Analyze this resume data and suggest missing content areas: ${JSON.stringify(data)}`,
+                  }),
+                });
+                
+                if (response.ok) {
+                  const result = await response.json();
+                  alert('Content suggestions generated! Check console for details.');
+                  console.log('Content Suggestions:', result);
+                }
+                break;
+                
+              default:
+                console.log(`AI Action: ${actionId} not implemented yet`);
+            }
+          } catch (error) {
+            console.error('AI Action failed:', error);
+            alert('AI action failed. Please try again.');
+          }
+        }}
+      />
     </div>
   );
 }

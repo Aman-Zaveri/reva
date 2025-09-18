@@ -42,44 +42,41 @@ function extractSectionContent(sectionType) {
   if (!titleToFind) return '';
 
   const spans = document.querySelectorAll('span');
-  
+
   for (const span of spans) {
     const spanText = span.textContent?.trim().toLowerCase();
     if (!spanText || !spanText.includes(titleToFind.toLowerCase())) continue;
 
-    // Found the section title, collect content from following p tags
     let content = '';
     let nextElement = span.nextElementSibling;
-    
+
     while (nextElement) {
-      if (nextElement.tagName?.toLowerCase() === 'p') {
+      const tag = nextElement.tagName?.toLowerCase();
+
+      if (tag === 'p') {
         const pText = nextElement.textContent?.trim();
-        if (pText) {
-          // Stop if we hit another section title
-          const isAnotherSection = Object.values(SECTION_TITLES).some(title => 
-            pText.toLowerCase().includes(title.toLowerCase()) && pText.length < 150
-          );
-          if (isAnotherSection) break;
-          
-          content += pText + '\n\n';
-        }
-      } else if (nextElement.tagName?.toLowerCase() === 'span') {
-        // Stop if we hit another section header
-        const spanText = nextElement.textContent?.trim().toLowerCase();
-        const isAnotherSection = Object.values(SECTION_TITLES).some(title => 
-          spanText.includes(title.toLowerCase())
-        );
-        if (isAnotherSection) break;
+        if (pText) content += pText + '\n\n';
+      } 
+      else if (tag === 'ul') {
+        const items = Array.from(nextElement.querySelectorAll('li'))
+          .map(li => '- ' + li.textContent.trim())
+          .join('\n');
+        if (items) content += items + '\n\n';
+      } 
+      else if (tag === 'span' || tag === 'strong') {
+        // Treat these as the start of the next section
+        break;
       }
-      
+
       nextElement = nextElement.nextElementSibling;
     }
-    
+
     return content.trim();
   }
-  
+
   return '';
 }
+
 
 /**
  * Extract job data from the current page
@@ -94,6 +91,8 @@ function extractJobData() {
     const description = extractSectionContent('description');
     const responsibilities = extractSectionContent('responsibilities');
     const skills = extractSectionContent('skills');
+
+    console.log('Extracted job data:', { title, company, description, responsibilities, skills });
 
     // Combine sections for full description
     let fullDescription = '';

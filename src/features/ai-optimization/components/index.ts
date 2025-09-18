@@ -1,4 +1,7 @@
 export { AIOptimizer } from './AIOptimizer';
+export { AIAgentControlPanel } from './AIAgentControlPanel';
+export { AIAgentConfiguration } from './AIAgentConfiguration';
+export { InteractiveGrammarEnhancer } from './InteractiveGrammarEnhancer';
 export { AIAnalysisModal } from './AIAnalysisModal';
 export { JobInfoModal } from './JobInfoModal';
 export { JobInputTabs } from './JobInputTabs';

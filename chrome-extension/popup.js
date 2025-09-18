@@ -367,15 +367,17 @@ function hideProgress() {
 }
 
 /**
- * Animate progress bar with steps
+ * Animate progress bar with steps including AI Resume Builder
  */
 function animateProgress() {
   const steps = [
     { percentage: 10, text: 'Extracting job data...' },
     { percentage: 25, text: 'Analyzing requirements...' },
-    { percentage: 40, text: 'Optimizing content...' },
-    { percentage: 60, text: 'Generating sections...' },
-    { percentage: 80, text: 'Finalizing resume...' },
+    { percentage: 35, text: 'AI selecting best experiences...' },
+    { percentage: 50, text: 'AI selecting relevant projects...' },
+    { percentage: 65, text: 'Optimizing content...' },
+    { percentage: 80, text: 'Generating sections...' },
+    { percentage: 90, text: 'Finalizing resume...' },
     { percentage: 95, text: 'Almost done...' }
   ];
 
@@ -443,9 +445,9 @@ elements.createBtn.addEventListener('click', async function() {
       }
 
       if (response?.success) {
-        updateProgress(100, 'Resume created successfully!');
+        updateProgress(100, 'AI-powered resume created successfully!');
         setTimeout(() => {
-          updateStatus('✅ Resume created! Click below to view', 'success');
+          updateStatus('✅ AI Resume created! Click below to view', 'success');
           hideProgress();
           stopAuthRefresh(); // Stop auth refresh since operation is complete
           
@@ -456,7 +458,8 @@ elements.createBtn.addEventListener('click', async function() {
               profile: response.data.profile,
               optimizations: response.data.optimizations,
               timestamp: Date.now(),
-              jobData: currentJobData
+              jobData: currentJobData,
+              aiSelections: response.data.aiSelections || null
             }
           });
           

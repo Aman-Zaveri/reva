@@ -64,6 +64,9 @@ export function ContentSections({
           visibilityStates={createVisibilityState(profile.experienceIds, data.experiences)}
           customizedItems={profile.experienceOverrides || {}}
           variant="customization"
+          profile={profile}
+          data={data}
+          jobContext={profile.aiOptimization?.jobData?.description}
           onItemsReorder={(newOrder) => handleReorder('experienceIds', newOrder)}
           onToggleVisibility={(id) => handleSelectionChange('experienceIds', id)}
           onCustomizeItem={onUpdateProfileExperience}
@@ -80,6 +83,9 @@ export function ContentSections({
           visibilityStates={createVisibilityState(profile.projectIds, data.projects)}
           customizedItems={profile.projectOverrides || {}}
           variant="customization"
+          profile={profile}
+          data={data}
+          jobContext={profile.aiOptimization?.jobData?.description}
           onItemsReorder={(newOrder) => handleReorder('projectIds', newOrder)}
           onToggleVisibility={(id) => handleSelectionChange('projectIds', id)}
           onCustomizeItem={onUpdateProfileProject}

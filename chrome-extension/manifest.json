@@ -7,11 +7,13 @@
   "permissions": [
     "activeTab",
     "storage", 
-    "notifications"
+    "notifications",
+    "cookies"
   ],
   
   "host_permissions": [
     "https://waterlooworks.uwaterloo.ca/*",
+    "http://localhost:3000/*",
     "http://localhost:3000/*"
   ],
   

@@ -10,7 +10,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/shared/components/ui/dialog';
-import type { Experience, Project, Skill, Education } from '@/shared/lib/types';
+import { AIEnhancedBulletEditor } from './AIEnhancedBulletEditor';
+import type { Experience, Project, Skill, Education, Profile, DataBundle } from '@/shared/lib/types';
 
 export interface ItemEditDialogProps {
   item: Experience | Project | Skill | Education;
@@ -18,9 +19,21 @@ export interface ItemEditDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (patch: Partial<Experience | Project | Skill | Education>) => void;
+  profile?: Profile;
+  data?: DataBundle;
+  jobContext?: string;
 }
 
-export function ItemEditDialog({ item, type, isOpen, onClose, onSave }: ItemEditDialogProps) {
+export function ItemEditDialog({ 
+  item, 
+  type, 
+  isOpen, 
+  onClose, 
+  onSave, 
+  profile, 
+  data,
+  jobContext 
+}: ItemEditDialogProps) {
   const [editedItem, setEditedItem] = useState(item);
 
   const handleSave = () => {
@@ -59,21 +72,35 @@ export function ItemEditDialog({ item, type, isOpen, onClose, onSave }: ItemEdit
           className="border-border focus:border-primary"
         />
       </div>
-      <div className="space-y-2">
-        <Label>Bullet Points</Label>
-        {exp.bullets.map((bullet, index) => (
-          <RichTextEditor
-            key={index}
-            value={bullet}
-            onChange={(value) => {
-              const newBullets = [...exp.bullets];
-              newBullets[index] = value;
-              setEditedItem({...exp, bullets: newBullets});
-            }}
-            className="border-border focus:border-primary"
-          />
-        ))}
-      </div>
+      
+      {/* AI-Enhanced Bullet Editor */}
+      {profile && data ? (
+        <AIEnhancedBulletEditor
+          bullets={exp.bullets}
+          itemTitle={exp.title}
+          itemType="experience"
+          profile={profile}
+          data={data}
+          jobContext={jobContext}
+          onBulletsChange={(bullets) => setEditedItem({...exp, bullets})}
+        />
+      ) : (
+        <div className="space-y-2">
+          <Label>Bullet Points</Label>
+          {exp.bullets.map((bullet, index) => (
+            <RichTextEditor
+              key={index}
+              value={bullet}
+              onChange={(value) => {
+                const newBullets = [...exp.bullets];
+                newBullets[index] = value;
+                setEditedItem({...exp, bullets: newBullets});
+              }}
+              className="border-border focus:border-primary"
+            />
+          ))}
+        </div>
+      )}
     </>
   );
 
@@ -99,21 +126,35 @@ export function ItemEditDialog({ item, type, isOpen, onClose, onSave }: ItemEdit
           />
         </div>
       </div>
-      <div className="space-y-2">
-        <Label>Bullet Points</Label>
-        {proj.bullets.map((bullet, index) => (
-          <RichTextEditor
-            key={index}
-            value={bullet}
-            onChange={(value) => {
-              const newBullets = [...proj.bullets];
-              newBullets[index] = value;
-              setEditedItem({...proj, bullets: newBullets});
-            }}
-            className="border-border focus:border-primary"
-          />
-        ))}
-      </div>
+      
+      {/* AI-Enhanced Bullet Editor for Projects */}
+      {profile && data ? (
+        <AIEnhancedBulletEditor
+          bullets={proj.bullets}
+          itemTitle={proj.title}
+          itemType="project"
+          profile={profile}
+          data={data}
+          jobContext={jobContext}
+          onBulletsChange={(bullets) => setEditedItem({...proj, bullets})}
+        />
+      ) : (
+        <div className="space-y-2">
+          <Label>Bullet Points</Label>
+          {proj.bullets.map((bullet, index) => (
+            <RichTextEditor
+              key={index}
+              value={bullet}
+              onChange={(value) => {
+                const newBullets = [...proj.bullets];
+                newBullets[index] = value;
+                setEditedItem({...proj, bullets: newBullets});
+              }}
+              className="border-border focus:border-primary"
+            />
+          ))}
+        </div>
+      )}
     </>
   );
 

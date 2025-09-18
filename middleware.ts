@@ -19,6 +19,7 @@ export const config = {
     "/print/:path*",
     "/api/profiles/:path*",
     "/api/optimize-resume/:path*",
-    "/api/extract-job/:path*"
+    "/api/extract-job/:path*",
+    "/api/jobs/:path*"
   ]
 }

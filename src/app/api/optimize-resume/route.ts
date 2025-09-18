@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
 import { ScrapingService } from '@/shared/services/scraping.service';
 import { ResumeOptimizationService } from '@/features/ai-optimization/services/resume-optimization.service';
 import { validateOptimizeRequest } from '@/shared/utils/validation';
 import { ERROR_MESSAGES } from '@/shared/utils/constants';
+import { prisma } from '@/shared/lib/prisma';
 
 /**
  * API Route: POST /api/optimize-resume
@@ -16,6 +19,7 @@ import { ERROR_MESSAGES } from '@/shared/utils/constants';
  * Request body should contain:
  * - jobUrl (optional): LinkedIn job posting URL to extract description from
  * - jobDescription (optional): Manual job description text
+ * - jobId (optional): ID of job record in database to use for optimization
  * - profile: Resume profile to optimize
  * - data: Master data bundle with experiences, projects, etc.
  * - glazeLevel (optional): Optimization aggressiveness level (1-5)
@@ -25,6 +29,15 @@ import { ERROR_MESSAGES } from '@/shared/utils/constants';
  */
 export async function POST(req: NextRequest) {
   try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const requestData = await req.json();
 
     // Validate request data
@@ -39,16 +52,64 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { jobUrl, jobDescription, isAutomaticExtraction, profile, data, glazeLevel = 2, customInstructions } = validation.data!;
+    const { jobUrl, jobDescription, jobId, isAutomaticExtraction, profile, data, glazeLevel = 2, customInstructions } = validation.data!;
 
     let finalJobDescription = jobDescription;
+    let jobInfo = null;
 
+    // Priority: jobId > jobUrl > jobDescription
+    // If jobId is provided, fetch job information from database
+    if (jobId) {
+      try {
+        const job = await prisma.$queryRaw<Array<{
+          id: string;
+          title: string;
+          company: string;
+          description: string | null;
+          requirements: string | null;
+          responsibilities: string | null;
+          skills: string | null;
+          url: string | null;
+        }>>`
+          SELECT id, title, company, description, requirements, responsibilities, skills, url
+          FROM jobs 
+          WHERE id = ${jobId} AND "userId" = ${session.user.id}
+        `;
+
+        if (job.length === 0) {
+          return NextResponse.json(
+            { error: 'Job not found or access denied' },
+            { status: 404 }
+          );
+        }
+
+        const jobRecord = job[0];
+        jobInfo = jobRecord;
+        
+        // Build comprehensive job description from database record
+        const jobParts = [];
+        if (jobRecord.description) jobParts.push(jobRecord.description);
+        if (jobRecord.requirements) jobParts.push(`Requirements: ${jobRecord.requirements}`);
+        if (jobRecord.responsibilities) jobParts.push(`Responsibilities: ${jobRecord.responsibilities}`);
+        if (jobRecord.skills) jobParts.push(`Skills: ${jobRecord.skills}`);
+        
+        finalJobDescription = jobParts.join('\n\n');
+      } catch (error) {
+        return NextResponse.json(
+          { 
+            error: 'Failed to fetch job information from database',
+            details: error instanceof Error ? error.message : 'Database error'
+          },
+          { status: 500 }
+        );
+      }
+    }
     // If LinkedIn URL is provided, extract job description from it
     // This allows users to simply paste a LinkedIn job URL instead of copying the description
-    if (jobUrl && !jobDescription) {
+    else if (jobUrl && !jobDescription) {
       try {
-        const jobInfo = await ScrapingService.extractJobInfo(jobUrl);
-        finalJobDescription = jobInfo.description;
+        const extractedJobInfo = await ScrapingService.extractJobInfo(jobUrl);
+        finalJobDescription = extractedJobInfo.description;
       } catch (error) {
         return NextResponse.json(
           { 
@@ -81,7 +142,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       optimizations,
-      jobDescriptionLength: finalJobDescription.length
+      jobDescriptionLength: finalJobDescription.length,
+      jobInfo: jobInfo // Include job information from database if available
     });
 
   } catch (error) {

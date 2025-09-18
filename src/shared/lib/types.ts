@@ -49,12 +49,28 @@ export type Education = BaseItem & {
   details: string;
 };
 
+export type Job = {
+  id: string;
+  title: string;
+  company: string;
+  description?: string;
+  requirements?: string;
+  responsibilities?: string;
+  skills?: string;
+  url?: string;
+  source: 'manual' | 'extension';
+  extractedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type DataBundle = {
   personalInfo: PersonalInfo;
   experiences: Experience[];
   projects: Project[];
   skills: Skill[];
   education: Education[];
+  jobs?: Job[];
 };
 
 export type FormattingOptions = {
@@ -76,6 +92,7 @@ export type SectionType = 'skills' | 'experiences' | 'projects' | 'education';
 export type Profile = {
   id: string;
   name: string;
+  jobId?: string; // Link to the job this profile was created for
   personalInfo?: PersonalInfo;
   experienceIds: string[];
   projectIds: string[];

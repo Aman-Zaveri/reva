@@ -28,7 +28,7 @@ import {
 import { SortableItemDisplay } from "./SortableItemDisplay";
 import { ItemEditDialog } from "@/shared/components/forms/ItemEditDialog";
 import { cn } from "@/shared/lib/utils";
-import type { Experience, Project, Skill, Education } from "@/shared/lib/types";
+import type { Experience, Project, Skill, Education, Profile, DataBundle } from "@/shared/lib/types";
 
 export interface UnifiedItemPickerProps {
   title: string;
@@ -43,6 +43,9 @@ export interface UnifiedItemPickerProps {
   variant?: "selection" | "customization";
   showAddButton?: boolean;
   className?: string;
+  profile?: Profile;
+  data?: DataBundle;
+  jobContext?: string;
   onItemsReorder: (newOrder: string[]) => void;
   onToggleVisibility: (id: string) => void;
   onToggleSelection?: (id: string) => void;
@@ -64,6 +67,9 @@ export function UnifiedItemPicker({
   variant = "selection",
   showAddButton = false,
   className,
+  profile,
+  data,
+  jobContext,
   onItemsReorder,
   onToggleVisibility,
   onToggleSelection,
@@ -289,6 +295,9 @@ export function UnifiedItemPicker({
             isOpen={true}
             onClose={() => setEditingItemId(null)}
             onSave={handleSaveEdit}
+            profile={profile}
+            data={data}
+            jobContext={jobContext}
           />
         )}
       </CardContent>

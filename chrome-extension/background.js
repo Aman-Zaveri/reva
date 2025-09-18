@@ -1,6 +1,6 @@
 /**
  * WaterlooWorks Resume Builder - Background Script
- * Handles notifications and resume creation via API calls
+ * Handles resume creation via API calls
  */
 
 const API_BASE = 'http://localhost:3000/api';
@@ -52,12 +52,16 @@ async function createResumeFromJobData(jobData) {
       // First check if user is authenticated
       const authCheck = await checkAuthentication();
       if (!authCheck.authenticated) {
-        throw new Error('Please sign in to your Resume Manager account first. Visit http://localhost:3000 to sign in.');
+        throw new Error('Please sign in to your Resume Manager account first. Visit http://localhost:3000 to sign in, then try again.');
       }
 
       console.log('Starting resume creation process...');
 
-      // 1. Load existing data and validate it's sufficient
+      // 1. Create job record first (new step)
+      console.log('Creating job record...');
+      const jobRecord = await createJobRecord(jobData);
+
+      // 2. Load existing data and validate it's sufficient
       console.log('Loading existing profile data...');
       const profilesData = await apiCall('/profiles', 'GET');
       if (!profilesData.success || !profilesData.data) {
@@ -72,31 +76,35 @@ async function createResumeFromJobData(jobData) {
         throw new Error(`Incomplete profile data: ${validationResult.message}`);
       }
 
-      // 2. Create temporary profile
-      console.log('Creating temporary profile...');
-      const tempProfile = createTempProfile(jobData, data);
+      // 3. Use AI Resume Builder Agent to intelligently select experiences and projects
+      console.log('Using AI Resume Builder Agent for intelligent selection...');
+      const aiSelections = await getAIResumeBuilderSelections(jobData, data);
 
-      // 3. Get AI optimization (this is the long-running operation)
+      // 4. Create optimized temporary profile with AI selections
+      console.log('Creating optimized profile with AI selections...');
+      const tempProfile = createOptimizedTempProfile(jobData, data, jobRecord.id, aiSelections);
+
+      // 5. Get AI optimization (this is the long-running operation)
       console.log('Starting AI optimization (this may take a moment)...');
-      const optimizationData = await getAIOptimization(jobData, tempProfile, data);
+      const optimizationData = await getAIOptimization(jobData, tempProfile, data, jobRecord.id);
 
-      // 4. Create final optimized profile
-      console.log('Creating optimized profile...');
-      const optimizedProfile = createOptimizedProfile(tempProfile, optimizationData, jobData);
+      // 6. Create final optimized profile with AI selection metadata
+      console.log('Creating final optimized profile...');
+      const optimizedProfile = createOptimizedProfile(tempProfile, optimizationData, jobData, jobRecord.id, aiSelections);
 
-      // 5. Add new skills to master data AND update profile skill IDs
+      // 7. Add new skills to master data AND update profile skill IDs
       const updatedData = addNewSkillsToData(data, optimizationData, jobData, optimizedProfile);
 
-      // 6. Save everything
+      // 8. Save everything
       console.log('Saving optimized profile...');
       await saveOptimizedProfile(profiles, optimizedProfile, updatedData);
 
-      // 7. Store result and show success notification
-      await storeResult(optimizedProfile, optimizationData, jobData, updatedData);
+      // 9. Store result and show success notification
+      await storeResult(optimizedProfile, optimizationData, jobData, updatedData, aiSelections);
       
       showNotification(
-        'Resume Created!',
-        `AI-optimized resume for ${jobData.title} at ${jobData.company} is ready`
+        'AI-Powered Resume Created!',
+        `Intelligent resume for ${jobData.title} at ${jobData.company} is ready with optimized content and selections`
       );
 
       return {
@@ -139,19 +147,30 @@ async function createResumeFromJobData(jobData) {
  */
 async function checkAuthentication() {
   try {
-    const response = await fetch(`${API_BASE}/health`, {
+    console.log('Checking authentication status...');
+    const response = await fetch(`${API_BASE}/../auth/session`, {
       method: 'GET',
       credentials: 'include', // Include session cookies
       headers: { 'Content-Type': 'application/json' }
     });
     
+    console.log(`Auth check response status: ${response.status}`);
+    
     if (response.ok) {
       const data = await response.json();
-      return { authenticated: true, data };
+      console.log('Auth check result:', data);
+      
+      // Check if the session has a user
+      if (data && data.user && data.user.id) {
+        return { authenticated: true, data };
+      }
+      
+      return { authenticated: false, error: 'No active session found' };
     }
     
-    return { authenticated: false, error: 'Not authenticated' };
+    return { authenticated: false, error: 'Authentication check failed' };
   } catch (error) {
+    console.error('Auth check failed:', error);
     return { authenticated: false, error: error.message };
   }
 }
@@ -162,6 +181,8 @@ async function checkAuthentication() {
 async function apiCall(endpoint, method, body = null, retryCount = 0) {
   const maxRetries = 2;
   
+  console.log(`Making API call: ${method} ${endpoint}`, { body: body ? 'present' : 'none', retryCount });
+  
   try {
     const response = await fetch(`${API_BASE}${endpoint}`, {
       method,
@@ -170,8 +191,11 @@ async function apiCall(endpoint, method, body = null, retryCount = 0) {
       ...(body && { body: JSON.stringify(body) })
     });
 
+    console.log(`API response status: ${response.status} for ${endpoint}`);
+
     if (!response.ok) {
       const errorText = await response.text();
+      console.error(`API call failed: ${response.status} - ${errorText}`);
       
       // Handle authentication errors specifically
       if (response.status === 401) {
@@ -188,7 +212,9 @@ async function apiCall(endpoint, method, body = null, retryCount = 0) {
       throw new Error(`API call failed: ${response.status} - ${errorText}`);
     }
 
-    return response.json();
+    const result = await response.json();
+    console.log(`API call successful for ${endpoint}:`, { success: result.success });
+    return result;
   } catch (error) {
     if (error.message.includes('Authentication') || error.message.includes('401')) {
       throw error; // Re-throw auth errors without retry
@@ -262,9 +288,44 @@ function validateMasterData(data) {
 }
 
 /**
+ * Create job record in database
+ */
+async function createJobRecord(jobData) {
+  console.log('Creating job record with data:', {
+    title: jobData.title,
+    company: jobData.company,
+    hasDescription: !!jobData.description,
+    hasUrl: !!jobData.url,
+    source: 'extension'
+  });
+
+  const jobRecord = await apiCall('/jobs', 'POST', {
+    title: jobData.title,
+    company: jobData.company,
+    description: jobData.description,
+    requirements: jobData.requirements,
+    responsibilities: jobData.responsibilities,
+    skills: jobData.skills,
+    url: jobData.url,
+    source: 'extension',
+    extractedAt: new Date().toISOString()
+  });
+
+  console.log('Job creation API response:', jobRecord);
+
+  if (!jobRecord.success) {
+    console.error('Job creation failed with error:', jobRecord.error);
+    throw new Error(`Failed to create job record: ${jobRecord.error}`);
+  }
+
+  console.log('Job record created successfully:', jobRecord.data);
+  return jobRecord.data;
+}
+
+/**
  * Create temporary profile for optimization with data validation
  */
-function createTempProfile(jobData, data) {
+function createTempProfile(jobData, data, jobId) {
   // Ensure personal info has all required fields
   const personalInfo = {
     fullName: data.personalInfo?.fullName || 'Your Name',
@@ -280,6 +341,7 @@ function createTempProfile(jobData, data) {
   return {
     id: Date.now().toString(),
     name: `${jobData.title} - ${jobData.company}`,
+    jobId: jobId, // Link to the job record
     personalInfo: personalInfo,
     experienceIds: (data.experiences || []).map(exp => exp.id),
     projectIds: (data.projects || []).map(proj => proj.id),
@@ -295,13 +357,121 @@ function createTempProfile(jobData, data) {
 }
 
 /**
+ * Use AI Resume Builder Agent to intelligently select experiences and projects
+ */
+async function getAIResumeBuilderSelections(jobData, data) {
+  console.log('Using AI Resume Builder Agent to select optimal experiences and projects...');
+  
+  // Prepare job description from all job data sections
+  const jobDescriptionParts = [];
+  if (jobData.description) jobDescriptionParts.push(jobData.description);
+  if (jobData.skills) jobDescriptionParts.push(`Required Skills: ${jobData.skills}`);
+  if (jobData.responsibilities) jobDescriptionParts.push(`Responsibilities: ${jobData.responsibilities}`);
+  if (jobData.requirements) jobDescriptionParts.push(`Requirements: ${jobData.requirements}`);
+  
+  const fullJobDescription = jobDescriptionParts.join('\n\n');
+  
+  try {
+    const response = await apiCall('/ai-agents/single-agent', 'POST', {
+      agentId: 'resume-builder',
+      input: {
+        maxExperiences: 4, // Limit to top 4 most relevant experiences
+        maxProjects: 3,    // Limit to top 3 most relevant projects
+        enforceMinimums: true,
+        selectionCriteria: `Focus on experiences and projects that demonstrate the technical skills and qualifications required for ${jobData.title} at ${jobData.company}.`
+      },
+      jobContext: {
+        description: fullJobDescription,
+        title: jobData.title,
+        company: jobData.company
+      },
+      profileData: {
+        profile: {},
+        data: data
+      },
+      config: {
+        prioritizeRecentExperience: true,
+        includeProjectSelection: true,
+        requireMinimumMatch: 70 // Minimum relevance score of 70%
+      }
+    });
+    
+    if (response.success && response.result) {
+      console.log('AI Resume Builder selections completed successfully');
+      return response.result;
+    } else {
+      console.warn('AI Resume Builder failed, falling back to all items');
+      return null;
+    }
+  } catch (error) {
+    console.error('AI Resume Builder Agent failed:', error);
+    console.log('Falling back to including all experiences and projects');
+    return null;
+  }
+}
+
+/**
+ * Create optimized profile using AI Resume Builder selections
+ */
+function createOptimizedTempProfile(jobData, data, jobId, aiSelections) {
+  // Start with basic profile
+  const baseProfile = createTempProfile(jobData, data, jobId);
+  
+  if (!aiSelections) {
+    console.log('No AI selections available, using all items');
+    return baseProfile;
+  }
+  
+  // Apply AI-selected experiences
+  if (aiSelections.selectedExperiences && aiSelections.selectedExperiences.length > 0) {
+    // Sort by suggested order and extract IDs
+    const selectedExpIds = aiSelections.selectedExperiences
+      .sort((a, b) => a.suggestedOrder - b.suggestedOrder)
+      .map(item => item.experience.id);
+    
+    baseProfile.experienceIds = selectedExpIds;
+    console.log(`AI selected ${selectedExpIds.length} experiences (out of ${data.experiences?.length || 0} total)`);
+  }
+  
+  // Apply AI-selected projects
+  if (aiSelections.selectedProjects && aiSelections.selectedProjects.length > 0) {
+    // Sort by suggested order and extract IDs
+    const selectedProjIds = aiSelections.selectedProjects
+      .sort((a, b) => a.suggestedOrder - b.suggestedOrder)
+      .map(item => item.project.id);
+    
+    baseProfile.projectIds = selectedProjIds;
+    console.log(`AI selected ${selectedProjIds.length} projects (out of ${data.projects?.length || 0} total)`);
+  }
+  
+  // Log AI insights for debugging
+  if (aiSelections.selectionAnalysis) {
+    console.log('AI Selection Analysis:', {
+      strategy: aiSelections.selectionAnalysis.selectionStrategy,
+      keyFactors: aiSelections.selectionAnalysis.keyFactors,
+      missingSkills: aiSelections.selectionAnalysis.missingSkillsNeeded
+    });
+  }
+  
+  if (aiSelections.recommendations) {
+    console.log('AI Recommendations:', {
+      experienceGaps: aiSelections.recommendations.experienceGaps,
+      skillsToHighlight: aiSelections.recommendations.skillsToHighlight,
+      improvements: aiSelections.recommendations.suggestedImprovements
+    });
+  }
+  
+  return baseProfile;
+}
+
+/**
  * Get AI optimization from backend
  */
-async function getAIOptimization(jobData, tempProfile, data) {
+async function getAIOptimization(jobData, tempProfile, data, jobId) {
   const customInstructions = createCustomInstructions(jobData);
   
   const optimizeResult = await apiCall('/optimize-resume', 'POST', {
-    jobDescription: jobData.description,
+    jobId: jobId, // Use job ID to fetch job data from database
     isAutomaticExtraction: true, // Flag to indicate this comes from Chrome extension auto-extraction
     profile: tempProfile,
     data: data,
@@ -338,12 +508,13 @@ Transform this resume to include ALL technical requirements from the job.`;
 /**
  * Create optimized profile from temporary profile and optimization data
  */
-function createOptimizedProfile(tempProfile, optimizationData, jobData) {
-  return {
+function createOptimizedProfile(tempProfile, optimizationData, jobData, jobId, aiSelections = null) {
+  const profile = {
     ...tempProfile,
     ...optimizationData,
     id: tempProfile.id,
     name: tempProfile.name,
+    jobId: jobId, // Ensure the job link is preserved
     aiOptimization: {
       timestamp: new Date().toISOString(),
       keyInsights: optimizationData.aiOptimization?.keyInsights || [],
@@ -351,9 +522,19 @@ function createOptimizedProfile(tempProfile, optimizationData, jobData) {
       jobData: jobData,
       newSkills: optimizationData.aiOptimization?.newSkills || [],
       skillOptimizations: optimizationData.aiOptimization?.skillOptimizations || [],
-      changeAnalysis: optimizationData.aiOptimization?.changeAnalysis || null
+      changeAnalysis: optimizationData.aiOptimization?.changeAnalysis || null,
+      // Add AI Resume Builder metadata
+      aiSelections: aiSelections ? {
+        selectedExperiences: aiSelections.selectedExperiences?.length || 0,
+        selectedProjects: aiSelections.selectedProjects?.length || 0,
+        selectionStrategy: aiSelections.selectionAnalysis?.selectionStrategy || 'Default selection',
+        keyFactors: aiSelections.selectionAnalysis?.keyFactors || [],
+        recommendations: aiSelections.recommendations || {}
+      } : null
     }
   };
+  
+  return profile;
 }
 
 /**
@@ -425,14 +606,15 @@ async function saveOptimizedProfile(profiles, optimizedProfile, updatedData) {
 /**
  * Store result in local storage
  */
-async function storeResult(optimizedProfile, optimizationData, jobData, updatedData) {
+async function storeResult(optimizedProfile, optimizationData, jobData, updatedData, aiSelections = null) {
   await chrome.storage.local.set({
     lastCreatedResume: {
       profile: optimizedProfile,
       optimizations: optimizationData,
       timestamp: Date.now(),
       jobData: jobData,
-      updatedData: updatedData
+      updatedData: updatedData,
+      aiSelections: aiSelections
     }
   });
 }
