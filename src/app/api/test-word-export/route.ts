@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { wordExportService } from '@/shared/services/word-export.service';
-import type { Profile, DataBundle } from '@/shared/lib/types';
+import { wordExportService } from '@/services/word-export.service';
+import type { Profile, DataBundle } from '@/lib/types';
 
 // Test endpoint to verify Word export functionality
 export async function GET() {

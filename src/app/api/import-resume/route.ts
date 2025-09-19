@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
-import { PostgreSQLProfileRepository } from '@/shared/repositories/postgresql.repository';
-import { GeminiService } from '@/shared/services/gemini.service';
-import type { DataBundle } from '@/shared/lib/types';
+import { PostgreSQLProfileRepository } from '@/repositories/postgresql.repository';
+import { GeminiService } from '@/services/gemini.service';
+import type { DataBundle } from '@/lib/types';
 import mammoth from 'mammoth';
 
 export async function POST(request: NextRequest) {

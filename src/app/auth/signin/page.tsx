@@ -2,8 +2,8 @@
 
 import { signIn, getProviders } from "next-auth/react"
 import { useEffect, useState } from "react"
-import { Button } from "@/shared/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function SignIn() {
   const [providers, setProviders] = useState<any>({})

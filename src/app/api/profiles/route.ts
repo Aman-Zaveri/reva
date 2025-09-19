@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
-import { PostgreSQLProfileRepository } from '@/shared/repositories/postgresql.repository';
-import type { Profile, DataBundle } from '@/shared/lib/types';
+import { PostgreSQLProfileRepository } from '@/repositories/postgresql.repository';
+import type { Profile, DataBundle } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
   try {

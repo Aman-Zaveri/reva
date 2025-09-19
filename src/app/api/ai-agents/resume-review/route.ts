@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
-import { AIAgentCoordinator } from '@/features/ai-optimization/services/ai-agent-coordinator.service';
-import { prisma } from '@/shared/lib/prisma';
+import { AIAgentCoordinator } from '@/services/ai-agent-coordinator.service';
+import { prisma } from '@/lib/prisma';
 
 /**
  * API Route: POST /api/ai-agents/resume-review

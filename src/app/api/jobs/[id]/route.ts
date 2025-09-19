@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
-import { prisma } from '@/shared/lib/prisma';
+import { prisma } from '@/lib/prisma';
 
 // Helper function to add CORS headers for Chrome extension
 function addCorsHeaders(response: NextResponse) {
@@ -18,7 +18,7 @@ export async function OPTIONS() {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -30,7 +30,7 @@ export async function GET(
       ));
     }
 
-    const jobId = params.id;
+    const { id: jobId } = await params;
 
     if (!jobId) {
       return addCorsHeaders(NextResponse.json(

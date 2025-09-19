@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
-import { ScrapingService } from '@/shared/services/scraping.service';
-import { ResumeOptimizationService } from '@/features/ai-optimization/services/resume-optimization.service';
-import { validateOptimizeRequest } from '@/shared/utils/validation';
-import { ERROR_MESSAGES } from '@/shared/utils/constants';
-import { prisma } from '@/shared/lib/prisma';
+import { ScrapingService } from '@/services/scraping.service';
+import { ResumeOptimizationService } from '@/services/resume-optimization.service';
+import { validateOptimizeRequest } from '@/utils/validation';
+import { ERROR_MESSAGES } from '@/utils/constants';
+import { prisma } from '@/lib/prisma';
 
 /**
  * API Route: POST /api/optimize-resume

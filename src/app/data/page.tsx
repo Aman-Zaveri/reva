@@ -1,21 +1,21 @@
 "use client";
 
-import { useProfilesStore } from '@/shared/lib/store';
+import { useProfilesStore } from '@/lib/store';
 import Link from 'next/link';
 import { ArrowLeft, Plus, Trash2, Edit3, ExternalLink, Calendar, Building, Chrome, User, Wand2 } from 'lucide-react';
-import { Button } from '@/shared/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card';
-import { Input } from '@/shared/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/shared/components/ui/dialog';
-import { RichTextEditor } from '@/shared/components/ui/rich-text-editor';
-import { AIEnhancedBulletEditor } from '@/shared/components/forms/AIEnhancedBulletEditor';
-import { PersonalInfoForm, StorageSettings } from '@/features/data-management/components';
-import { AIFloatingActions } from '@/shared/components/shared/AIFloatingActions';
-import { Separator } from '@/shared/components/ui/separator';
-import { Badge } from '@/shared/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
+import { AIEnhancedBulletEditor } from '@/components/forms/AIEnhancedBulletEditor';
+import { PersonalInfoForm, StorageSettings } from '@/components/data-management';
+import { AIFloatingActions } from '@/components/shared/AIFloatingActions';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
 import { useState, useEffect } from 'react';
-import type { Job } from '@/shared/lib/types';
+import type { Job } from '@/lib/types';
 
 export default function DataManagerPage() {
   const {

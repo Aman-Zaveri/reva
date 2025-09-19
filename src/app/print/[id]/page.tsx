@@ -1,9 +1,9 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { useProfilesStore } from '@/shared/lib/store';
+import { useProfilesStore } from '@/lib/store';
 import { useEffect, useMemo, useState } from 'react';
-import { A4Resume } from '@/shared/components/A4Resume';
+import { A4Resume } from '@/components/A4Resume';
 
 export default function PrintPage() {
   const params = useParams<{ id: string }>();

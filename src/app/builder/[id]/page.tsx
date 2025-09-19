@@ -2,19 +2,19 @@
 
 import { notFound, useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { useProfilesStore } from "@/shared/lib/store";
+import { useProfilesStore } from "@/lib/store";
 import type {
   PersonalInfo,
   Experience,
   Project,
   Skill,
   Education,
-} from "@/shared/lib/types";
-import { useBuilderState } from "@/shared/hooks/useBuilderState";
-import { BuilderHeader, ProfileSettings, ContentSections, SectionOrderSettings } from "@/features/resume-builder";
-import { A4Resume } from "@/shared/components/A4Resume";
-import { AIFloatingActions } from "@/shared/components/shared/AIFloatingActions";
-import { ScrollArea } from "@/shared/components/ui/scroll-area";
+} from "@/lib/types";
+import { useBuilderState } from "@/hooks/useBuilderState";
+import { BuilderHeader, ProfileSettings, ContentSections, SectionOrderSettings } from "@/components/resume-builder";
+import { A4Resume } from "@/components/A4Resume";
+import { AIFloatingActions } from "@/components/shared/AIFloatingActions";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function BuilderPage() {
   const params = useParams<{ id: string }>();

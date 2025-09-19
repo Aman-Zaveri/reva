@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
-import { AIAgentCoordinator } from '@/features/ai-optimization/services/ai-agent-coordinator.service';
+import { AIAgentCoordinator } from '@/services/ai-agent-coordinator.service';
 
 /**
  * API Route: POST /api/ai-agents/grammar-enhance

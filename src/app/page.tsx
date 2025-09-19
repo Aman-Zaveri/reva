@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSession, signIn } from "next-auth/react";
-import { useProfilesStore } from "@/shared/lib/store";
+import { useProfilesStore } from "@/lib/store";
 import {
   Plus,
   FileText,
@@ -13,18 +13,18 @@ import {
   Upload,
   CheckCircle,
 } from "lucide-react";
-import { Button } from "@/shared/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/shared/components/ui/card";
-import { Badge } from "@/shared/components/ui/badge";
-import { Alert, AlertDescription } from "@/shared/components/ui/alert";
-import { ModeToggle } from "@/shared/components/theme/mode-toggle";
-import { UserMenu } from "@/shared/components/auth/UserMenu";
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ModeToggle } from "@/components/theme/mode-toggle";
+import { UserMenu } from "@/components/auth/UserMenu";
 
 export default function Page() {
   const { data: session } = useSession();

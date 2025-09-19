@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { AIFloatingActions } from '@/shared/components/shared/AIFloatingActions';
+import { AIFloatingActions } from '@/components/shared/AIFloatingActions';
 
 export default function ImportResumePage() {
   const [file, setFile] = useState<File | null>(null);

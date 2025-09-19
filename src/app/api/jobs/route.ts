@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
-import { prisma } from '@/shared/lib/prisma';
-import type { Job } from '@/shared/lib/types';
+import { prisma } from '@/lib/prisma';
+import type { Job } from '@/lib/types';
 
 // Helper function to add CORS headers for Chrome extension
 function addCorsHeaders(response: NextResponse) {
