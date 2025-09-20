@@ -32,9 +32,10 @@ export function usePersonalInfo() {
         throw new Error('Failed to fetch personal info');
       }
       
-      const data = await response.json();
-      setPersonalInfo(data);
-      setOriginalData(data);
+      const responseData = await response.json();
+      console.log('Personal info from API:', responseData);
+      setPersonalInfo(responseData);
+      setOriginalData(responseData);
       setHasUnsavedChanges(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');

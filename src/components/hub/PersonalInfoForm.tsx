@@ -4,6 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
 import { usePersonalInfo } from "@/hooks";
 import { SectionHeader } from "./base";
+import { EmptyState } from "./base/EmptyState";
 
 export function PersonalInfoSection() {
     const { 
@@ -21,11 +22,39 @@ export function PersonalInfoSection() {
         updatePersonalInfo({ [field]: value });
     };
 
+    const handleCreatePersonalInfo = () => {
+        // Initialize with empty personal info to start editing
+        updatePersonalInfo({
+            firstName: '',
+            lastName: '',
+            email: '',
+            phone: '',
+            linkedin: '',
+            github: '',
+            summary: ''
+        });
+    };
+
+    const isEmptyPersonalInfo = !personalInfo || (!personalInfo.firstName && !personalInfo.lastName && !personalInfo.email && !personalInfo.phone && !personalInfo.linkedin && !personalInfo.github && !personalInfo.summary);
+
     if (isLoading) {
         return (
             <div className="w-full flex items-center justify-center py-16">
                 <Loader2 className="h-8 w-8 animate-spin" />
             </div>
+        );
+    }
+
+    // Show empty state if no personal info exists
+    if (isEmptyPersonalInfo && !hasUnsavedChanges) {
+        return (
+            <EmptyState
+                emoji="👤"
+                title="No Personal Information"
+                description="Add your personal information to get started with your resume."
+                buttonText="Add Personal Info"
+                onAdd={handleCreatePersonalInfo}
+            />
         );
     }
 

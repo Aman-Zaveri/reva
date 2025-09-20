@@ -66,6 +66,8 @@ model VerificationToken {
 
 model PersonalInfo {
   id        String   @id @default(cuid())
+  firstName String?
+  lastName  String?
   email     String?
   phone     String?
   linkedin  String?
@@ -74,8 +76,6 @@ model PersonalInfo {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   userId    String   @unique
-  firstName String?
-  lastName  String?
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("personal_info")
@@ -154,13 +154,13 @@ model ProjectBullet {
 
 model Skill {
   id        String   @id @default(cuid())
-  name      String
+  category  String
+  skills    String[] // Array of skill names
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  category  String
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId, category])
+  @@unique([userId, category])
   @@map("skills")
 }
