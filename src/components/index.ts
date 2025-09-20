@@ -12,3 +12,4 @@ export * from './theme';
 export * from './ai-optimization';
 export * from './resume-builder';
 export * from './data-management';
+export * from './hub';

@@ -1,7 +1,6 @@
 'use client';
 
 import { create } from 'zustand';
-import { nanoid } from './utils';
 import { ApiStorageService } from '@/services/storage.service';
 import { ERROR_MESSAGES } from '@/utils/constants';
 import type { Profile, DataBundle, Experience, Project, Skill, Education, PersonalInfo } from './types';

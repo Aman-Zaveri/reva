@@ -58,7 +58,7 @@ export function CustomInstructionsInput({ value, onChange }: CustomInstructionsI
             </Label>
             <Textarea
               id="custom-instructions"
-              placeholder="e.g., Focus on leadership experience, emphasize technical skills in cloud computing, highlight international experience..."
+              placeholder="Focus on leadership experience, emphasize technical skills in cloud computing, highlight international experience..."
               value={value}
               onChange={(e) => onChange(e.target.value)}
               rows={4}
