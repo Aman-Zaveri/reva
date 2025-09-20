@@ -2,22 +2,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Plus, Trash2, ExternalLink, Save, X, Loader2 } from "lucide-react";
+import { Plus, ExternalLink, Loader2 } from "lucide-react";
 import { useProjects } from "@/hooks/hub/useProjects";
+import { SectionHeader, EmptyState, FormCard, FloatingAddButton } from "./base";
 
 interface ProjectEntry {
   id: string;
@@ -89,100 +78,37 @@ export function ProjectsSection() {
 
   return (
     <div className="w-full relative">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-xl font-medium mb-2">Projects</h2>
-          <p className="text-sm">Showcase your personal and professional projects.</p>
-        </div>
-        {hasUnsavedChanges && (
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={discardChanges}
-              className="gap-2"
-            >
-              <X className="h-4 w-4" />
-              Discard Changes
-            </Button>
-            <Button
-              size="sm"
-              onClick={saveProjects}
-              disabled={isSaving}
-              className="gap-2"
-            >
-              {isSaving ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Save className="h-4 w-4" />
-              )}
-              Save Changes
-            </Button>
-          </div>
-        )}
-      </div>
+      <SectionHeader
+        title="Projects"
+        description="Showcase your personal and professional projects."
+        hasUnsavedChanges={hasUnsavedChanges}
+        isSaving={isSaving}
+        onSave={saveProjects}
+        onDiscard={discardChanges}
+        showActions={hasUnsavedChanges}
+      />
 
       {projects.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center min-h-[400px]">
-          <div className="text-6xl mb-4">🚀</div>
-          <h3 className="text-lg font-medium mb-2">No projects yet!</h3>
-          <p className="text-sm text-gray-600 mb-6 max-w-md">
-            Time to show off your amazing work! Add your first project to highlight your skills and creativity.
-          </p>
-          <Button 
-            onClick={addProject}
-            className="gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Add Your First Project
-          </Button>
-        </div>
+        <EmptyState
+          emoji="🚀"
+          title="No projects yet!"
+          description="Time to show off your amazing work! Add your first project to highlight your skills and creativity."
+          buttonText="Add Your First Project"
+          onAdd={addProject}
+        />
       ) : (
         <div className="space-y-6">
           {projects.map((project, projectIndex) => (
-            <Card key={project.id} className="p-6 border border-accent">
-              <div className="flex items-center justify-between">
-                <Input
-                  value={project.title || `Project ${projectIndex + 1}`}
-                  onChange={(e) => handleUpdate(project.id, 'title', e.target.value)}
-                  placeholder="Project Title"
-                  className="text-3xl font-medium border-none shadow-none p-0 h-auto bg-transparent focus:border-none focus:shadow-none focus-visible:ring-0"
-                />
-                <AlertDialog>
-                  <Tooltip>
-                    <AlertDialogTrigger asChild>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-red-600 rounded-full hover:text-red-700"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                    </AlertDialogTrigger>
-                    <TooltipContent>
-                      Delete project
-                    </TooltipContent>
-                  </Tooltip>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Delete Project</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Are you sure you want to delete this project? This action cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => removeProject(project.id)} className="bg-red-600 hover:bg-red-700">
-                        Delete
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-
-              <div className="space-y-4">
+            <FormCard 
+              key={project.id}
+              title={project.title || `Project ${projectIndex + 1}`}
+              titlePlaceholder="Project Title"
+              onTitleChange={(value) => handleUpdate(project.id, 'title', value)}
+              onDelete={() => removeProject(project.id)}
+              deleteTitle="Delete Project"
+              deleteDescription="Are you sure you want to delete this project? This action cannot be undone."
+              isSaving={isSaving}
+            >
                 {/* Project Link and Date */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -257,29 +183,19 @@ export function ProjectsSection() {
                     ))}
                   </div>
                 </div>
-              </div>
-            </Card>
+            </FormCard>
           ))}
         </div>
       )}
 
       {/* Fixed circular add button - only show when there are projects */}
       {projects.length > 0 && (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              onClick={addProject}
-              className="fixed bottom-6 right-6 h-12 w-12 rounded-full shadow-lg hover:shadow-xl transition-shadow z-50"
-              size="icon"
-            >
-              <Plus className="h-5 w-5" />
-              <span className="sr-only">Add Project</span>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            Add new project
-          </TooltipContent>
-        </Tooltip>
+        <FloatingAddButton
+          onClick={addProject}
+          tooltip="Add new project"
+          disabled={isSaving}
+          isLoading={isSaving}
+        />
       )}
     </div>
   );

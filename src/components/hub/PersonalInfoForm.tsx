@@ -1,9 +1,9 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Save, Loader2, X } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { usePersonalInfo } from "@/hooks";
+import { SectionHeader } from "./base";
 
 export function PersonalInfoSection() {
     const { 
@@ -31,39 +31,14 @@ export function PersonalInfoSection() {
 
     return (
         <div className="w-full">
-            {/* Personal Information Section */}
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h2 className="text-xl font-medium mb-2">Personal Information</h2>
-                    <p className="text-sm">Update your personal details here.</p>
-                </div>
-                <div className="flex gap-2">
-                    {hasUnsavedChanges && (
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={discardChanges}
-                            className="gap-2"
-                        >
-                            <X className="h-4 w-4" />
-                            Discard Changes
-                        </Button>
-                    )}
-                    <Button
-                        size="sm"
-                        onClick={savePersonalInfo}
-                        disabled={isSaving || !hasUnsavedChanges}
-                        className="gap-2"
-                    >
-                        {isSaving ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                            <Save className="h-4 w-4" />
-                        )}
-                        Save Changes
-                    </Button>
-                </div>
-            </div>
+            <SectionHeader
+                title="Personal Information"
+                description="Update your personal details here."
+                hasUnsavedChanges={hasUnsavedChanges}
+                isSaving={isSaving}
+                onSave={savePersonalInfo}
+                onDiscard={discardChanges}
+            />
 
             {error && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">

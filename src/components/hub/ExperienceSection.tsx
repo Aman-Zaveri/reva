@@ -2,22 +2,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Plus, Trash2, Loader2, Save, RotateCcw } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import { useExperiences } from "@/hooks";
+import { SectionHeader, EmptyState, FormCard, FloatingAddButton } from "./base";
 
 export function ExperienceSection() {
   const { 
@@ -89,35 +78,21 @@ export function ExperienceSection() {
 
   return (
     <div className="w-full relative">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-xl font-medium mb-2">Work Experience</h2>
-          <p className="text-sm">Add your professional experience and achievements.</p>
+      <SectionHeader
+        title="Work Experience"
+        description="Add your professional experience and achievements."
+        hasUnsavedChanges={hasUnsavedChanges}
+        isSaving={isSaving}
+        onSave={saveExperiences}
+        onDiscard={discardChanges}
+        showActions={experiences.length > 0}
+      />
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
+          {error}
         </div>
-        {experiences.length > 0 && (
-          <div className="flex items-center gap-2">
-            {hasUnsavedChanges && (
-              <Button
-                variant="outline"
-                onClick={discardChanges}
-                className="gap-2"
-                disabled={isSaving}
-              >
-                <RotateCcw className="h-4 w-4" />
-                Discard Changes
-              </Button>
-            )}
-            <Button
-              onClick={saveExperiences}
-              disabled={isSaving || !hasUnsavedChanges}
-              className="gap-2"
-            >
-              {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-              Save Changes
-            </Button>
-          </div>
-        )}
-      </div>
+      )}
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
@@ -130,66 +105,26 @@ export function ExperienceSection() {
           <Loader2 className="h-8 w-8 animate-spin" />
         </div>
       ) : experiences.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center min-h-[400px]">
-          <div className="text-6xl mb-4">🎯</div>
-          <h3 className="text-lg font-medium mb-2">No work experience yet!</h3>
-          <p className="text-sm text-gray-600 mb-6 max-w-md">
-            Ready to showcase your professional journey? Add your first work experience to get started!
-          </p>
-          <Button 
-            onClick={addExperience}
-            className="gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Add Your First Experience
-          </Button>
-        </div>
+        <EmptyState
+          emoji="🎯"
+          title="No work experience yet!"
+          description="Ready to showcase your professional journey? Add your first work experience to get started!"
+          buttonText="Add Your First Experience"
+          onAdd={addExperience}
+        />
       ) : (
         <div className="space-y-6">
           {experiences.map((experience, experienceIndex) => (
-            <Card key={experience.id} className="p-6 border border-accent">
-              <div className="flex items-center justify-between">
-                <Input
-                  value={experience.title || `Experience ${experienceIndex + 1}`}
-                  onChange={(e) => handleUpdate(experience.id!, 'title', e.target.value)}
-                  placeholder="Job Title"
-                  className="text-3xl font-medium border-none shadow-none p-0 h-auto bg-transparent rounded-none focus:border-none focus:shadow-none focus-visible:ring-0"
-                />
-                <AlertDialog>
-                  <Tooltip>
-                    <AlertDialogTrigger asChild>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-red-600 rounded-full hover:text-red-700"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                    </AlertDialogTrigger>
-                    <TooltipContent>
-                      Delete experience
-                    </TooltipContent>
-                  </Tooltip>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Delete Experience</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Are you sure you want to delete this work experience? This action cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => removeExperience(experience.id!)} className="bg-red-600 hover:bg-red-700">
-                        Delete
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-
-            <div className="space-y-4">
+            <FormCard 
+              key={experience.id}
+              title={experience.title || `Experience ${experienceIndex + 1}`}
+              titlePlaceholder="Job Title"
+              onTitleChange={(value) => handleUpdate(experience.id!, 'title', value)}
+              onDelete={() => removeExperience(experience.id!)}
+              deleteTitle="Delete Experience"
+              deleteDescription="Are you sure you want to delete this work experience? This action cannot be undone."
+              isSaving={isSaving}
+            >
               {/* Company and Location */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -279,29 +214,19 @@ export function ExperienceSection() {
                   ))}
                 </div>
               </div>
-            </div>
-          </Card>
-        ))}
+            </FormCard>
+          ))}
         </div>
       )}
 
       {/* Fixed circular add button - only show when there are experiences */}
       {experiences.length > 0 && (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              onClick={addExperience}
-              className="fixed bottom-6 right-6 h-12 w-12 rounded-full shadow-lg hover:shadow-xl transition-shadow z-50"
-              size="icon"
-            >
-              <Plus className="h-5 w-5" />
-              <span className="sr-only">Add Experience</span>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            Add new experience
-          </TooltipContent>
-        </Tooltip>
+        <FloatingAddButton
+          onClick={addExperience}
+          tooltip="Add new experience"
+          disabled={isSaving}
+          isLoading={isSaving}
+        />
       )}
     </div>
   );
