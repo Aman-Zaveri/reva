@@ -20,7 +20,7 @@ export function FloatingAddButton({
       <TooltipTrigger asChild>
         <Button
           onClick={onClick}
-          className="fixed bottom-6 right-6 h-12 w-12 rounded-full shadow-lg hover:shadow-xl transition-shadow z-50"
+          className="fixed bottom-10 right-10 h-10 w-10 shadow-lg hover:shadow-xl transition-shadow z-50"
           size="icon"
           disabled={disabled}
         >

@@ -33,7 +33,6 @@ export function usePersonalInfo() {
       }
       
       const responseData = await response.json();
-      console.log('Personal info from API:', responseData);
       setPersonalInfo(responseData);
       setOriginalData(responseData);
       setHasUnsavedChanges(false);
@@ -55,7 +54,7 @@ export function usePersonalInfo() {
       setError(null);
 
       const response = await fetch('/api/hub/personal-info', {
-        method: 'POST',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },

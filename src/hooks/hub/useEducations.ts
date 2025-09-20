@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 interface Education {
   id?: string;
   institution: string;
-  program: string; // Maps to 'degree' in database
+  degree: string;
   minor?: string;
   graduationDate?: Date;
   gpa?: string;
@@ -34,7 +34,6 @@ export function useEducations() {
       const data = await response.json();
       const transformedData = data.map((edu: any) => ({
         ...edu,
-        program: edu.degree, // Map degree back to program
         graduationDate: edu.graduationDate ? new Date(edu.graduationDate) : undefined,
       }));
       
@@ -52,7 +51,7 @@ export function useEducations() {
     const newEdu: Education = {
       id: 'temp-' + Date.now(),
       institution: "",
-      program: "",
+      degree: "",
       minor: "",
       graduationDate: undefined,
       gpa: "",
@@ -84,10 +83,7 @@ export function useEducations() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(educations.map(edu => ({
-          ...edu,
-          degree: edu.program, // Map program to degree for API
-        }))),
+        body: JSON.stringify(educations),
       });
 
       if (!response.ok) {
@@ -97,7 +93,6 @@ export function useEducations() {
       const savedData = await response.json();
       const transformedData = savedData.map((edu: any) => ({
         ...edu,
-        program: edu.degree, // Map degree back to program
         graduationDate: edu.graduationDate ? new Date(edu.graduationDate) : undefined,
       }));
       

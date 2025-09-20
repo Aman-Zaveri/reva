@@ -57,7 +57,7 @@ export function EducationSection() {
         showActions={hasUnsavedChanges}
       />
 
-      {educations.length === 0 ? (
+      {educations.length === 0 && !hasUnsavedChanges ? (
         <EmptyState
           emoji="🎓"
           title="No education entries yet!"

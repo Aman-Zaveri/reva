@@ -99,7 +99,7 @@ export function SkillsSection() {
         </div>
       )}
 
-      {skillCategories.length === 0 ? (
+      {skillCategories.length === 0 && !hasUnsavedChanges ? (
         <EmptyState
           emoji="🎯"
           title="No skill categories yet!"

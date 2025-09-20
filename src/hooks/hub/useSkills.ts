@@ -16,7 +16,7 @@ interface SkillCategory {
 
 export function useSkills() {
   const [skillCategories, setSkillCategories] = useState<SkillCategory[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -55,7 +55,7 @@ export function useSkills() {
   // Create new skill category
   const createSkillCategory = (title: string) => {
     const newCategory: SkillCategory = {
-      id: Date.now().toString(),
+      id: 'temp-' + Date.now(),
       title,
       skills: [],
     };
@@ -81,7 +81,7 @@ export function useSkills() {
   // Add skill to category
   const addSkillToCategory = (categoryId: string, skillName: string) => {
     const newSkill: Skill = {
-      id: Date.now().toString(),
+      id: 'temp-' + Date.now(),
       name: skillName,
       category: '',
     };

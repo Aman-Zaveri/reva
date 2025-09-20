@@ -45,19 +45,6 @@ export function PersonalInfoSection() {
         );
     }
 
-    // Show empty state if no personal info exists
-    if (isEmptyPersonalInfo && !hasUnsavedChanges) {
-        return (
-            <EmptyState
-                emoji="👤"
-                title="No Personal Information"
-                description="Add your personal information to get started with your resume."
-                buttonText="Add Personal Info"
-                onAdd={handleCreatePersonalInfo}
-            />
-        );
-    }
-
     return (
         <div className="w-full">
             <SectionHeader
@@ -67,6 +54,7 @@ export function PersonalInfoSection() {
                 isSaving={isSaving}
                 onSave={savePersonalInfo}
                 onDiscard={discardChanges}
+                showActions={hasUnsavedChanges}
             />
 
             {error && (
@@ -75,8 +63,16 @@ export function PersonalInfoSection() {
                 </div>
             )}
 
-            {/* Form */}
-            <form className="space-y-6">
+            {isEmptyPersonalInfo && !hasUnsavedChanges ? (
+                <EmptyState
+                    emoji="👤"
+                    title="No Personal Information"
+                    description="Add your personal information to get started with your resume."
+                    buttonText="Add Personal Info"
+                    onAdd={handleCreatePersonalInfo}
+                />
+            ) : (
+                <form className="space-y-6">
                 {/* First and Last Name Row */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
@@ -180,7 +176,8 @@ export function PersonalInfoSection() {
                         className="w-full min-h-[120px] resize-y"
                     />
                 </div>
-            </form>
+                </form>
+            )}
         </div>
     );
 }

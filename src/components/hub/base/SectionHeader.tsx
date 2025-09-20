@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Save, Loader2, X } from "lucide-react";
 
 interface SectionHeaderProps {
@@ -29,30 +30,43 @@ export function SectionHeader({
       {showActions && hasUnsavedChanges && (
         <div className="flex gap-2">
           {onDiscard && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onDiscard}
-              className="gap-2"
-            >
-              <X className="h-4 w-4" />
-              Discard Changes
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onDiscard}
+                  className="gap-2"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                Discard changes
+              </TooltipContent>
+            </Tooltip>
           )}
           {onSave && (
-            <Button
-              size="sm"
-              onClick={onSave}
-              disabled={isSaving}
-              className="gap-2"
-            >
-              {isSaving ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Save className="h-4 w-4" />
-              )}
-              Save Changes
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onSave}
+                  disabled={isSaving}
+                  className="gap-2"
+                >
+                  {isSaving ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {isSaving ? "Saving..." : "Save changes"}
+              </TooltipContent>
+            </Tooltip>
           )}
         </div>
       )}

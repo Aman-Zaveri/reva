@@ -30,6 +30,12 @@ export function ProjectsSection() {
     discardChanges
   } = useProjects();
 
+  console.log('ProjectsSection render:', { 
+    projectsLength: projects.length, 
+    hasUnsavedChanges, 
+    showEmptyState: projects.length === 0 && !hasUnsavedChanges 
+  });
+
   const addProject = () => {
     createProject();
   };
@@ -88,7 +94,7 @@ export function ProjectsSection() {
         showActions={hasUnsavedChanges}
       />
 
-      {projects.length === 0 ? (
+      {projects.length === 0 && !hasUnsavedChanges ? (
         <EmptyState
           emoji="🚀"
           title="No projects yet!"

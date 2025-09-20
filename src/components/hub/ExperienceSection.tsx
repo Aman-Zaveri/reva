@@ -104,7 +104,7 @@ export function ExperienceSection() {
         <div className="w-full flex items-center justify-center py-16">
           <Loader2 className="h-8 w-8 animate-spin" />
         </div>
-      ) : experiences.length === 0 ? (
+      ) : experiences.length === 0 && !hasUnsavedChanges ? (
         <EmptyState
           emoji="🎯"
           title="No work experience yet!"
