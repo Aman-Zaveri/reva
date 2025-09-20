@@ -132,7 +132,7 @@ export class ApiStorageService {
     try {
       // Clear by saving empty data
       return await this.saveProfiles([], {
-        personalInfo: { fullName: '', email: '', phone: '', location: '' },
+        personalInfo: { fullName: '', email: '', phone: '' },
         experiences: [],
         projects: [],
         skills: [],

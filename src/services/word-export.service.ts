@@ -190,13 +190,6 @@ class WordExportService {
 
     // Contact information - single line with pipes and hyperlinks
     const contactParts: (TextRun | ExternalHyperlink)[] = [];
-    if (personalInfo?.location) {
-      contactParts.push(new TextRun({
-        text: personalInfo.location,
-        size: FORMATTING.FONT_SIZE.BODY,
-        font: FORMATTING.FONT_FAMILY,
-      }));
-    }
     
     if (personalInfo?.phone) {
       if (contactParts.length > 0) contactParts.push(new TextRun({ 

@@ -14,13 +14,10 @@ export type PersonalInfo = {
   fullName: string;
   email: string;
   phone: string;
-  location: string;
   linkedin?: string;
   linkedinHyperlink?: HyperlinkInfo;
   github?: string;
   githubHyperlink?: HyperlinkInfo;
-  website?: string;
-  websiteHyperlink?: HyperlinkInfo;
   summary?: string;
 };
 

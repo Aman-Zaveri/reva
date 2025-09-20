@@ -16,8 +16,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Plus, Trash2, ExternalLink } from "lucide-react";
-import { useState } from "react";
+import { Plus, Trash2, ExternalLink, Save, X, Loader2 } from "lucide-react";
+import { useProjects } from "@/hooks/hub/useProjects";
 
 interface ProjectEntry {
   id: string;
@@ -28,59 +28,63 @@ interface ProjectEntry {
 }
 
 export function ProjectsSection() {
-  const [projects, setProjects] = useState<ProjectEntry[]>([]);
+  const { 
+    projects, 
+    isLoading, 
+    error, 
+    isSaving,
+    hasUnsavedChanges,
+    createProject, 
+    updateProject, 
+    deleteProject,
+    saveProjects,
+    discardChanges
+  } = useProjects();
 
   const addProject = () => {
-    const newProject: ProjectEntry = {
-      id: Date.now().toString(),
-      title: "",
-      link: "",
-      date: undefined,
-      bullets: [""]
-    };
-    setProjects([...projects, newProject]);
+    createProject();
   };
 
-  const removeProject = (id: string) => {
-    setProjects(projects.filter(proj => proj.id !== id));
+  const handleUpdate = (id: string | undefined, field: string, value: any) => {
+    if (!id) return;
+    updateProject(id, { [field]: value });
   };
 
-  const updateProject = (id: string, field: keyof Omit<ProjectEntry, 'id'>, value: string | string[] | Date | undefined) => {
-    setProjects(projects.map(proj => 
-      proj.id === id ? { ...proj, [field]: value } : proj
-    ));
+  const removeProject = (id: string | undefined) => {
+    if (!id) return;
+    deleteProject(id);
   };
 
-  const addBullet = (projectId: string) => {
-    setProjects(projects.map(proj => 
-      proj.id === projectId 
-        ? { ...proj, bullets: [...proj.bullets, ""] }
-        : proj
-    ));
+  const addBullet = (projectId: string | undefined) => {
+    if (!projectId) return;
+    
+    const project = projects.find(proj => proj.id === projectId);
+    if (project) {
+      const newBullets = [...(project.bullets || []), ""];
+      updateProject(projectId, { bullets: newBullets });
+    }
   };
 
-  const updateBullet = (projectId: string, bulletIndex: number, value: string) => {
-    setProjects(projects.map(proj => 
-      proj.id === projectId 
-        ? { 
-            ...proj, 
-            bullets: proj.bullets.map((bullet, index) => 
-              index === bulletIndex ? value : bullet
-            ) 
-          }
-        : proj
-    ));
+  const updateBullet = (projectId: string | undefined, bulletIndex: number, value: string) => {
+    if (!projectId) return;
+    
+    const project = projects.find(proj => proj.id === projectId);
+    if (project) {
+      const newBullets = project.bullets?.map((bullet, index) =>
+        index === bulletIndex ? value : bullet
+      ) || [];
+      updateProject(projectId, { bullets: newBullets });
+    }
   };
 
-  const removeBullet = (projectId: string, bulletIndex: number) => {
-    setProjects(projects.map(proj => 
-      proj.id === projectId && proj.bullets.length > 1
-        ? { 
-            ...proj, 
-            bullets: proj.bullets.filter((_, index) => index !== bulletIndex)
-          }
-        : proj
-    ));
+  const removeBullet = (projectId: string | undefined, bulletIndex: number) => {
+    if (!projectId) return;
+    
+    const project = projects.find(proj => proj.id === projectId);
+    if (project && (project.bullets?.length || 0) > 1) {
+      const newBullets = project.bullets?.filter((_, index) => index !== bulletIndex) || [];
+      updateProject(projectId, { bullets: newBullets });
+    }
   };
 
   return (
@@ -90,6 +94,32 @@ export function ProjectsSection() {
           <h2 className="text-xl font-medium mb-2">Projects</h2>
           <p className="text-sm">Showcase your personal and professional projects.</p>
         </div>
+        {hasUnsavedChanges && (
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={discardChanges}
+              className="gap-2"
+            >
+              <X className="h-4 w-4" />
+              Discard Changes
+            </Button>
+            <Button
+              size="sm"
+              onClick={saveProjects}
+              disabled={isSaving}
+              className="gap-2"
+            >
+              {isSaving ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
+              Save Changes
+            </Button>
+          </div>
+        )}
       </div>
 
       {projects.length === 0 ? (
@@ -114,7 +144,7 @@ export function ProjectsSection() {
               <div className="flex items-center justify-between">
                 <Input
                   value={project.title || `Project ${projectIndex + 1}`}
-                  onChange={(e) => updateProject(project.id, 'title', e.target.value)}
+                  onChange={(e) => handleUpdate(project.id, 'title', e.target.value)}
                   placeholder="Project Title"
                   className="text-3xl font-medium border-none shadow-none p-0 h-auto bg-transparent focus:border-none focus:shadow-none focus-visible:ring-0"
                 />
@@ -163,7 +193,7 @@ export function ProjectsSection() {
                       <Input
                         id={`link-${project.id}`}
                         value={project.link}
-                        onChange={(e) => updateProject(project.id, 'link', e.target.value)}
+                        onChange={(e) => handleUpdate(project.id, 'link', e.target.value)}
                         placeholder="https://github.com/username/project"
                         className="w-full pr-10"
                       />
@@ -186,7 +216,7 @@ export function ProjectsSection() {
                     <DatePicker
                       id={`date-${project.id}`}
                       date={project.date}
-                      onSelect={(date) => updateProject(project.id, 'date', date)}
+                      onSelect={(date) => handleUpdate(project.id, 'date', date)}
                       placeholder="Select date"
                     />
                   </div>
@@ -215,7 +245,7 @@ export function ProjectsSection() {
                     </Tooltip>
                   </div>
                   <div className="space-y-3">
-                    {project.bullets.map((bullet, bulletIndex) => (
+                    {(project.bullets || []).map((bullet, bulletIndex) => (
                       <div key={bulletIndex} className="flex gap-2">
                         <Textarea
                           value={bullet}

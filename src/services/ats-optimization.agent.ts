@@ -337,10 +337,8 @@ ${data.personalInfo ? `
 - Name: ${data.personalInfo.fullName}
 - Email: ${data.personalInfo.email}
 - Phone: ${data.personalInfo.phone}
-- Location: ${data.personalInfo.location}
 - LinkedIn: ${data.personalInfo.linkedin || 'Not provided'}
 - GitHub: ${data.personalInfo.github || 'Not provided'}
-- Website: ${data.personalInfo.website || 'Not provided'}
 - Summary: ${data.personalInfo.summary || 'No summary provided'}
 ` : 'No personal information provided'}
 

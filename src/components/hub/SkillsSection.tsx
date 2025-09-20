@@ -21,142 +21,45 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Plus, Trash2, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Trash2, X, Loader2, Save } from "lucide-react";
 import { useState } from "react";
-
-interface SkillCategory {
-  id: string;
-  title: string;
-  skills: string[];
-}
+import { useSkills } from "@/hooks";
 
 export function SkillsSection() {
-  const [skillCategories, setSkillCategories] = useState<SkillCategory[]>([]);
+  const {
+    skillCategories,
+    isLoading,
+    error,
+    isSaving,
+    hasUnsavedChanges,
+    createSkillCategory,
+    deleteSkillCategory,
+    updateCategoryTitle,
+    addSkillToCategory,
+    removeSkillFromCategory,
+    saveSkills,
+    discardChanges,
+  } = useSkills();
+
   const [newSkillInput, setNewSkillInput] = useState<{
     [categoryId: string]: string;
   }>({});
-  const [hoveredSkill, setHoveredSkill] = useState<{
-    categoryId: string;
-    skillIndex: number;
-  } | null>(null);
-  const [animatingSkill, setAnimatingSkill] = useState<{
-    categoryId: string;
-    skillIndex: number;
-  } | null>(null);
 
   const addSkillCategory = () => {
-    const newCategory: SkillCategory = {
-      id: Date.now().toString(),
-      title: "",
-      skills: [],
-    };
-    setSkillCategories([...skillCategories, newCategory]);
+    createSkillCategory("");
   };
 
-  const removeSkillCategory = (id: string) => {
-    setSkillCategories(
-      skillCategories.filter((category) => category.id !== id)
-    );
-    // Clean up the input state for this category
-    const newInputState = { ...newSkillInput };
-    delete newInputState[id];
-    setNewSkillInput(newInputState);
-  };
-
-  const updateSkillCategoryTitle = (id: string, title: string) => {
-    setSkillCategories(
-      skillCategories.map((category) =>
-        category.id === id ? { ...category, title } : category
-      )
-    );
+  const handleSkillInputChange = (categoryId: string, value: string) => {
+    setNewSkillInput({ ...newSkillInput, [categoryId]: value });
   };
 
   const addSkill = (categoryId: string) => {
     const skillText = newSkillInput[categoryId]?.trim();
     if (!skillText) return;
 
-    setSkillCategories(
-      skillCategories.map((category) =>
-        category.id === categoryId
-          ? { ...category, skills: [...category.skills, skillText] }
-          : category
-      )
-    );
-
+    addSkillToCategory(categoryId, skillText);
     // Clear the input for this category
     setNewSkillInput({ ...newSkillInput, [categoryId]: "" });
-  };
-
-  const removeSkill = (categoryId: string, skillIndex: number) => {
-    setSkillCategories(
-      skillCategories.map((category) =>
-        category.id === categoryId
-          ? {
-              ...category,
-              skills: category.skills.filter(
-                (_, index) => index !== skillIndex
-              ),
-            }
-          : category
-      )
-    );
-  };
-
-  const moveSkillLeft = (categoryId: string, skillIndex: number) => {
-    if (skillIndex === 0) return; // Already at the beginning
-
-    // Set animation state
-    setAnimatingSkill({ categoryId, skillIndex });
-
-    // Apply the swap immediately for smooth animation
-    setSkillCategories(
-      skillCategories.map((category) =>
-        category.id === categoryId
-          ? {
-              ...category,
-              skills: category.skills.map((skill, index) => {
-                if (index === skillIndex)
-                  return category.skills[skillIndex - 1];
-                if (index === skillIndex - 1)
-                  return category.skills[skillIndex];
-                return skill;
-              }),
-            }
-          : category
-      )
-    );
-
-    // Clear animation state
-    setTimeout(() => setAnimatingSkill(null), 300);
-  };
-
-  const moveSkillRight = (categoryId: string, skillIndex: number) => {
-    // Set animation state
-    setAnimatingSkill({ categoryId, skillIndex });
-
-    // Apply the swap immediately for smooth animation
-    setSkillCategories((prevCategories) =>
-      prevCategories.map((category) => {
-        if (category.id !== categoryId) return category;
-        if (skillIndex >= category.skills.length - 1) return category; // Already at the end
-
-        return {
-          ...category,
-          skills: category.skills.map((skill, index) => {
-            if (index === skillIndex) return category.skills[skillIndex + 1];
-            if (index === skillIndex + 1) return category.skills[skillIndex];
-            return skill;
-          }),
-        };
-      })
-    );
-
-    // Clear animation state
-    setTimeout(() => setAnimatingSkill(null), 300);
-  };
-
-  const handleSkillInputChange = (categoryId: string, value: string) => {
-    setNewSkillInput({ ...newSkillInput, [categoryId]: value });
   };
 
   const handleSkillInputKeyPress = (
@@ -169,6 +72,30 @@ export function SkillsSection() {
     }
   };
 
+  const handleCategoryTitleChange = (categoryId: string, newTitle: string) => {
+    updateCategoryTitle(categoryId, newTitle);
+  };
+
+  const removeSkill = (categoryId: string, skillId: string) => {
+    removeSkillFromCategory(categoryId, skillId);
+  };
+
+  const removeCategory = (categoryId: string) => {
+    deleteSkillCategory(categoryId);
+    // Clean up the input state for this category
+    const newInputState = { ...newSkillInput };
+    delete newInputState[categoryId];
+    setNewSkillInput(newInputState);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="w-full flex items-center justify-center py-16">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="w-full relative">
       <div className="flex items-center justify-between mb-6">
@@ -178,7 +105,39 @@ export function SkillsSection() {
             Organize your technical and professional skills by category.
           </p>
         </div>
+        {hasUnsavedChanges && (
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={discardChanges}
+              className="gap-2"
+            >
+              <X className="h-4 w-4" />
+              Discard Changes
+            </Button>
+            <Button
+              size="sm"
+              onClick={saveSkills}
+              disabled={isSaving}
+              className="gap-2"
+            >
+              {isSaving ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
+              Save Changes
+            </Button>
+          </div>
+        )}
       </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
+          {error}
+        </div>
+      )}
 
       {skillCategories.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center min-h-[400px]">
@@ -204,7 +163,7 @@ export function SkillsSection() {
                     placeholder="Programming Languages, Design Tools, etc."
                     value={category.title}
                     onChange={(e) =>
-                      updateSkillCategoryTitle(category.id, e.target.value)
+                      handleCategoryTitleChange(category.id, e.target.value)
                     }
                     className="text-3xl font-medium border-none shadow-none p-0 h-auto bg-transparent focus:border-none focus:shadow-none focus-visible:ring-0"
                   />
@@ -216,6 +175,7 @@ export function SkillsSection() {
                             variant="ghost"
                             size="sm"
                             className="text-red-600 rounded-full hover:text-red-700"
+                            disabled={isSaving}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -236,10 +196,11 @@ export function SkillsSection() {
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction
-                          onClick={() => removeSkillCategory(category.id)}
+                          onClick={() => removeCategory(category.id)}
                           className="bg-red-600 hover:bg-red-700"
+                          disabled={isSaving}
                         >
-                          Delete
+                          {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Delete'}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
@@ -261,6 +222,7 @@ export function SkillsSection() {
                           handleSkillInputKeyPress(category.id, e)
                         }
                         className="w-56"
+                        disabled={isSaving}
                       />
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -269,8 +231,9 @@ export function SkillsSection() {
                             size="sm"
                             onClick={() => addSkill(category.id)}
                             className="gap-2 rounded-full"
+                            disabled={isSaving || !newSkillInput[category.id]?.trim()}
                           >
-                            <Plus className="h-3 w-3" />
+                            {isSaving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>Add skill</TooltipContent>
@@ -281,109 +244,35 @@ export function SkillsSection() {
                   {/* Skills Display */}
                   {category.skills.length > 0 && (
                     <div className="flex flex-wrap gap-2">
-                      {category.skills.map((skill, skillIndex) => {
-                        const isHovered =
-                          hoveredSkill?.categoryId === category.id &&
-                          hoveredSkill?.skillIndex === skillIndex;
-                        const isAnimating =
-                          animatingSkill?.categoryId === category.id &&
-                          animatingSkill?.skillIndex === skillIndex;
-
-                        return (
-                          <div
-                            key={`${category.id}-${skillIndex}`}
-                            className={`relative flex flex-col items-center transition-all duration-300 ease-in-out ${
-                              isAnimating ? "scale-[1.01] z-10" : "scale-100"
-                            }`}
-                            onMouseEnter={() =>
-                              setHoveredSkill({
-                                categoryId: category.id,
-                                skillIndex,
-                              })
-                            }
-                            onMouseLeave={() => setHoveredSkill(null)}
-                            style={{
-                              transform: isAnimating
-                                ? "translateX(10px)"
-                                : "translateX(0px)",
-                            }}
+                      {category.skills.map((skill) => (
+                        <div
+                          key={skill.id}
+                          className="group relative flex items-center"
+                        >
+                          <Badge
+                            variant="secondary"
+                            className="text-sm px-3 py-1.5 pr-8 hover:shadow-sm transition-shadow"
                           >
-                            {/* Control Icons Above Badge */}
-                            <div
-                              className={`absolute -top-5 left-1/2 transform -translate-x-1/2 flex items-center gap-1 transition-all duration-200 z-10 ${
-                                isHovered ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
-                              }`}
-                            >
-                              {/* Move Left Button */}
-                              {skillIndex > 0 && (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() =>
-                                        moveSkillLeft(category.id, skillIndex)
-                                      }
-                                      className="h-5 w-5 p-0 hover:bg-blue-100 rounded-full"
-                                    >
-                                      <ChevronLeft className="h-3 w-3 text-blue-600" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>Move left</TooltipContent>
-                                </Tooltip>
-                              )}
-
-                              {/* Delete Button */}
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() =>
-                                      removeSkill(category.id, skillIndex)
-                                    }
-                                    className="h-5 w-5 p-0 hover:bg-red-100 rounded-full"
-                                  >
-                                    <X className="h-3 w-3 text-red-600" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>Remove skill</TooltipContent>
-                              </Tooltip>
-
-                              {/* Move Right Button */}
-                              {skillIndex < category.skills.length - 1 && (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() =>
-                                        moveSkillRight(category.id, skillIndex)
-                                      }
-                                      className="h-5 w-5 p-0 hover:bg-blue-100 rounded-full"
-                                    >
-                                      <ChevronRight className="h-3 w-3 text-blue-600" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>Move right</TooltipContent>
-                                </Tooltip>
-                              )}
-                            </div>
-
-                            {/* Skill Badge */}
-                            <Badge
-                              variant="secondary"
-                              className={`text-sm px-3 py-1.5 transition-all duration-200 ease-in-out ${
-                                isHovered
-                                  ? "shadow-md scale-[1.01]"
-                                  : "shadow-sm"
-                              }`}
-                            >
-                              {skill}
-                            </Badge>
-                          </div>
-                        );
-                      })}
+                            {skill.name}
+                          </Badge>
+                          
+                          {/* Delete button overlay */}
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeSkill(category.id, skill.id!)}
+                                className="absolute right-1 top-1/2 -translate-y-1/2 h-5 w-5 p-0 opacity-0 group-hover:opacity-100 hover:bg-red-100 rounded-full transition-opacity"
+                                disabled={isSaving}
+                              >
+                                <X className="h-3 w-3 text-red-600" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Remove skill</TooltipContent>
+                          </Tooltip>
+                        </div>
+                      ))}
                     </div>
                   )}
 
@@ -407,8 +296,9 @@ export function SkillsSection() {
               onClick={addSkillCategory}
               className="fixed bottom-6 right-6 h-12 w-12 rounded-full shadow-lg hover:shadow-xl transition-shadow z-50"
               size="icon"
+              disabled={isSaving}
             >
-              <Plus className="h-5 w-5" />
+              {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Plus className="h-5 w-5" />}
               <span className="sr-only">Add Skill Category</span>
             </Button>
           </TooltipTrigger>

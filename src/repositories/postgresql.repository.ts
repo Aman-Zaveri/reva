@@ -114,8 +114,8 @@ export class PostgreSQLProfileRepository implements ProfileRepository {
             lastName: data.personalInfo.fullName.split(' ').slice(1).join(' ') || '',
             email: data.personalInfo.email,
             phone: data.personalInfo.phone,
-            location: data.personalInfo.location,
-            website: data.personalInfo.website,
+            linkedin: data.personalInfo.linkedin,
+            github: data.personalInfo.github,
             summary: data.personalInfo.summary,
           },
           update: {
@@ -123,8 +123,8 @@ export class PostgreSQLProfileRepository implements ProfileRepository {
             lastName: data.personalInfo.fullName.split(' ').slice(1).join(' ') || '',
             email: data.personalInfo.email,
             phone: data.personalInfo.phone,
-            location: data.personalInfo.location,
-            website: data.personalInfo.website,
+            linkedin: data.personalInfo.linkedin,
+            github: data.personalInfo.github,
             summary: data.personalInfo.summary,
           }
         });
@@ -488,7 +488,6 @@ export class PostgreSQLProfileRepository implements ProfileRepository {
       fullName: `${personalInfo.firstName || ''} ${personalInfo.lastName || ''}`.trim(),
       email: personalInfo.email || '',
       phone: personalInfo.phone || '',
-      location: personalInfo.location || '',
       linkedin: linkedinLink?.url.split('/').pop(),
       linkedinHyperlink: linkedinLink ? {
         url: linkedinLink.url,
@@ -499,7 +498,6 @@ export class PostgreSQLProfileRepository implements ProfileRepository {
         url: githubLink.url,
         displayText: githubLink.url
       } : undefined,
-      website: personalInfo.website || undefined,
       summary: personalInfo.summary || undefined
     };
   }

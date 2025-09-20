@@ -88,17 +88,6 @@ export function PersonalInfoForm({ personalInfo, onUpdate }: PersonalInfoFormPro
           />
         </div>
       
-        <div className="space-y-2">
-          <Label htmlFor="location">Location</Label>
-          <Input
-            id="location"
-            value={personalInfo.location || ''}
-            onChange={(e) => onUpdate({ location: e.target.value })}
-            placeholder="City, State/Province"
-            className="border-border focus:border-primary"
-          />
-        </div>
-        
         <HyperlinkInput
           id="linkedin"
           label="LinkedIn"
@@ -122,17 +111,6 @@ export function PersonalInfoForm({ personalInfo, onUpdate }: PersonalInfoFormPro
         />
       </div>
 
-      <HyperlinkInput
-        id="website"
-        label="Website"
-        value={personalInfo.website || ''}
-        onChange={(value) => onUpdate({ website: value })}
-        placeholder="https://yourwebsite.com"
-        className="border-border focus:border-primary"
-        hyperlinkInfo={personalInfo.websiteHyperlink}
-        onHyperlinkChange={(hyperlinkInfo) => onUpdate({ websiteHyperlink: hyperlinkInfo })}
-      />
-      
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <Label htmlFor="summary">Professional Summary</Label>

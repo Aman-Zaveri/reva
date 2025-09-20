@@ -399,11 +399,10 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
         </h1>
         <div className={clsx('mt-1 text-muted-foreground break-words', contactTextSize)}>
           {[
-            profile.personalInfo?.location,
             profile.personalInfo?.phone,
             profile.personalInfo?.email,
           ].filter(Boolean).join(' | ')}
-          {(profile.personalInfo?.linkedin || profile.personalInfo?.github || profile.personalInfo?.website) && ' | '}
+          {(profile.personalInfo?.linkedin || profile.personalInfo?.github) && ' | '}
           {[
             profile.personalInfo?.linkedin && (
               <PersonalInfoLink
@@ -417,13 +416,6 @@ export function Resume({ profile, data, compact }: { profile: Profile; data: Dat
                 key="github"
                 value={profile.personalInfo.github}
                 hyperlinkInfo={profile.personalInfo.githubHyperlink}
-              />
-            ),
-            profile.personalInfo?.website && (
-              <PersonalInfoLink
-                key="website"
-                value={profile.personalInfo.website}
-                hyperlinkInfo={profile.personalInfo.websiteHyperlink}
               />
             ),
           ].filter(Boolean).reduce((acc, item, index, arr) => {

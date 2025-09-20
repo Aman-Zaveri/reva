@@ -21,8 +21,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { Plus, Trash2, Loader2, Save, X } from "lucide-react";
+import { useEducations } from "@/hooks";
 
 interface Education {
   id: string;
@@ -35,31 +35,31 @@ interface Education {
 }
 
 export function EducationSection() {
-  const [educations, setEducations] = useState<Education[]>([]);
+  const { 
+    educations, 
+    isLoading, 
+    error, 
+    isSaving, 
+    hasUnsavedChanges,
+    createEducation, 
+    updateEducation, 
+    deleteEducation,
+    saveEducations,
+    discardChanges
+  } = useEducations();
 
   const addEducation = () => {
-    const newEducation: Education = {
-      id: Date.now().toString(),
-      program: "",
-      institution: "",
-      graduationDate: undefined,
-      minor: "",
-      gpa: "",
-      relevantCoursework: "",
-    };
-    setEducations([...educations, newEducation]);
+    createEducation();
   };
 
-  const removeEducation = (id: string) => {
-    setEducations(educations.filter((education) => education.id !== id));
+  const handleUpdate = (id: string | undefined, field: string, value: any) => {
+    if (!id) return;
+    updateEducation(id, { [field]: value });
   };
 
-  const updateEducation = (id: string, field: keyof Education, value: any) => {
-    setEducations(
-      educations.map((education) =>
-        education.id === id ? { ...education, [field]: value } : education
-      )
-    );
+  const removeEducation = (id: string | undefined) => {
+    if (!id) return;
+    deleteEducation(id);
   };
 
   return (
@@ -71,6 +71,32 @@ export function EducationSection() {
             Add your educational background, degrees, and academic achievements.
           </p>
         </div>
+        {hasUnsavedChanges && (
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={discardChanges}
+              className="gap-2"
+            >
+              <X className="h-4 w-4" />
+              Discard Changes
+            </Button>
+            <Button
+              size="sm"
+              onClick={saveEducations}
+              disabled={isSaving}
+              className="gap-2"
+            >
+              {isSaving ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
+              Save Changes
+            </Button>
+          </div>
+        )}
       </div>
 
       {educations.length === 0 ? (
@@ -97,7 +123,7 @@ export function EducationSection() {
                     placeholder="Bachelor of Science in Computer Science"
                     value={education.program}
                     onChange={(e) =>
-                      updateEducation(education.id, "program", e.target.value)
+                      handleUpdate(education.id, "program", e.target.value)
                     }
                     className="text-3xl font-medium border-none shadow-none p-0 h-auto bg-transparent focus:border-none focus:shadow-none focus-visible:ring-0"
                   />
@@ -149,7 +175,7 @@ export function EducationSection() {
                       placeholder="University of California, Berkeley"
                       value={education.institution}
                       onChange={(e) =>
-                        updateEducation(
+                        handleUpdate(
                           education.id,
                           "institution",
                           e.target.value
@@ -167,7 +193,7 @@ export function EducationSection() {
                       id={`graduation-${education.id}`}
                       date={education.graduationDate}
                       onSelect={(date: Date | undefined) =>
-                        updateEducation(education.id, "graduationDate", date)
+                        handleUpdate(education.id, "graduationDate", date)
                       }
                       placeholder="Select graduation date"
                     />
@@ -183,7 +209,7 @@ export function EducationSection() {
                       placeholder="Business Administration"
                       value={education.minor}
                       onChange={(e) =>
-                        updateEducation(education.id, "minor", e.target.value)
+                        handleUpdate(education.id, "minor", e.target.value)
                       }
                     />
                   </div>
@@ -198,7 +224,7 @@ export function EducationSection() {
                       placeholder="3.8/4.0"
                       value={education.gpa}
                       onChange={(e) =>
-                        updateEducation(education.id, "gpa", e.target.value)
+                        handleUpdate(education.id, "gpa", e.target.value)
                       }
                     />
                   </div>
@@ -214,7 +240,7 @@ export function EducationSection() {
                     placeholder="Data Structures, Algorithms, Database Systems, Machine Learning"
                     value={education.relevantCoursework}
                     onChange={(e) =>
-                      updateEducation(
+                      handleUpdate(
                         education.id,
                         "relevantCoursework",
                         e.target.value

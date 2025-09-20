@@ -11,13 +11,10 @@ export const PersonalInfoSchema = z.object({
   fullName: z.string().min(1, 'Full name is required'),
   email: z.string().email('Invalid email address'),
   phone: z.string().min(1, 'Phone number is required'),
-  location: z.string().min(1, 'Location is required'),
   linkedin: z.string().optional(),
   linkedinHyperlink: HyperlinkInfoSchema.optional(),
   github: z.string().optional(),
   githubHyperlink: HyperlinkInfoSchema.optional(),
-  website: z.string().optional(),
-  websiteHyperlink: HyperlinkInfoSchema.optional(),
   summary: z.string().optional(),
 });
 

@@ -16,75 +16,75 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
-
-interface ExperienceEntry {
-  id: string;
-  title: string;
-  company: string;
-  location: string;
-  startDate: Date | undefined;
-  endDate: Date | undefined;
-  bullets: string[];
-}
+import { Plus, Trash2, Loader2, Save, RotateCcw } from "lucide-react";
+import { useExperiences } from "@/hooks";
 
 export function ExperienceSection() {
-  const [experiences, setExperiences] = useState<ExperienceEntry[]>([]);
+  const { 
+    experiences, 
+    isLoading, 
+    error, 
+    isSaving,
+    hasUnsavedChanges,
+    createExperience, 
+    updateExperience, 
+    deleteExperience,
+    saveExperiences,
+    discardChanges
+  } = useExperiences();
 
   const addExperience = () => {
-    const newExperience: ExperienceEntry = {
-      id: Date.now().toString(),
-      title: "",
-      company: "",
-      location: "",
-      startDate: undefined,
-      endDate: undefined,
-      bullets: [""]
-    };
-    setExperiences([...experiences, newExperience]);
+    createExperience();
   };
 
-  const removeExperience = (id: string) => {
-    setExperiences(experiences.filter(exp => exp.id !== id));
+  const handleUpdate = (id: string, field: string, value: any) => {
+    const experience = experiences.find(exp => exp.id === id);
+    if (experience) {
+      updateExperience(id, {
+        ...experience,
+        [field]: value
+      });
+    }
   };
 
-  const updateExperience = (id: string, field: keyof Omit<ExperienceEntry, 'id'>, value: string | string[] | Date | undefined) => {
-    setExperiences(experiences.map(exp => 
-      exp.id === id ? { ...exp, [field]: value } : exp
-    ));
+  const handleUpdateBullets = (id: string, bullets: string[]) => {
+    const experience = experiences.find(exp => exp.id === id);
+    if (experience) {
+      updateExperience(id, {
+        ...experience,
+        bullets: bullets.filter(bullet => bullet.trim() !== '')
+      });
+    }
   };
 
   const addBullet = (experienceId: string) => {
-    setExperiences(experiences.map(exp => 
-      exp.id === experienceId 
-        ? { ...exp, bullets: [...exp.bullets, ""] }
-        : exp
-    ));
+    const experience = experiences.find(exp => exp.id === experienceId);
+    if (experience) {
+      const newBullets = [...(experience.bullets || []), ""];
+      handleUpdateBullets(experienceId, newBullets);
+    }
   };
 
   const updateBullet = (experienceId: string, bulletIndex: number, value: string) => {
-    setExperiences(experiences.map(exp => 
-      exp.id === experienceId 
-        ? { 
-            ...exp, 
-            bullets: exp.bullets.map((bullet, index) => 
-              index === bulletIndex ? value : bullet
-            ) 
-          }
-        : exp
-    ));
+    const experience = experiences.find(exp => exp.id === experienceId);
+    if (experience && experience.bullets) {
+      const newBullets = experience.bullets.map((bullet, index) => 
+        index === bulletIndex ? value : bullet
+      );
+      handleUpdateBullets(experienceId, newBullets);
+    }
   };
 
   const removeBullet = (experienceId: string, bulletIndex: number) => {
-    setExperiences(experiences.map(exp => 
-      exp.id === experienceId && exp.bullets.length > 1
-        ? { 
-            ...exp, 
-            bullets: exp.bullets.filter((_, index) => index !== bulletIndex)
-          }
-        : exp
-    ));
+    const experience = experiences.find(exp => exp.id === experienceId);
+    if (experience && experience.bullets && experience.bullets.length > 1) {
+      const newBullets = experience.bullets.filter((_, index) => index !== bulletIndex);
+      handleUpdateBullets(experienceId, newBullets);
+    }
+  };
+
+  const removeExperience = (id: string) => {
+    deleteExperience(id);
   };
 
   return (
@@ -94,9 +94,42 @@ export function ExperienceSection() {
           <h2 className="text-xl font-medium mb-2">Work Experience</h2>
           <p className="text-sm">Add your professional experience and achievements.</p>
         </div>
+        {experiences.length > 0 && (
+          <div className="flex items-center gap-2">
+            {hasUnsavedChanges && (
+              <Button
+                variant="outline"
+                onClick={discardChanges}
+                className="gap-2"
+                disabled={isSaving}
+              >
+                <RotateCcw className="h-4 w-4" />
+                Discard Changes
+              </Button>
+            )}
+            <Button
+              onClick={saveExperiences}
+              disabled={isSaving || !hasUnsavedChanges}
+              className="gap-2"
+            >
+              {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              Save Changes
+            </Button>
+          </div>
+        )}
       </div>
 
-      {experiences.length === 0 ? (
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
+          {error}
+        </div>
+      )}
+
+      {isLoading ? (
+        <div className="w-full flex items-center justify-center py-16">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      ) : experiences.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center min-h-[400px]">
           <div className="text-6xl mb-4">🎯</div>
           <h3 className="text-lg font-medium mb-2">No work experience yet!</h3>
@@ -118,9 +151,9 @@ export function ExperienceSection() {
               <div className="flex items-center justify-between">
                 <Input
                   value={experience.title || `Experience ${experienceIndex + 1}`}
-                  onChange={(e) => updateExperience(experience.id, 'title', e.target.value)}
+                  onChange={(e) => handleUpdate(experience.id!, 'title', e.target.value)}
                   placeholder="Job Title"
-                  className="text-3xl font-medium border-none shadow-none p-0 h-auto bg-transparent focus:border-none focus:shadow-none focus-visible:ring-0"
+                  className="text-3xl font-medium border-none shadow-none p-0 h-auto bg-transparent rounded-none focus:border-none focus:shadow-none focus-visible:ring-0"
                 />
                 <AlertDialog>
                   <Tooltip>
@@ -148,7 +181,7 @@ export function ExperienceSection() {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => removeExperience(experience.id)} className="bg-red-600 hover:bg-red-700">
+                      <AlertDialogAction onClick={() => removeExperience(experience.id!)} className="bg-red-600 hover:bg-red-700">
                         Delete
                       </AlertDialogAction>
                     </AlertDialogFooter>
@@ -166,7 +199,7 @@ export function ExperienceSection() {
                   <Input
                     id={`company-${experience.id}`}
                     value={experience.company}
-                    onChange={(e) => updateExperience(experience.id, 'company', e.target.value)}
+                    onChange={(e) => handleUpdate(experience.id!, 'company', e.target.value)}
                     placeholder="Company Name"
                     className="w-full"
                   />
@@ -178,7 +211,7 @@ export function ExperienceSection() {
                   <Input
                     id={`location-${experience.id}`}
                     value={experience.location}
-                    onChange={(e) => updateExperience(experience.id, 'location', e.target.value)}
+                    onChange={(e) => handleUpdate(experience.id!, 'location', e.target.value)}
                     placeholder="New York, NY"
                     className="w-full"
                   />
@@ -194,7 +227,7 @@ export function ExperienceSection() {
                   <DatePicker
                     id={`start-date-${experience.id}`}
                     date={experience.startDate}
-                    onSelect={(date) => updateExperience(experience.id, 'startDate', date)}
+                    onSelect={(date) => handleUpdate(experience.id!, 'startDate', date)}
                     placeholder="Select start date"
                   />
                 </div>
@@ -205,7 +238,7 @@ export function ExperienceSection() {
                   <DatePicker
                     id={`end-date-${experience.id}`}
                     date={experience.endDate}
-                    onSelect={(date) => updateExperience(experience.id, 'endDate', date)}
+                    onSelect={(date) => handleUpdate(experience.id!, 'endDate', date)}
                     placeholder="Select end date"
                   />
                 </div>
@@ -222,7 +255,7 @@ export function ExperienceSection() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => addBullet(experience.id)}
+                        onClick={() => addBullet(experience.id!)}
                         className="rounded-full p-2"
                       >
                         <Plus className="h-4 w-4" />
@@ -234,11 +267,11 @@ export function ExperienceSection() {
                   </Tooltip>
                 </div>
                 <div className="space-y-3">
-                  {experience.bullets.map((bullet, bulletIndex) => (
+                  {(experience.bullets || []).map((bullet, bulletIndex) => (
                     <div key={bulletIndex} className="flex gap-2">
                       <Textarea
                         value={bullet}
-                        onChange={(e) => updateBullet(experience.id, bulletIndex, e.target.value)}
+                        onChange={(e) => updateBullet(experience.id!, bulletIndex, e.target.value)}
                         placeholder="Implemented a new feature that improved user engagement by 20%."
                         className="flex-1 min-h-[60px] resize-y"
                       />

@@ -1,5 +1,7 @@
 "use client"
 
+import { useSession } from "next-auth/react"
+import { redirect } from "next/navigation"
 import { AppSidebar } from "@/components/sidebar/AppSidebar"
 import {
   Breadcrumb,
@@ -23,8 +25,18 @@ import { EducationSection } from "@/components/hub/EducationSection"
 import { useSearchParams } from "next/navigation"
 
 export default function Page() {
+  const { data: session, status } = useSession()
   const searchParams = useSearchParams()
   const section = searchParams.get('section') || 'overview'
+
+  // Redirect to sign in if not authenticated
+  if (status === "loading") {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>
+  }
+
+  if (status === "unauthenticated") {
+    redirect("/auth/login")
+  }
 
   const getSectionTitle = () => {
     switch (section) {
